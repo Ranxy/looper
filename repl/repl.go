@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Ranxy/looper/bind"
+	"github.com/Ranxy/looper/evaluator"
 	"github.com/Ranxy/looper/syntax"
 )
 
@@ -41,12 +43,16 @@ func main() {
 				fmt.Println(err)
 			}
 		} else {
-			res, err := tree.Eval()
-			if err != nil {
-				fmt.Println("EvalFailed: ", err)
-			} else {
-				fmt.Println(res)
+			b := bind.NewBinder()
+			boundExpress := b.BindExpression(tree.Root)
+			if len(b.Errors) != 0 {
+				for _, err := range b.Errors {
+					fmt.Println(err)
+				}
+				return
 			}
+			res := evaluator.Evaluate(boundExpress)
+			fmt.Println(res)
 		}
 
 	}

@@ -11,6 +11,7 @@ func NewLiteralExpress(literal SyntaxToken) *LiteralExpress {
 	return &LiteralExpress{
 		kind:    SyntaxKindLiteralExpress,
 		Literal: literal,
+		Value:   literal.Value,
 	}
 }
 func NewLiteralValueExpress(literal SyntaxToken, value any) *LiteralExpress {

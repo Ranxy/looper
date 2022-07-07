@@ -1,8 +1,11 @@
-package syntax
+package evaluator
 
 import (
+	"fmt"
 	"testing"
 
+	"github.com/Ranxy/looper/bind"
+	"github.com/Ranxy/looper/syntax"
 	"github.com/stretchr/testify/require"
 )
 
@@ -46,13 +49,15 @@ func TestEvaluate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.text, func(t *testing.T) {
 
-			tree := NewParser(tt.text).Parse()
-			got, err := Evaluate(tree.Root)
-			if tt.wantErr {
-				require.Error(t, err)
-			} else {
-				require.NoError(t, err)
+			tree := syntax.NewParser(tt.text).Parse()
+
+			bound := bind.NewBinder()
+			boundTree := bound.BindExpression(tree.Root)
+			if len(bound.Errors) != 0 {
+				fmt.Println(bound.Errors)
+				t.FailNow()
 			}
+			got := Evaluate(boundTree)
 			require.Equal(t, tt.want, got)
 		})
 	}
@@ -112,13 +117,12 @@ func TestEvaluate_bool(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.text, func(t *testing.T) {
 
-			tree := NewParser(tt.text).Parse()
-			got, err := Evaluate(tree.Root)
-			if tt.wantErr {
-				require.Error(t, err)
-			} else {
-				require.NoError(t, err)
-			}
+			tree := syntax.NewParser(tt.text).Parse()
+			bound := bind.NewBinder()
+			boundTree := bound.BindExpression(tree.Root)
+			require.Zero(t, len(bound.Errors))
+
+			got := Evaluate(boundTree)
 			require.Equal(t, tt.want, got)
 		})
 	}

@@ -9,7 +9,7 @@ type UnaryExpress struct {
 func NewUnaryExpress(operator SyntaxToken, operand Express) *UnaryExpress {
 
 	return &UnaryExpress{
-		kind:     SyntaxKindBinaryExpress,
+		kind:     SyntaxKindUnaryExpress,
 		Operator: operator,
 		Operand:  operand,
 	}

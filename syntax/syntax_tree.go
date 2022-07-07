@@ -22,7 +22,7 @@ func ParseToTree(text string) *SyntaxTree {
 	return p.Parse()
 }
 
-func (s *SyntaxTree) Eval() (int64, error) {
+func (s *SyntaxTree) Eval() (any, error) {
 	return Evaluate(s.Root)
 }
 

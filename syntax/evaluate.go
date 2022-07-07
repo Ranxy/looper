@@ -3,11 +3,19 @@ package syntax
 import (
 	"errors"
 	"fmt"
+	"reflect"
 )
 
-func Evaluate(node Express) (int64, error) {
+func Evaluate(node Express) (any, error) {
 	if n, ok := node.(*LiteralExpress); ok {
-		return n.Literal.Value.(int64), nil
+		switch n.Literal.kind {
+		case SyntaxKindNumberToken:
+			return n.Literal.Value.(int64), nil
+		case SyntaxKindTrueKeywords, SyntaxKindFalseKeywords:
+			return n.Value.(bool), nil
+		default:
+			return nil, fmt.Errorf("Unsupport LiteralExpress %s", n.Kind())
+		}
 	}
 
 	switch n := node.(type) {
@@ -24,7 +32,13 @@ func Evaluate(node Express) (int64, error) {
 			if err != nil {
 				return 0, err
 			}
-			return -v, nil
+			return -v.(int64), nil
+		case SyntaxKindBangToken:
+			v, err := Evaluate(n.Operand)
+			if err != nil {
+				return 0, err
+			}
+			return !v.(bool), nil
 		default:
 			return 0, errors.New(fmt.Sprintf("UnaryOperator Kind %s not found ", n.Operator.Kind()))
 		}
@@ -39,13 +53,37 @@ func Evaluate(node Express) (int64, error) {
 		}
 		switch n.Operator.Kind() {
 		case SyntaxKindPlusToken:
-			return left + right, nil
+			return left.(int64) + right.(int64), nil
 		case SyntaxKindMinusToken:
-			return left - right, nil
+			return left.(int64) - right.(int64), nil
 		case SyntaxKindStarToken:
-			return left * right, nil
+			return left.(int64) * right.(int64), nil
 		case SyntaxKindSlashToken:
-			return left / right, nil
+			return left.(int64) / right.(int64), nil
+
+		case SyntaxKindAmpersandAmpersandToken:
+			return left.(bool) && right.(bool), nil
+		case SyntaxKindPipePileToken:
+			return left.(bool) || right.(bool), nil
+
+		case SyntaxKindEqualEqualToken:
+			switch left.(type) {
+			case int64:
+				return left.(int64) == right.(int64), nil
+			case bool:
+				return left.(bool) == right.(bool), nil
+			default:
+				return 0, errors.New(fmt.Sprintf("SyntaxKindEqualEqualToken Left Type %v And Right Type %s Not equal ", reflect.TypeOf(left), reflect.TypeOf(right)))
+			}
+		case SyntaxKindBangEqualToken:
+			switch left.(type) {
+			case int64:
+				return left.(int64) != right.(int64), nil
+			case bool:
+				return left.(bool) != right.(bool), nil
+			default:
+				return 0, errors.New(fmt.Sprintf("SyntaxKindBangEqualToken Left Type %v And Right Type %s Not equal ", reflect.TypeOf(left), reflect.TypeOf(right)))
+			}
 		default:
 			return 0, errors.New(fmt.Sprintf("BinaryOperator Kind %s not found ", n.Operator.Kind()))
 		}

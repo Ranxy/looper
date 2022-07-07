@@ -6,15 +6,25 @@ const (
 	SyntaxKindBadToken SyntaxKind = iota
 	SyntaxKindEofToken
 	SyntaxKindWhiteSpaceToken
-	SyntaxKindNumberToken
-	SyntaxKindPlusToken
-	SyntaxKindMinusToken
-	SyntaxKindStarToken
-	SyntaxKindSlashToken
-	SyntaxKindOpenParenthesisToken
-	SyntaxKindCloseParenthesisToken
+	SyntaxKindNumberToken             // 12
+	SyntaxKindPlusToken               //+
+	SyntaxKindMinusToken              //-
+	SyntaxKindStarToken               //*
+	SyntaxKindSlashToken              // /
+	SyntaxKindBangToken               //!
+	SyntaxKindAmpersandAmpersandToken //&&
+	SyntaxKindPipePileToken           // ||
+	SyntaxKindEqualEqualToken         // ==
+	SyntaxKindBangEqualToken          // !=
+	SyntaxKindOpenParenthesisToken    //(
+	SyntaxKindCloseParenthesisToken   //)
+	SyntaxKindIdentifierToken
 
-	SyntaxKindNumberExpress
+	SyntaxKindTrueKeywords  // True
+	SyntaxKindFalseKeywords //False
+
+	SyntaxKindLiteralExpress
+	SyntaxKindUnaryExpress
 	SyntaxKindBinaryExpress
 	SyntaxKindParenthesizedExpress
 )
@@ -28,18 +38,28 @@ func (k SyntaxKind) String() string {
 }
 
 var syntaxKindKeyMap = map[SyntaxKind]string{
-	SyntaxKindBadToken:              "SyntaxKindBadToken",
-	SyntaxKindEofToken:              "SyntaxKindEofToken",
-	SyntaxKindWhiteSpaceToken:       "SyntaxKindWhiteSpaceToken",
-	SyntaxKindNumberToken:           "SyntaxKindNumberToken",
-	SyntaxKindPlusToken:             "SyntaxKindPluxToken",
-	SyntaxKindMinusToken:            "SyntaxKindMinusToken",
-	SyntaxKindStarToken:             "SyntaxKindStarToken",
-	SyntaxKindSlashToken:            "SyntaxKindSlashToken",
-	SyntaxKindOpenParenthesisToken:  "SyntaxKindOpenParenthesisToken",
-	SyntaxKindCloseParenthesisToken: "SyntaxKindCloseParenthesisToken",
+	SyntaxKindBadToken:                "SyntaxKindBadToken",
+	SyntaxKindEofToken:                "SyntaxKindEofToken",
+	SyntaxKindWhiteSpaceToken:         "SyntaxKindWhiteSpaceToken",
+	SyntaxKindNumberToken:             "SyntaxKindNumberToken",
+	SyntaxKindPlusToken:               "SyntaxKindPluxToken",
+	SyntaxKindMinusToken:              "SyntaxKindMinusToken",
+	SyntaxKindStarToken:               "SyntaxKindStarToken",
+	SyntaxKindSlashToken:              "SyntaxKindSlashToken",
+	SyntaxKindBangToken:               "SyntaxKindBangToken",
+	SyntaxKindAmpersandAmpersandToken: "SyntaxKindAmpersandAmpersandToken",
+	SyntaxKindPipePileToken:           "SyntaxKindPipePileToken",
+	SyntaxKindEqualEqualToken:         "SyntaxKindEqualEqualToken",
+	SyntaxKindBangEqualToken:          "SyntaxKindBangEqualToken",
+	SyntaxKindOpenParenthesisToken:    "SyntaxKindOpenParenthesisToken",
+	SyntaxKindCloseParenthesisToken:   "SyntaxKindCloseParenthesisToken",
+	SyntaxKindIdentifierToken:         "SyntaxKindIdentifierToken",
 
-	SyntaxKindNumberExpress:        "SyntaxKindNumberExpress",
+	SyntaxKindTrueKeywords:  "SyntaxKindTrueKeywords",
+	SyntaxKindFalseKeywords: "SyntaxKindFalseKeywords",
+
+	SyntaxKindLiteralExpress:       "SyntaxKindLiteralExpress",
+	SyntaxKindUnaryExpress:         "SyntaxKindUnaryExpress",
 	SyntaxKindBinaryExpress:        "SyntaxKindBinaryExpress",
 	SyntaxKindParenthesizedExpress: "SyntaxKindParenthesizedExpress",
 }

@@ -29,16 +29,28 @@ func (l *Lexer) Error() []string {
 }
 
 func (l *Lexer) Current() rune {
-	if l.pos >= l.len {
+	return l.Peek(0)
+}
+func (l *Lexer) Lookahead() rune {
+	return l.Peek(1)
+}
+
+func (l *Lexer) Peek(offset int) rune {
+	idx := l.pos + offset
+
+	if idx >= l.len {
 		return unicode.MaxRune
 	}
 
-	return l.text[l.pos]
+	return l.text[idx]
 }
 
 func (l *Lexer) posAndNext() int {
+	return l.posAndOffset(1)
+}
+func (l *Lexer) posAndOffset(offset int) int {
 	pos := l.pos
-	l.pos += 1
+	l.pos += offset
 	return pos
 }
 
@@ -93,6 +105,16 @@ func (l *Lexer) NextToken() SyntaxToken {
 		}
 	}
 
+	if unicode.IsLetter(l.Current()) {
+		start := l.pos
+		for unicode.IsLetter(l.Current()) {
+			l.next()
+		}
+		text := string(l.text[start:l.pos])
+		kind := GetKeyWordsKind(text)
+		return SyntaxToken{kind, start, text, nil}
+	}
+
 	//match predefine opt
 
 	switch l.Current() {
@@ -108,6 +130,25 @@ func (l *Lexer) NextToken() SyntaxToken {
 		return SyntaxToken{SyntaxKindOpenParenthesisToken, l.posAndNext(), "(", nil}
 	case ')':
 		return SyntaxToken{SyntaxKindCloseParenthesisToken, l.posAndNext(), ")", nil}
+
+	case '&':
+		if l.Lookahead() == '&' {
+			return SyntaxToken{SyntaxKindAmpersandAmpersandToken, l.posAndOffset(2), "&&", nil}
+		}
+	case '|':
+		if l.Lookahead() == '|' {
+			return SyntaxToken{SyntaxKindPipePileToken, l.posAndOffset(2), "||", nil}
+		}
+	case '=':
+		if l.Lookahead() == '=' {
+			return SyntaxToken{SyntaxKindEqualEqualToken, l.posAndOffset(2), "==", nil}
+		}
+	case '!':
+		if l.Lookahead() == '=' {
+			return SyntaxToken{SyntaxKindBangEqualToken, l.posAndOffset(2), "||", nil}
+		} else {
+			return SyntaxToken{SyntaxKindBangToken, l.posAndNext(), "!", nil}
+		}
 	}
 
 	l.errors = append(l.errors, fmt.Sprintf("Bad Token input %v", l.Current()))

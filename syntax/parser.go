@@ -88,13 +88,26 @@ func (p *Parser) ParserExpress(parentPrecedence int) Express {
 }
 
 func (p *Parser) parsePrimaryExpress() Express {
-	if p.Current().Kind() == SyntaxKindOpenParenthesisToken {
-		open := p.NextToken()
-		expr := p.ParserExpress(0)
-		right := p.MatchToken(SyntaxKindCloseParenthesisToken)
+	switch p.Current().Kind() {
+	case SyntaxKindOpenParenthesisToken:
+		{
+			open := p.NextToken()
+			expr := p.ParserExpress(0)
+			right := p.MatchToken(SyntaxKindCloseParenthesisToken)
 
-		return NewParenthesisExpress(open, expr, right)
+			return NewParenthesisExpress(open, expr, right)
+		}
+	case SyntaxKindTrueKeywords, SyntaxKindFalseKeywords:
+		{
+			keywords := p.NextToken()
+			value := keywords.Kind() == SyntaxKindTrueKeywords
+			return NewLiteralValueExpress(keywords, value)
+		}
+	default:
+		{
+			number := p.MatchToken(SyntaxKindNumberToken)
+			return NewLiteralExpress(number)
+		}
 	}
-	number := p.MatchToken(SyntaxKindNumberToken)
-	return NewLiteralExpress(number)
+
 }

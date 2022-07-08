@@ -48,16 +48,17 @@ func TestEvaluate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.text, func(t *testing.T) {
-
+			vm := bind.NewVariableManage()
 			tree := syntax.NewParser(tt.text).Parse()
 
-			bound := bind.NewBinder()
+			bound := bind.NewBinder(vm)
 			boundTree := bound.BindExpression(tree.Root)
 			if len(bound.Errors) != 0 {
 				fmt.Println(bound.Errors)
 				t.FailNow()
 			}
-			got := Evaluate(boundTree)
+			ev := NewEvaluater(boundTree, vm)
+			got := ev.Evaluate()
 			require.Equal(t, tt.want, got)
 		})
 	}
@@ -116,14 +117,36 @@ func TestEvaluate_bool(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.text, func(t *testing.T) {
-
+			vm := bind.NewVariableManage()
 			tree := syntax.NewParser(tt.text).Parse()
-			bound := bind.NewBinder()
+			bound := bind.NewBinder(vm)
 			boundTree := bound.BindExpression(tree.Root)
 			require.Zero(t, len(bound.Errors))
 
-			got := Evaluate(boundTree)
+			ev := NewEvaluater(boundTree, vm)
+			got := ev.Evaluate()
 			require.Equal(t, tt.want, got)
 		})
 	}
+}
+
+func TestEvaluate_variable(t *testing.T) {
+	vm := bind.NewVariableManage()
+
+	ev_variable(vm, t, "a=3", int64(3))
+	ev_variable(vm, t, "-a", int64(-3))
+	ev_variable(vm, t, "a+2", int64(5))
+
+	ev_variable(vm, t, "a==3", true)
+}
+
+func ev_variable(vm bind.VariableManage, t *testing.T, text string, want any) {
+	tree := syntax.NewParser(text).Parse()
+	bound := bind.NewBinder(vm)
+	boundTree := bound.BindExpression(tree.Root)
+	require.Zero(t, len(bound.Errors))
+
+	ev := NewEvaluater(boundTree, vm)
+	got := ev.Evaluate()
+	require.Equal(t, want, got)
 }

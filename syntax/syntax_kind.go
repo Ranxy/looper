@@ -12,6 +12,7 @@ const (
 	SyntaxKindStarToken               //*
 	SyntaxKindSlashToken              // /
 	SyntaxKindBangToken               //!
+	SyntaxKindEqualToken              //=
 	SyntaxKindAmpersandAmpersandToken //&&
 	SyntaxKindPipePileToken           // ||
 	SyntaxKindEqualEqualToken         // ==
@@ -24,9 +25,11 @@ const (
 	SyntaxKindFalseKeywords //False
 
 	SyntaxKindLiteralExpress
+	SyntaxKindNameExpress
 	SyntaxKindUnaryExpress
 	SyntaxKindBinaryExpress
 	SyntaxKindParenthesizedExpress
+	SyntaxKindAssignmentExpress
 )
 
 func (k SyntaxKind) String() string {
@@ -47,6 +50,7 @@ var syntaxKindKeyMap = map[SyntaxKind]string{
 	SyntaxKindStarToken:               "SyntaxKindStarToken",
 	SyntaxKindSlashToken:              "SyntaxKindSlashToken",
 	SyntaxKindBangToken:               "SyntaxKindBangToken",
+	SyntaxKindEqualToken:              "SyntaxKindEqualToken",
 	SyntaxKindAmpersandAmpersandToken: "SyntaxKindAmpersandAmpersandToken",
 	SyntaxKindPipePileToken:           "SyntaxKindPipePileToken",
 	SyntaxKindEqualEqualToken:         "SyntaxKindEqualEqualToken",
@@ -59,7 +63,9 @@ var syntaxKindKeyMap = map[SyntaxKind]string{
 	SyntaxKindFalseKeywords: "SyntaxKindFalseKeywords",
 
 	SyntaxKindLiteralExpress:       "SyntaxKindLiteralExpress",
+	SyntaxKindNameExpress:          "SyntaxKindNameExpress",
 	SyntaxKindUnaryExpress:         "SyntaxKindUnaryExpress",
 	SyntaxKindBinaryExpress:        "SyntaxKindBinaryExpress",
 	SyntaxKindParenthesizedExpress: "SyntaxKindParenthesizedExpress",
+	SyntaxKindAssignmentExpress:    "SyntaxKindAssignmentExpress",
 }

@@ -6,12 +6,41 @@ import (
 	"github.com/Ranxy/looper/bind"
 )
 
-func Evaluate(node bind.BoundExpression) any {
+type Evaluater struct {
+	root bind.BoundExpression
+	vm   bind.VariableManage
+}
+
+func NewEvaluater(root bind.BoundExpression, vm bind.VariableManage) *Evaluater {
+	return &Evaluater{
+		root: root,
+		vm:   vm,
+	}
+}
+
+func (e *Evaluater) Evaluate() any {
+	return e.EvaluateExpression(e.root)
+}
+
+func (e *Evaluater) EvaluateExpression(node bind.BoundExpression) any {
 	if n, ok := node.(*bind.BoundLiteralExpression); ok {
 		return n.Value
 	}
+	if n, ok := node.(*bind.BoundVariableExpression); ok {
+		v := e.vm.GetValue(n.Variable.Name)
+		if v == nil {
+			panic(fmt.Sprintf("Undefined Variable %s", n.Variable.Name))
+		}
+		return v.Value
+	}
+
+	if n, ok := node.(*bind.BoundAssignmentExpression); ok {
+		value := e.EvaluateExpression(n.Express)
+		e.vm.Add(n.Variable, value)
+		return value
+	}
 	if n, ok := node.(*bind.BoundUnaryExpression); ok {
-		operand := Evaluate(n.Operand)
+		operand := e.EvaluateExpression(n.Operand)
 		switch n.Op.Kind {
 		case bind.BoundUnaryOperatorKindIdentity:
 			return operand.(int64)
@@ -25,8 +54,8 @@ func Evaluate(node bind.BoundExpression) any {
 	}
 
 	if n, ok := node.(*bind.BoundBinaryExpression); ok {
-		left := Evaluate(n.Left)
-		right := Evaluate(n.Right)
+		left := e.EvaluateExpression(n.Left)
+		right := e.EvaluateExpression(n.Right)
 
 		switch n.Op.Kind {
 		case bind.BoundBinaryKindAddition:

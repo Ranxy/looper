@@ -57,18 +57,34 @@ func (p *Parser) MatchToken(kind SyntaxKind) SyntaxToken {
 }
 
 func (p *Parser) Parse() *SyntaxTree {
-	expr := p.ParserExpress(0)
+	expr := p.ParserExpress()
 	eof := p.MatchToken(SyntaxKindEofToken)
 
 	return NewSyntaxTree(expr, eof, p.errors)
 }
 
-func (p *Parser) ParserExpress(parentPrecedence int) Express {
+func (p *Parser) ParserExpress() Express {
+	return p.ParserAssignmentExpress()
+}
+
+func (p *Parser) ParserAssignmentExpress() Express {
+	if p.Peek(0).Kind() == SyntaxKindIdentifierToken && p.Peek(1).Kind() == SyntaxKindEqualToken {
+		identifierToken := p.NextToken()
+		operator := p.NextToken()
+		right := p.ParserAssignmentExpress()
+
+		return NewAssignmentExpress(identifierToken, operator, right)
+	}
+
+	return p.ParserBinaryExpress(0)
+}
+
+func (p *Parser) ParserBinaryExpress(parentPrecedence int) Express {
 	var left Express
 	unaryOperatorPrecedence := GetUnaryOperatorPrecedence(p.Current().Kind())
 	if unaryOperatorPrecedence != 0 && unaryOperatorPrecedence >= parentPrecedence {
 		operator := p.NextToken()
-		operand := p.ParserExpress(unaryOperatorPrecedence)
+		operand := p.ParserBinaryExpress(unaryOperatorPrecedence)
 		left = NewUnaryExpress(operator, operand)
 	} else {
 		left = p.parsePrimaryExpress()
@@ -81,7 +97,7 @@ func (p *Parser) ParserExpress(parentPrecedence int) Express {
 			break
 		}
 		operator := p.NextToken()
-		right := p.ParserExpress(precedence)
+		right := p.ParserBinaryExpress(precedence)
 		left = NewBinaryExpress(left, operator, right)
 	}
 	return left
@@ -92,7 +108,7 @@ func (p *Parser) parsePrimaryExpress() Express {
 	case SyntaxKindOpenParenthesisToken:
 		{
 			open := p.NextToken()
-			expr := p.ParserExpress(0)
+			expr := p.ParserBinaryExpress(0)
 			right := p.MatchToken(SyntaxKindCloseParenthesisToken)
 
 			return NewParenthesisExpress(open, expr, right)
@@ -102,6 +118,11 @@ func (p *Parser) parsePrimaryExpress() Express {
 			keywords := p.NextToken()
 			value := keywords.Kind() == SyntaxKindTrueKeywords
 			return NewLiteralValueExpress(keywords, value)
+		}
+	case SyntaxKindIdentifierToken:
+		{
+			identifierToken := p.NextToken()
+			return NewNameExpress(identifierToken)
 		}
 	default:
 		{

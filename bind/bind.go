@@ -8,22 +8,30 @@ import (
 
 type Binder struct {
 	Errors []string
+	vm     VariableManage
 }
 
-func NewBinder() *Binder {
-	return &Binder{}
+func NewBinder(vm VariableManage) *Binder {
+	return &Binder{
+		Errors: make([]string, 0),
+		vm:     vm,
+	}
 }
 
 func (b *Binder) BindExpression(express syntax.Express) BoundExpression {
 	switch express.Kind() {
 	case syntax.SyntaxKindLiteralExpress:
 		return b.BindLiteralExpress(express.(*syntax.LiteralExpress))
+	case syntax.SyntaxKindNameExpress:
+		return b.BindNameExpress(express.(*syntax.NameExpress))
 	case syntax.SyntaxKindUnaryExpress:
 		return b.BindUnaryExpress(express.(*syntax.UnaryExpress))
 	case syntax.SyntaxKindBinaryExpress:
 		return b.BindBinaryOperator(express.(*syntax.BinaryExpress))
 	case syntax.SyntaxKindParenthesizedExpress:
 		return b.BindExpression(express.(*syntax.ParenthesisExpress).Expr)
+	case syntax.SyntaxKindAssignmentExpress:
+		return b.BindAssignmentExpress(express.(*syntax.AssignmentExpress))
 	default:
 		panic(fmt.Sprintf("unexceped expresss %q", express.Kind()))
 	}
@@ -32,9 +40,29 @@ func (b *Binder) BindExpression(express syntax.Express) BoundExpression {
 func (b *Binder) BindLiteralExpress(express *syntax.LiteralExpress) BoundExpression {
 	value := express.Value
 	if value == nil {
-		value = 0
+		value = int64(0)
 	}
 	return NewBoundLiteralExpression(value)
+}
+
+func (b *Binder) BindNameExpress(express *syntax.NameExpress) BoundExpression {
+	name := express.Identifier.Text
+	variable := b.vm.GetSymbol(name)
+	if variable == nil {
+		b.Errors = append(b.Errors, fmt.Sprintf("Undefined variable '%s'", name))
+		return NewBoundLiteralExpression(int64(0))
+	}
+	return NewBoundVariableExpression(variable)
+}
+
+func (b *Binder) BindAssignmentExpress(express *syntax.AssignmentExpress) BoundExpression {
+
+	name := express.Identifier.Text
+	boundExpress := b.BindExpression(express.Express)
+
+	variable := syntax.NewVariableSymbol(name, boundExpress.Type())
+	b.vm.Declare(variable)
+	return NewBoundAssignmentExpression(variable, boundExpress)
 }
 
 func (b *Binder) BindUnaryExpress(express *syntax.UnaryExpress) BoundExpression {

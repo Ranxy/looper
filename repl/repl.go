@@ -15,6 +15,8 @@ func main() {
 
 	reader := bufio.NewReader(os.Stdin)
 
+	vm := bind.NewVariableManage()
+
 	for {
 		fmt.Print("> ")
 		line, _, err := reader.ReadLine()
@@ -32,6 +34,10 @@ func main() {
 			}
 			continue
 		}
+		if text == "#dump" {
+			fmt.Print(vm.Dump())
+			continue
+		}
 
 		tree := syntax.NewParser(text).Parse()
 
@@ -43,15 +49,16 @@ func main() {
 				fmt.Println(err)
 			}
 		} else {
-			b := bind.NewBinder()
+			b := bind.NewBinder(vm)
 			boundExpress := b.BindExpression(tree.Root)
 			if len(b.Errors) != 0 {
 				for _, err := range b.Errors {
 					fmt.Println(err)
 				}
-				return
+				continue
 			}
-			res := evaluator.Evaluate(boundExpress)
+			eval := evaluator.NewEvaluater(boundExpress, vm)
+			res := eval.Evaluate()
 			fmt.Println(res)
 		}
 

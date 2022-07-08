@@ -142,6 +142,8 @@ func (l *Lexer) NextToken() SyntaxToken {
 	case '=':
 		if l.Lookahead() == '=' {
 			return SyntaxToken{SyntaxKindEqualEqualToken, l.posAndOffset(2), "==", nil}
+		} else {
+			return SyntaxToken{SyntaxKindEqualToken, l.posAndOffset(1), "=", nil}
 		}
 	case '!':
 		if l.Lookahead() == '=' {

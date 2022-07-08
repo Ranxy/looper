@@ -8,9 +8,19 @@ import (
 )
 
 func TestNewParser(t *testing.T) {
-	expr := "- 10 + 1 * 2   3 "
+	expr := "a=a+1 "
 	p := NewParser(expr)
-	fmt.Println(p.tokenList)
+	if len(p.errors) != 0 {
+		fmt.Println(p.errors)
+		t.Fail()
+	}
+	fmt.Println(1)
+	tree := p.Parse()
+	if len(p.errors) != 0 {
+		fmt.Println(p.errors)
+		t.Fail()
+	}
+	tree.Print()
 }
 func TestNewParser_parser(t *testing.T) {
 	expr := "1 + -2 * ---3"

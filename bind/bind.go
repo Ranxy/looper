@@ -3,18 +3,19 @@ package bind
 import (
 	"fmt"
 
+	"github.com/Ranxy/looper/diagnostic"
 	"github.com/Ranxy/looper/syntax"
 )
 
 type Binder struct {
-	Errors []string
-	vm     VariableManage
+	Diagnostics *diagnostic.DiagnosticBag
+	vm          VariableManage
 }
 
 func NewBinder(vm VariableManage) *Binder {
 	return &Binder{
-		Errors: make([]string, 0),
-		vm:     vm,
+		Diagnostics: diagnostic.NewDiagnostics(),
+		vm:          vm,
 	}
 }
 
@@ -49,7 +50,7 @@ func (b *Binder) BindNameExpress(express *syntax.NameExpress) BoundExpression {
 	name := express.Identifier.Text
 	variable := b.vm.GetSymbol(name)
 	if variable == nil {
-		b.Errors = append(b.Errors, fmt.Sprintf("Undefined variable '%s'", name))
+		b.Diagnostics.UndefinedName(express.Identifier.Span(), name)
 		return NewBoundLiteralExpression(int64(0))
 	}
 	return NewBoundVariableExpression(variable)
@@ -70,7 +71,7 @@ func (b *Binder) BindUnaryExpress(express *syntax.UnaryExpress) BoundExpression 
 	boundOperator := BindBoundUnaryOperator(express.Operator.Kind(), boundOperand.Type())
 
 	if boundOperator == nil {
-		b.Errors = append(b.Errors, fmt.Sprintf("Unary operator %s is not defined for type %q", express.Operator.Text, boundOperand.Type()))
+		b.Diagnostics.UndefinedUnaryOperator(express.Operator.Span(), express.Operator.Text, boundOperand.Type())
 		return boundOperand
 	}
 
@@ -83,7 +84,7 @@ func (b *Binder) BindBinaryOperator(express *syntax.BinaryExpress) BoundExpressi
 	boundOperator := BindBoundBinaryOperator(express.Operator.Kind(), boundLeft.Type(), boundRight.Type())
 
 	if boundOperator == nil {
-		b.Errors = append(b.Errors, fmt.Sprintf("Binary operator %s is not defined for type %q and type %q", express.Operator.Text, boundLeft.Type(), boundRight.Type()))
+		b.Diagnostics.UndefinedBinaryOperator(express.Operator.Span(), express.Operator.Text, boundLeft.Type(), boundRight.Type())
 		return boundLeft
 	}
 

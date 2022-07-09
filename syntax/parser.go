@@ -1,12 +1,16 @@
 package syntax
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/Ranxy/looper/diagnostic"
+)
 
 type Parser struct {
-	tokenList []SyntaxToken
-	len       int
-	errors    []string
-	pos       int
+	tokenList   []SyntaxToken
+	len         int
+	diagnostics *diagnostic.DiagnosticBag
+	pos         int
 }
 
 func NewParser(text string) *Parser {
@@ -23,10 +27,10 @@ func NewParser(text string) *Parser {
 	}
 
 	return &Parser{
-		tokenList: tokenList,
-		len:       len(tokenList),
-		errors:    lex.errors,
-		pos:       0,
+		tokenList:   tokenList,
+		len:         len(tokenList),
+		diagnostics: diagnostic.MergeDiagnostics(lex.diagnostics),
+		pos:         0,
 	}
 }
 
@@ -52,7 +56,7 @@ func (p *Parser) MatchToken(kind SyntaxKind) SyntaxToken {
 	if p.Current().Kind() == kind {
 		return p.NextToken()
 	}
-	p.errors = append(p.errors, fmt.Sprintf("Unexpected token %v, expected %v", p.Current().Kind(), kind))
+	p.diagnostics.Report(p.Current().Span(), fmt.Sprintf("Unexpected token %v, expected %v", p.Current().Kind(), kind))
 	return SyntaxToken{kind, p.Current().Position, "", nil}
 }
 
@@ -60,7 +64,7 @@ func (p *Parser) Parse() *SyntaxTree {
 	expr := p.ParserExpress()
 	eof := p.MatchToken(SyntaxKindEofToken)
 
-	return NewSyntaxTree(expr, eof, p.errors)
+	return NewSyntaxTree(expr, eof, p.diagnostics)
 }
 
 func (p *Parser) ParserExpress() Express {

@@ -38,28 +38,27 @@ func main() {
 			fmt.Print(vm.Dump())
 			continue
 		}
+		if text == "" {
+			continue
+		}
 
 		tree := syntax.NewParser(text).Parse()
 
 		if showTree {
 			tree.Print()
 		}
-		if len(tree.Errors) != 0 {
-			for _, err := range tree.Errors {
-				fmt.Println(err)
-			}
+		if len(tree.Diagnostics.List) != 0 {
+			tree.Diagnostics.Print(text)
 		} else {
 			b := bind.NewBinder(vm)
 			boundExpress := b.BindExpression(tree.Root)
-			if len(b.Errors) != 0 {
-				for _, err := range b.Errors {
-					fmt.Println(err)
-				}
-				continue
+			if len(b.Diagnostics.List) != 0 {
+				b.Diagnostics.Print(text)
+			} else {
+				eval := evaluator.NewEvaluater(boundExpress, vm)
+				res := eval.Evaluate()
+				fmt.Println(res)
 			}
-			eval := evaluator.NewEvaluater(boundExpress, vm)
-			res := eval.Evaluate()
-			fmt.Println(res)
 		}
 
 	}

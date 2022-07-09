@@ -17,7 +17,8 @@ func TestBinder_BindExpression(t *testing.T) {
 	tree := syntax.NewParser(text).Parse()
 	bound := NewBinder(vm)
 	boundTree := bound.BindExpression(tree.Root)
-	require.Zero(t, len(bound.Errors))
+	bound.Diagnostics.Print(text)
+	require.Zero(t, len(bound.Diagnostics.List))
 
 	assert.Equal(t, BoundNodeKindAssignmentExpress, boundTree.Kind())
 	symbolA := vm.GetSymbol("a")

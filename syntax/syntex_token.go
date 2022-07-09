@@ -1,5 +1,7 @@
 package syntax
 
+import "github.com/Ranxy/looper/diagnostic"
+
 type SyntaxToken struct {
 	kind     SyntaxKind
 	Position int
@@ -12,4 +14,8 @@ func (s SyntaxToken) GetChildren() []Express {
 }
 func (e SyntaxToken) Kind() SyntaxKind {
 	return e.kind
+}
+
+func (e SyntaxToken) Span() diagnostic.TextSpan {
+	return diagnostic.NewTextSpan(e.Position, len([]rune(e.Text)))
 }

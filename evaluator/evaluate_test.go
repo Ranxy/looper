@@ -1,7 +1,6 @@
 package evaluator
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/Ranxy/looper/bind"
@@ -53,8 +52,8 @@ func TestEvaluate(t *testing.T) {
 
 			bound := bind.NewBinder(vm)
 			boundTree := bound.BindExpression(tree.Root)
-			if len(bound.Errors) != 0 {
-				fmt.Println(bound.Errors)
+			if len(bound.Diagnostics.List) != 0 {
+				bound.Diagnostics.Print(tt.text)
 				t.FailNow()
 			}
 			ev := NewEvaluater(boundTree, vm)
@@ -121,7 +120,7 @@ func TestEvaluate_bool(t *testing.T) {
 			tree := syntax.NewParser(tt.text).Parse()
 			bound := bind.NewBinder(vm)
 			boundTree := bound.BindExpression(tree.Root)
-			require.Zero(t, len(bound.Errors))
+			require.Zero(t, len(bound.Diagnostics.List))
 
 			ev := NewEvaluater(boundTree, vm)
 			got := ev.Evaluate()
@@ -144,7 +143,8 @@ func ev_variable(vm bind.VariableManage, t *testing.T, text string, want any) {
 	tree := syntax.NewParser(text).Parse()
 	bound := bind.NewBinder(vm)
 	boundTree := bound.BindExpression(tree.Root)
-	require.Zero(t, len(bound.Errors))
+	require.Zero(t, len(bound.Diagnostics.List))
+	bound.Diagnostics.Print(text)
 
 	ev := NewEvaluater(boundTree, vm)
 	got := ev.Evaluate()

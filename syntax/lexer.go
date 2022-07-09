@@ -1,9 +1,11 @@
 package syntax
 
 import (
-	"fmt"
+	"reflect"
 	"strconv"
 	"unicode"
+
+	"github.com/Ranxy/looper/diagnostic"
 )
 
 type Lexer struct {
@@ -11,21 +13,21 @@ type Lexer struct {
 	len  int
 	pos  int
 
-	errors []string
+	diagnostics *diagnostic.DiagnosticBag
 }
 
 func NewLexer(text string) *Lexer {
 	list := []rune(text)
 	return &Lexer{
-		text:   list,
-		len:    len(list),
-		pos:    0,
-		errors: []string{},
+		text:        list,
+		len:         len(list),
+		pos:         0,
+		diagnostics: diagnostic.NewDiagnostics(),
 	}
 }
 
-func (l *Lexer) Error() []string {
-	return l.errors
+func (l *Lexer) Diagnostics() *diagnostic.DiagnosticBag {
+	return l.diagnostics
 }
 
 func (l *Lexer) Current() rune {
@@ -77,7 +79,7 @@ func (l *Lexer) NextToken() SyntaxToken {
 		text := string(l.text[start:l.pos])
 		v, err := strconv.ParseInt(text, 10, 64)
 		if err != nil {
-			l.errors = append(l.errors, fmt.Sprintf("Number %s not a valid int", text))
+			l.diagnostics.InvalidNumber(diagnostic.NewTextSpan(start, l.pos-start), text, reflect.Int64)
 		}
 
 		return SyntaxToken{
@@ -153,7 +155,7 @@ func (l *Lexer) NextToken() SyntaxToken {
 		}
 	}
 
-	l.errors = append(l.errors, fmt.Sprintf("Bad Token input %v", l.Current()))
+	l.diagnostics.BadCharacter(l.pos, l.Current())
 
 	return SyntaxToken{SyntaxKindBadToken, l.posAndNext(), string(l.text[l.pos:l.pos]), nil}
 }

@@ -13,6 +13,10 @@ type Lexer struct {
 	len  int
 	pos  int
 
+	_start int
+	_kind  SyntaxKind
+	_value any
+
 	diagnostics *diagnostic.DiagnosticBag
 }
 
@@ -47,115 +51,125 @@ func (l *Lexer) Peek(offset int) rune {
 	return l.text[idx]
 }
 
-func (l *Lexer) posAndNext() int {
-	return l.posAndOffset(1)
-}
-func (l *Lexer) posAndOffset(offset int) int {
-	pos := l.pos
-	l.pos += offset
-	return pos
-}
-
-func (l *Lexer) next() {
-	l.pos += 1
+func (l *Lexer) next(n int) {
+	l.pos += n
 }
 
 func (l *Lexer) NextToken() SyntaxToken {
-	if l.pos >= l.len {
-		return SyntaxToken{
-			kind:     SyntaxKindEofToken,
-			Position: l.pos,
-			Text:     "",
-			Value:    nil,
-		}
-	}
-
-	if unicode.IsDigit(l.Current()) {
-		start := l.pos
-		for unicode.IsDigit(l.Current()) {
-			l.next()
-		}
-
-		text := string(l.text[start:l.pos])
-		v, err := strconv.ParseInt(text, 10, 64)
-		if err != nil {
-			l.diagnostics.InvalidNumber(diagnostic.NewTextSpan(start, l.pos-start), text, reflect.Int64)
-		}
-
-		return SyntaxToken{
-			kind:     SyntaxKindNumberToken,
-			Position: start,
-			Text:     text,
-			Value:    v,
-		}
-	}
-
-	if unicode.IsSpace(l.Current()) {
-		start := l.pos
-
-		for unicode.IsSpace(l.Current()) {
-			l.next()
-		}
-
-		text := string(l.text[start:l.pos])
-
-		return SyntaxToken{
-			kind:     SyntaxKindWhiteSpaceToken,
-			Position: start,
-			Text:     text,
-			Value:    nil,
-		}
-	}
-
-	if unicode.IsLetter(l.Current()) {
-		start := l.pos
-		for unicode.IsLetter(l.Current()) {
-			l.next()
-		}
-		text := string(l.text[start:l.pos])
-		kind := GetKeyWordsKind(text)
-		return SyntaxToken{kind, start, text, nil}
-	}
-
-	//match predefine opt
+	l._start = l.pos
+	l._kind = SyntaxKindBadToken
+	l._value = nil
 
 	switch l.Current() {
+	case unicode.MaxRune:
+		l._kind = SyntaxKindEofToken
 	case '+':
-		return SyntaxToken{SyntaxKindPlusToken, l.posAndNext(), "+", nil}
+		l._kind = SyntaxKindPlusToken
+		l.next(1)
 	case '-':
-		return SyntaxToken{SyntaxKindMinusToken, l.posAndNext(), "-", nil}
+		l._kind = SyntaxKindMinusToken
+		l.next(1)
 	case '*':
-		return SyntaxToken{SyntaxKindStarToken, l.posAndNext(), "*", nil}
+		l._kind = SyntaxKindStarToken
+		l.next(1)
 	case '/':
-		return SyntaxToken{SyntaxKindSlashToken, l.posAndNext(), "/", nil}
+		l._kind = SyntaxKindSlashToken
+		l.next(1)
 	case '(':
-		return SyntaxToken{SyntaxKindOpenParenthesisToken, l.posAndNext(), "(", nil}
+		l._kind = SyntaxKindOpenParenthesisToken
+		l.next(1)
 	case ')':
-		return SyntaxToken{SyntaxKindCloseParenthesisToken, l.posAndNext(), ")", nil}
+		l._kind = SyntaxKindCloseParenthesisToken
+		l.next(1)
 
 	case '&':
 		if l.Lookahead() == '&' {
-			return SyntaxToken{SyntaxKindAmpersandAmpersandToken, l.posAndOffset(2), "&&", nil}
+			l._kind = SyntaxKindAmpersandAmpersandToken
+			l.next(2)
 		}
 	case '|':
 		if l.Lookahead() == '|' {
-			return SyntaxToken{SyntaxKindPipePileToken, l.posAndOffset(2), "||", nil}
+			l._kind = SyntaxKindPipePileToken
+			l.next(2)
 		}
 	case '=':
 		if l.Lookahead() == '=' {
-			return SyntaxToken{SyntaxKindEqualEqualToken, l.posAndOffset(2), "==", nil}
+			l._kind = SyntaxKindEqualEqualToken
+			l.next(2)
 		} else {
-			return SyntaxToken{SyntaxKindEqualToken, l.posAndOffset(1), "=", nil}
+			l._kind = SyntaxKindEqualToken
+			l.next(1)
 		}
 	case '!':
 		if l.Lookahead() == '=' {
-			return SyntaxToken{SyntaxKindBangEqualToken, l.posAndOffset(2), "||", nil}
+			l._kind = SyntaxKindBangEqualToken
+			l.next(2)
 		} else {
-			return SyntaxToken{SyntaxKindBangToken, l.posAndNext(), "!", nil}
+			l._kind = SyntaxKindBangToken
+			l.next(1)
+		}
+	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+		l.readDigit()
+	case ' ', '\t', '\n', '\r':
+		l.readSpace()
+	default:
+		if unicode.IsLetter(l.Current()) {
+			l.readIdentifier()
+		} else if unicode.IsSpace(l.Current()) {
+			l.readSpace()
+		} else {
+			l.diagnostics.BadCharacter(l.pos, l.Current())
+			l.next(1)
 		}
 	}
 
-	l.diagnostics.BadCharacter(l.pos, l.Current())
+	text := l._kind.Text()
+	if text == "" {
+		text = string(l.text[l._start:l.pos])
+	}
 
-	return SyntaxToken{SyntaxKindBadToken, l.posAndNext(), string(l.text[l.pos:l.pos]), nil}
+	return SyntaxToken{l._kind, l._start, text, l._value}
+}
+
+func (l *Lexer) readDigit() {
+	for unicode.IsDigit(l.Current()) {
+		l.next(1)
+	}
+
+	text := string(l.text[l._start:l.pos])
+	v, err := strconv.ParseInt(text, 10, 64)
+	if err != nil {
+		l.diagnostics.InvalidNumber(diagnostic.NewTextSpan(l._start, l.pos-l._start), text, reflect.Int64)
+	}
+
+	l._value = v
+	l._kind = SyntaxKindNumberToken
+}
+
+func (l *Lexer) readSpace() {
+	for unicode.IsSpace(l.Current()) {
+		l.next(1)
+	}
+	l._kind = SyntaxKindWhiteSpaceToken
+}
+
+func (l *Lexer) readIdentifier() {
+	for unicode.IsLetter(l.Current()) {
+		l.next(1)
+	}
+	text := l.text[l._start:l.pos]
+	l._kind = GetKeyWordsKind(string(text))
+}
+
+func ParseTokens(text string) (res []SyntaxToken) {
+
+	lex := NewLexer(text)
+	for {
+		token := lex.NextToken()
+		if token.Kind() == SyntaxKindEofToken {
+			break
+		}
+		res = append(res, token)
+	}
+	return res
 }

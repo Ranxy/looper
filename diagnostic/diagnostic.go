@@ -99,6 +99,6 @@ func (b *DiagnosticBag) UndefinedBinaryOperator(span TextSpan, operatorText stri
 }
 
 func (b *DiagnosticBag) UndefinedName(span TextSpan, name string) {
-	message := fmt.Sprintf("Variable %s doesn't exist.", name)
+	message := fmt.Sprintf("Variable '%s' doesn't exist.", name)
 	b.Report(span, message)
 }

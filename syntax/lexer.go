@@ -6,10 +6,11 @@ import (
 	"unicode"
 
 	"github.com/Ranxy/looper/diagnostic"
+	"github.com/Ranxy/looper/texts"
 )
 
 type Lexer struct {
-	text []rune
+	text *texts.TextSource
 	len  int
 	pos  int
 
@@ -20,11 +21,10 @@ type Lexer struct {
 	diagnostics *diagnostic.DiagnosticBag
 }
 
-func NewLexer(text string) *Lexer {
-	list := []rune(text)
+func NewLexer(text *texts.TextSource) *Lexer {
 	return &Lexer{
-		text:        list,
-		len:         len(list),
+		text:        text,
+		len:         text.Len(),
 		pos:         0,
 		diagnostics: diagnostic.NewDiagnostics(),
 	}
@@ -48,7 +48,7 @@ func (l *Lexer) Peek(offset int) rune {
 		return unicode.MaxRune
 	}
 
-	return l.text[idx]
+	return l.text.RuneAt(idx)
 }
 
 func (l *Lexer) next(n int) {
@@ -125,7 +125,7 @@ func (l *Lexer) NextToken() SyntaxToken {
 
 	text := l._kind.Text()
 	if text == "" {
-		text = string(l.text[l._start:l.pos])
+		text = l.text.StringSub(l._start, l.pos)
 	}
 
 	return SyntaxToken{l._kind, l._start, text, l._value}
@@ -136,10 +136,10 @@ func (l *Lexer) readDigit() {
 		l.next(1)
 	}
 
-	text := string(l.text[l._start:l.pos])
+	text := l.text.StringSub(l._start, l.pos)
 	v, err := strconv.ParseInt(text, 10, 64)
 	if err != nil {
-		l.diagnostics.InvalidNumber(diagnostic.NewTextSpan(l._start, l.pos-l._start), text, reflect.Int64)
+		l.diagnostics.InvalidNumber(texts.NewTextSpan(l._start, l.pos-l._start), text, reflect.Int64)
 	}
 
 	l._value = v
@@ -157,13 +157,15 @@ func (l *Lexer) readIdentifier() {
 	for unicode.IsLetter(l.Current()) {
 		l.next(1)
 	}
-	text := l.text[l._start:l.pos]
+	text := l.text.StringSub(l._start, l.pos)
 	l._kind = GetKeyWordsKind(string(text))
 }
 
 func ParseTokens(text string) (res []SyntaxToken) {
 
-	lex := NewLexer(text)
+	textSource := texts.NewTextSource([]rune(text))
+
+	lex := NewLexer(textSource)
 	for {
 		token := lex.NextToken()
 		if token.Kind() == SyntaxKindEofToken {

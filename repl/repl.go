@@ -4,10 +4,12 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/Ranxy/looper/bind"
 	"github.com/Ranxy/looper/evaluator"
 	"github.com/Ranxy/looper/syntax"
+	"github.com/Ranxy/looper/texts"
 )
 
 func main() {
@@ -17,43 +19,59 @@ func main() {
 
 	vm := bind.NewVariableManage()
 
+	textBuild := strings.Builder{}
+
 	for {
-		fmt.Print("> ")
+		if textBuild.Len() == 0 {
+			fmt.Print("> ")
+		} else {
+			fmt.Print("| ")
+		}
+
 		line, _, err := reader.ReadLine()
 		if err != nil {
 			panic(err)
 		}
-		text := string(line)
 
-		if text == "#showTree" {
-			showTree = !showTree
-			if showTree {
-				fmt.Println("Showing parse tree")
-			} else {
-				fmt.Println("Not showing parse tree")
+		if textBuild.Len() == 0 {
+			text := string(line)
+
+			if text == "#showTree" {
+				showTree = !showTree
+				if showTree {
+					fmt.Println("Showing parse tree")
+				} else {
+					fmt.Println("Not showing parse tree")
+				}
+				continue
 			}
-			continue
-		}
-		if text == "#dump" {
-			fmt.Print(vm.Dump())
-			continue
-		}
-		if text == "" {
-			continue
+			if text == "#dump" {
+				fmt.Print(vm.Dump())
+				continue
+			}
+			if text == "" {
+				continue
+			}
 		}
 
-		tree := syntax.NewParser(text).Parse()
+		textBuild.Write(line)
+
+		text := textBuild.String()
+
+		sourceText := texts.NewTextSource([]rune(text))
+
+		tree := syntax.NewParser(sourceText).Parse()
 
 		if showTree {
-			tree.Print()
+			tree.Print(os.Stdout)
 		}
 		if len(tree.Diagnostics.List) != 0 {
-			tree.Diagnostics.Print(text)
+			tree.Diagnostics.PrintWithSource(sourceText)
 		} else {
 			b := bind.NewBinder(vm)
 			boundExpress := b.BindExpression(tree.Root)
 			if len(b.Diagnostics.List) != 0 {
-				b.Diagnostics.Print(text)
+				b.Diagnostics.PrintWithSource(sourceText)
 			} else {
 				eval := evaluator.NewEvaluater(boundExpress, vm)
 				res := eval.Evaluate()
@@ -61,5 +79,6 @@ func main() {
 			}
 		}
 
+		textBuild.Reset()
 	}
 }

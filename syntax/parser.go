@@ -4,16 +4,18 @@ import (
 	"fmt"
 
 	"github.com/Ranxy/looper/diagnostic"
+	"github.com/Ranxy/looper/texts"
 )
 
 type Parser struct {
+	text        *texts.TextSource
 	tokenList   []SyntaxToken
 	len         int
 	diagnostics *diagnostic.DiagnosticBag
 	pos         int
 }
 
-func NewParser(text string) *Parser {
+func NewParser(text *texts.TextSource) *Parser {
 	tokenList := make([]SyntaxToken, 0)
 	lex := NewLexer(text)
 
@@ -27,6 +29,7 @@ func NewParser(text string) *Parser {
 	}
 
 	return &Parser{
+		text:        text,
 		tokenList:   tokenList,
 		len:         len(tokenList),
 		diagnostics: diagnostic.MergeDiagnostics(lex.diagnostics),
@@ -64,7 +67,7 @@ func (p *Parser) Parse() *SyntaxTree {
 	expr := p.ParserExpress()
 	eof := p.MatchToken(SyntaxKindEofToken)
 
-	return NewSyntaxTree(expr, eof, p.diagnostics)
+	return NewSyntaxTree(expr, eof, p.text, p.diagnostics)
 }
 
 func (p *Parser) ParserExpress() Express {

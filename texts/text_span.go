@@ -1,4 +1,4 @@
-package diagnostic
+package texts
 
 type TextSpan struct {
 	start  int

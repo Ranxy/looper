@@ -5,6 +5,7 @@ import (
 
 	"github.com/Ranxy/looper/bind"
 	"github.com/Ranxy/looper/syntax"
+	"github.com/Ranxy/looper/texts"
 	"github.com/stretchr/testify/require"
 )
 
@@ -48,7 +49,8 @@ func TestEvaluate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.text, func(t *testing.T) {
 			vm := bind.NewVariableManage()
-			tree := syntax.NewParser(tt.text).Parse()
+			textSource := texts.NewTextSource([]rune(tt.text))
+			tree := syntax.NewParser(textSource).Parse()
 
 			bound := bind.NewBinder(vm)
 			boundTree := bound.BindExpression(tree.Root)
@@ -117,7 +119,8 @@ func TestEvaluate_bool(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.text, func(t *testing.T) {
 			vm := bind.NewVariableManage()
-			tree := syntax.NewParser(tt.text).Parse()
+			textSource := texts.NewTextSource([]rune(tt.text))
+			tree := syntax.NewParser(textSource).Parse()
 			bound := bind.NewBinder(vm)
 			boundTree := bound.BindExpression(tree.Root)
 			require.Zero(t, len(bound.Diagnostics.List))
@@ -137,14 +140,19 @@ func TestEvaluate_variable(t *testing.T) {
 	ev_variable(vm, t, "a+2", int64(5))
 
 	ev_variable(vm, t, "a==3", true)
+
+	ev_variable(vm, t, "a=a+a+1", int64(7))
+	ev_variable(vm, t, "b=(a==7)", true)
+	ev_variable(vm, t, "b==false", false)
 }
 
 func ev_variable(vm bind.VariableManage, t *testing.T, text string, want any) {
-	tree := syntax.NewParser(text).Parse()
+	textSource := texts.NewTextSource([]rune(text))
+	tree := syntax.NewParser(textSource).Parse()
 	bound := bind.NewBinder(vm)
 	boundTree := bound.BindExpression(tree.Root)
-	require.Zero(t, len(bound.Diagnostics.List))
 	bound.Diagnostics.Print(text)
+	require.Zero(t, len(bound.Diagnostics.List))
 
 	ev := NewEvaluater(boundTree, vm)
 	got := ev.Evaluate()

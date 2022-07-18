@@ -69,3 +69,33 @@ var syntaxKindKeyMap = map[SyntaxKind]string{
 	SyntaxKindParenthesizedExpress: "SyntaxKindParenthesizedExpress",
 	SyntaxKindAssignmentExpress:    "SyntaxKindAssignmentExpress",
 }
+
+func (k SyntaxKind) Text() string {
+	return syntaxKindTextMap[k]
+}
+
+func ListTextSyntaxKind() []SyntaxKind {
+	res := make([]SyntaxKind, 0, len(syntaxKindTextMap))
+	for k := range syntaxKindTextMap {
+		res = append(res, k)
+	}
+	return res
+}
+
+var syntaxKindTextMap = map[SyntaxKind]string{
+	SyntaxKindPlusToken:               "+",
+	SyntaxKindMinusToken:              "-",
+	SyntaxKindStarToken:               "*",
+	SyntaxKindSlashToken:              "/",
+	SyntaxKindBangToken:               "!",
+	SyntaxKindEqualToken:              "=",
+	SyntaxKindAmpersandAmpersandToken: "&&",
+	SyntaxKindPipePileToken:           "||",
+	SyntaxKindEqualEqualToken:         "==",
+	SyntaxKindBangEqualToken:          "!=",
+	SyntaxKindOpenParenthesisToken:    "(",
+	SyntaxKindCloseParenthesisToken:   ")",
+
+	SyntaxKindTrueKeywords:  "true",
+	SyntaxKindFalseKeywords: "false",
+}

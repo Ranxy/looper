@@ -1,8 +1,11 @@
 package syntax
 
-import "fmt"
+import (
+	"fmt"
+	"io"
+)
 
-func PrintExpress(express Express, indent string, isLast bool) {
+func PrintExpress(writer io.Writer, express Express, indent string, isLast bool) {
 
 	var marker string
 	if isLast {
@@ -11,15 +14,15 @@ func PrintExpress(express Express, indent string, isLast bool) {
 		marker = "├──"
 	}
 
-	fmt.Print(indent)
-	fmt.Print(marker)
+	writer.Write([]byte(indent))
+	writer.Write([]byte(marker))
 
-	fmt.Print(express.Kind())
+	writer.Write([]byte(express.Kind().String()))
 	if token, ok := express.(SyntaxToken); ok && token.Value != nil {
-		fmt.Print(" ")
-		fmt.Print(token.Value)
+		writer.Write([]byte(" "))
+		writer.Write([]byte(fmt.Sprint(token.Value)))
 	}
-	fmt.Println()
+	writer.Write([]byte("\n"))
 
 	if isLast {
 		indent += "    "
@@ -29,6 +32,6 @@ func PrintExpress(express Express, indent string, isLast bool) {
 
 	for idx, child := range express.GetChildren() {
 		isLast := idx == len(express.GetChildren())-1
-		PrintExpress(child, indent, isLast)
+		PrintExpress(writer, child, indent, isLast)
 	}
 }

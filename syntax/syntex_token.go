@@ -1,6 +1,8 @@
 package syntax
 
-import "github.com/Ranxy/looper/diagnostic"
+import (
+	"github.com/Ranxy/looper/texts"
+)
 
 type SyntaxToken struct {
 	kind     SyntaxKind
@@ -16,6 +18,6 @@ func (e SyntaxToken) Kind() SyntaxKind {
 	return e.kind
 }
 
-func (e SyntaxToken) Span() diagnostic.TextSpan {
-	return diagnostic.NewTextSpan(e.Position, len([]rune(e.Text)))
+func (e SyntaxToken) Span() texts.TextSpan {
+	return texts.NewTextSpan(e.Position, len([]rune(e.Text)))
 }

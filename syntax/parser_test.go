@@ -11,25 +11,23 @@ import (
 func TestNewParser(t *testing.T) {
 	expr := "a=2+1 - c + 2 * 3 "
 	source := texts.NewTextSource([]rune(expr))
-	p := NewParser(source)
-	p.diagnostics.Print(expr)
-	tree := p.Parse()
-	p.diagnostics.Print(expr)
-	tree.Print(os.Stdout)
+	tree := newSyntaxTree(source)
+	err := tree.Print(os.Stdout)
+	require.NoError(t, err)
 }
 func TestNewParser_parser(t *testing.T) {
 	expr := "1 + -2 * ---3"
 	source := texts.NewTextSource([]rune(expr))
-	p := NewParser(source)
-	tree := p.Parse()
+	tree := newSyntaxTree(source)
 	require.Zero(t, len(tree.Diagnostics.List))
-	tree.Print(os.Stdout)
+	err := tree.Print(os.Stdout)
+	require.NoError(t, err)
 }
 func TestNewParser_parser_bool(t *testing.T) {
 	expr := "(!true && !false ||  false ==false ) ==false && 1 == 1"
 	source := texts.NewTextSource([]rune(expr))
-	p := NewParser(source)
-	tree := p.Parse()
+	tree := newSyntaxTree(source)
 	require.Zero(t, len(tree.Diagnostics.List))
-	tree.Print(os.Stdout)
+	err := tree.Print(os.Stdout)
+	require.NoError(t, err)
 }

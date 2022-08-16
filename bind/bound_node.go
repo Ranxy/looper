@@ -8,4 +8,8 @@ const (
 	BoundNodeKindAssignmentExpress
 	BoundNodeKindUnaryExpress
 	BoundNodeKindBinaryExpress
+
+	BoundNodeKindBlockStatement
+	BoundNodeKindVariableDeclaration
+	BoundNodeKindExpressionStatement
 )

@@ -8,6 +8,5 @@ var (
 )
 
 type Express interface {
-	Kind() SyntaxKind
-	GetChildren() []Express
+	SyntaxNode
 }

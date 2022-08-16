@@ -27,3 +27,7 @@ func (t *TextLine) Span() TextSpan {
 func (t *TextLine) SpanWithLineBreak() TextSpan {
 	return NewTextSpan(t.Start, t.LengthIncludingLineBreak)
 }
+
+func (t *TextLine) String() string {
+	return string(t.Source.Text[t.Start : t.Start+t.Length])
+}

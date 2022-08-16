@@ -63,11 +63,56 @@ func (p *Parser) MatchToken(kind SyntaxKind) SyntaxToken {
 	return SyntaxToken{kind, p.Current().Position, "", nil}
 }
 
-func (p *Parser) Parse() *SyntaxTree {
-	expr := p.ParserExpress()
-	eof := p.MatchToken(SyntaxKindEofToken)
+func (p *Parser) ParseComplitionUnit() *CompliationUnit {
+	var statement = p.ParseStatement()
+	eofToken := p.MatchToken(SyntaxKindEofToken)
+	return NewCompliationUnit(statement, eofToken)
+}
 
-	return NewSyntaxTree(expr, eof, p.text, p.diagnostics)
+func (p *Parser) ParseStatement() Statement {
+	switch p.Current().Kind() {
+	case SyntaxKindOpenBraceToken:
+		return p.ParseBlockStatement()
+	case SyntaxKindLetKeywords:
+		fallthrough
+	case SyntaxKindVarKeywords:
+		return p.ParseVariableDeclaration()
+	default:
+		return p.ParseExpressStatement()
+	}
+}
+
+func (p *Parser) ParseBlockStatement() *BlockStatement {
+	var statements = make([]Statement, 0)
+	openBraceToken := p.MatchToken(SyntaxKindOpenBraceToken)
+	for p.Current().Kind() != SyntaxKindEofToken && p.Current().Kind() != SyntaxKindCloseBraceToken {
+		statement := p.ParseStatement()
+		statements = append(statements, statement)
+	}
+	closeBraceToken := p.MatchToken(SyntaxKindCloseBraceToken)
+
+	return NewBlockStatement(openBraceToken, statements, closeBraceToken)
+}
+
+func (p *Parser) ParseVariableDeclaration() Statement {
+	var exprected SyntaxKind
+	if p.Current().Kind() == SyntaxKindLetKeywords {
+		exprected = SyntaxKindLetKeywords
+	} else {
+		exprected = SyntaxKindVarKeywords
+	}
+
+	keyword := p.MatchToken(exprected)
+	identifier := p.MatchToken(SyntaxKindIdentifierToken)
+	equals := p.MatchToken(SyntaxKindEqualToken)
+	initializer := p.ParserExpress()
+
+	return NewVariableDeclarationSyntax(keyword, identifier, equals, initializer)
+}
+
+func (p *Parser) ParseExpressStatement() *ExpressStatement {
+	express := p.ParserExpress()
+	return NewExpressStatement(express)
 }
 
 func (p *Parser) ParserExpress() Express {

@@ -1,6 +1,7 @@
 package bind
 
 import (
+	"container/list"
 	"fmt"
 
 	"github.com/Ranxy/looper/diagnostic"
@@ -9,14 +10,54 @@ import (
 
 type Binder struct {
 	Diagnostics *diagnostic.DiagnosticBag
-	vm          VariableManage
+	scope       *BoundScope
 }
 
-func NewBinder(vm VariableManage) *Binder {
+func NewBinder(parent *BoundScope) *Binder {
 	return &Binder{
 		Diagnostics: diagnostic.NewDiagnostics(),
-		vm:          vm,
+		scope:       NewBoundScope(parent),
 	}
+}
+
+func BindGlobalScope(previous *BoundGlobalScope, s *syntax.CompliationUnit) *BoundGlobalScope {
+	parentScope := CreateParentScope(previous)
+	binder := NewBinder(parentScope)
+	expression := binder.BindStatement(s.Statement)
+	variables := binder.scope.GetDeclareVariables()
+	diagnostics := binder.Diagnostics
+
+	if previous != nil {
+		diagnostics = diagnostics.Merge(previous.Diagnostic)
+	}
+
+	return NewBoundGlobalScope(previous, diagnostics, variables, expression)
+}
+
+func CreateParentScope(previous *BoundGlobalScope) *BoundScope {
+
+	stack := list.New()
+
+	for previous != nil {
+		stack.PushBack(previous)
+		previous = previous.Previous
+	}
+
+	var parent *BoundScope
+
+	for stack.Len() > 0 {
+		pvi := stack.Back()
+		if pvi != nil {
+			stack.Remove(pvi)
+		}
+		pv := pvi.Value.(*BoundGlobalScope)
+		scope := NewBoundScope(parent)
+		for _, v := range pv.Variables {
+			scope.TryDeclare(v)
+		}
+		parent = scope
+	}
+	return parent
 }
 
 func (b *Binder) BindExpression(express syntax.Express) BoundExpression {
@@ -38,6 +79,47 @@ func (b *Binder) BindExpression(express syntax.Express) BoundExpression {
 	}
 }
 
+func (b *Binder) BindStatement(s syntax.Statement) Boundstatement {
+	switch s.Kind() {
+	case syntax.SyntaxKindBlockStatement:
+		return b.BindBlockStatement(s.(*syntax.BlockStatement))
+	case syntax.SyntaxKindVariableDeclaration:
+		return b.BindVariableDeclaration(s.(*syntax.VariableDeclarationSyntax))
+	case syntax.SyntaxKindExpressStatement:
+		return b.BindExpressionStatement(s.(*syntax.ExpressStatement))
+	default:
+		panic(fmt.Sprintf("Unexceped syntax %s", s.Kind()))
+	}
+}
+
+func (b *Binder) BindBlockStatement(s *syntax.BlockStatement) Boundstatement {
+	statements := make([]Boundstatement, 0)
+	b.scope = NewBoundScope(b.scope)
+	for _, statement := range s.Statements {
+		statements = append(statements, b.BindStatement(statement))
+	}
+	b.scope = b.scope.Parent
+	return NewBoundBlockStatement(statements)
+}
+
+func (b *Binder) BindVariableDeclaration(s *syntax.VariableDeclarationSyntax) Boundstatement {
+	name := s.Identifier.Text
+	isReadOnly := s.Keyword.Kind() == syntax.SyntaxKindLetKeywords
+	initializer := b.BindExpression(s.Initializer)
+	variable := syntax.NewVariableSymbol(name, isReadOnly, initializer.Type())
+
+	if !b.scope.TryDeclare(variable) {
+		b.Diagnostics.VariableAlreadyDeclared(s.Identifier.Span(), name)
+	}
+
+	return NewBoundVariableDeclaration(variable, initializer)
+}
+
+func (b *Binder) BindExpressionStatement(es *syntax.ExpressStatement) Boundstatement {
+	expression := b.BindExpression(es.Express)
+	return NewBoundExpressStatements(expression)
+}
+
 func (b *Binder) BindLiteralExpress(express *syntax.LiteralExpress) BoundExpression {
 	value := express.Value
 	if value == nil {
@@ -48,8 +130,8 @@ func (b *Binder) BindLiteralExpress(express *syntax.LiteralExpress) BoundExpress
 
 func (b *Binder) BindNameExpress(express *syntax.NameExpress) BoundExpression {
 	name := express.Identifier.Text
-	variable := b.vm.GetSymbol(name)
-	if variable == nil {
+	variable, has := b.scope.TryLookup(name)
+	if !has {
 		b.Diagnostics.UndefinedName(express.Identifier.Span(), name)
 		return NewBoundLiteralExpression(int64(0))
 	}
@@ -60,9 +142,21 @@ func (b *Binder) BindAssignmentExpress(express *syntax.AssignmentExpress) BoundE
 
 	name := express.Identifier.Text
 	boundExpress := b.BindExpression(express.Express)
+	variable, has := b.scope.TryLookup(name)
+	if !has {
+		b.Diagnostics.UndefinedName(express.Identifier.Span(), name)
+		return boundExpress
+	}
+	if variable.IsReadOnly {
+		b.Diagnostics.CannotAssign(express.Identifier.Span(), name)
+		return boundExpress
+	}
 
-	variable := syntax.NewVariableSymbol(name, boundExpress.Type())
-	b.vm.Declare(variable)
+	if boundExpress.Type() != variable.Type {
+		b.Diagnostics.CannotConvert(express.Identifier.Span(), boundExpress.Type(), variable.Type)
+		return boundExpress
+	}
+
 	return NewBoundAssignmentExpression(variable, boundExpress)
 }
 

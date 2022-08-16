@@ -1,28 +1,22 @@
 package bind
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/Ranxy/looper/syntax"
 	"github.com/Ranxy/looper/texts"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestBinder_BindExpression(t *testing.T) {
-	vm := NewVariableManage()
-
-	text := "a = 2"
+	text := "let a = 2"
 	textSource := texts.NewTextSource([]rune(text))
-	tree := syntax.NewParser(textSource).Parse()
-	bound := NewBinder(vm)
-	boundTree := bound.BindExpression(tree.Root)
-	bound.Diagnostics.Print(text)
-	require.Zero(t, len(bound.Diagnostics.List))
+	tree := syntax.ParseToTree(textSource)
+	boundTree := BindGlobalScope(nil, tree.Root)
 
-	assert.Equal(t, BoundNodeKindAssignmentExpress, boundTree.Kind())
-	symbolA := vm.GetSymbol("a")
-	assert.NotNil(t, symbolA)
-	assert.Equal(t, reflect.Int64, symbolA.Type)
+	t.Log(boundTree.Diagnostic)
+	t.Log(boundTree.Variables)
+	require.Len(t, boundTree.Variables, 1)
+	require.Equal(t, boundTree.Variables[0].Name, "a")
+	require.Equal(t, boundTree.Variables[0].IsReadOnly, true)
 }

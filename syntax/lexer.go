@@ -81,6 +81,12 @@ func (l *Lexer) NextToken() SyntaxToken {
 	case ')':
 		l._kind = SyntaxKindCloseParenthesisToken
 		l.next(1)
+	case '{':
+		l._kind = SyntaxKindOpenBraceToken
+		l.next(1)
+	case '}':
+		l._kind = SyntaxKindCloseBraceToken
+		l.next(1)
 
 	case '&':
 		if l.Lookahead() == '&' {

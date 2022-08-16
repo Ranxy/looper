@@ -10,35 +10,41 @@ import (
 
 type SyntaxTree struct {
 	Text        *texts.TextSource
-	Root        Express
-	Eof         SyntaxToken
+	Root        *CompliationUnit
 	Diagnostics *diagnostic.DiagnosticBag
 }
 
-func NewSyntaxTree(root Express, eof SyntaxToken, source *texts.TextSource, diagnostics *diagnostic.DiagnosticBag) *SyntaxTree {
+func newSyntaxTree(texts *texts.TextSource) *SyntaxTree {
+	parser := NewParser(texts)
+	root := parser.ParseComplitionUnit()
 	return &SyntaxTree{
-		Text:        source,
+		Text:        texts,
 		Root:        root,
-		Eof:         eof,
-		Diagnostics: diagnostic.MergeDiagnostics(diagnostics),
+		Diagnostics: diagnostic.MergeDiagnostics(parser.diagnostics),
 	}
 }
 
 func ParseToTree(sourceText *texts.TextSource) *SyntaxTree {
-	p := NewParser(sourceText)
-	return p.Parse()
+
+	return newSyntaxTree(sourceText)
 }
 
 func ParseToTreeRaw(text string) *SyntaxTree {
 	sourceText := texts.NewTextSource([]rune(text))
-	p := NewParser(sourceText)
-	return p.Parse()
+	return ParseToTree(sourceText)
 }
 
-func (s *SyntaxTree) Print(w io.Writer) {
+func (s *SyntaxTree) Print(w io.Writer) (err error) {
 	for _, err := range s.Diagnostics.List {
-		w.Write([]byte(fmt.Sprintln("ERROR: ", err)))
+		_, e2 := w.Write([]byte(fmt.Sprintln("ERROR: ", err)))
+		if e2 != nil {
+			return e2
+		}
 	}
 
-	PrintExpress(w, s.Root, "", true)
+	err = PrintExpress(w, s.Root, "", true)
+	if err != nil {
+		return err
+	}
+	return nil
 }

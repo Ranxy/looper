@@ -5,7 +5,7 @@ import (
 	"io"
 )
 
-func PrintExpress(writer io.Writer, express Express, indent string, isLast bool) {
+func PrintExpress(writer io.Writer, express Express, indent string, isLast bool) (err error) {
 
 	var marker string
 	if isLast {
@@ -14,15 +14,29 @@ func PrintExpress(writer io.Writer, express Express, indent string, isLast bool)
 		marker = "├──"
 	}
 
-	writer.Write([]byte(indent))
-	writer.Write([]byte(marker))
-
-	writer.Write([]byte(express.Kind().String()))
-	if token, ok := express.(SyntaxToken); ok && token.Value != nil {
-		writer.Write([]byte(" "))
-		writer.Write([]byte(fmt.Sprint(token.Value)))
+	_, err = writer.Write([]byte(indent))
+	if err != nil {
+		return err
 	}
-	writer.Write([]byte("\n"))
+	_, err = writer.Write([]byte(marker))
+	if err != nil {
+		return err
+	}
+
+	_, err = writer.Write([]byte(express.Kind().String()))
+	if err != nil {
+		return err
+	}
+	if token, ok := express.(SyntaxToken); ok && token.Value != nil {
+		_, err = writer.Write(append([]byte(" "), []byte(fmt.Sprint(token.Value))...))
+		if err != nil {
+			return err
+		}
+	}
+	_, err = writer.Write([]byte("\n"))
+	if err != nil {
+		return err
+	}
 
 	if isLast {
 		indent += "    "
@@ -32,6 +46,10 @@ func PrintExpress(writer io.Writer, express Express, indent string, isLast bool)
 
 	for idx, child := range express.GetChildren() {
 		isLast := idx == len(express.GetChildren())-1
-		PrintExpress(writer, child, indent, isLast)
+		err = PrintExpress(writer, child, indent, isLast)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }

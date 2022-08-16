@@ -4,14 +4,17 @@ import (
 	"fmt"
 
 	"github.com/Ranxy/looper/bind"
+	"github.com/Ranxy/looper/syntax"
 )
 
 type Evaluater struct {
-	root bind.BoundExpression
-	vm   bind.VariableManage
+	root bind.Boundstatement
+	vm   map[syntax.VariableSymbol]any
+
+	lastValue any
 }
 
-func NewEvaluater(root bind.BoundExpression, vm bind.VariableManage) *Evaluater {
+func NewEvaluater(root bind.BoundExpression, vm map[syntax.VariableSymbol]any) *Evaluater {
 	return &Evaluater{
 		root: root,
 		vm:   vm,
@@ -19,7 +22,37 @@ func NewEvaluater(root bind.BoundExpression, vm bind.VariableManage) *Evaluater 
 }
 
 func (e *Evaluater) Evaluate() any {
-	return e.EvaluateExpression(e.root)
+	e.EvaluateStatement(e.root)
+	return e.lastValue
+}
+
+func (e *Evaluater) EvaluateStatement(node bind.Boundstatement) {
+	switch node.Kind() {
+	case bind.BoundNodeKindBlockStatement:
+		e.EvaluateBlockStatement(node.(*bind.BoundBlockStatements))
+	case bind.BoundNodeKindVariableDeclaration:
+		e.EvaluateVariableDeclaration(node.(*bind.BoundVariableDeclaration))
+	case bind.BoundNodeKindExpressionStatement:
+		e.EvaluateExpressionStatement(node.(*bind.BoundExpressStatements))
+	default:
+		panic(fmt.Sprintf("Unexceped Node %v", node.Kind()))
+	}
+}
+
+func (e *Evaluater) EvaluateBlockStatement(node *bind.BoundBlockStatements) {
+	for _, statement := range node.Statement {
+		e.EvaluateStatement(statement)
+	}
+}
+
+func (e *Evaluater) EvaluateVariableDeclaration(node *bind.BoundVariableDeclaration) {
+	value := e.EvaluateExpression(node.Initializer)
+	e.vm[*node.Variable] = value
+	e.lastValue = value
+}
+
+func (e *Evaluater) EvaluateExpressionStatement(node *bind.BoundExpressStatements) {
+	e.lastValue = e.EvaluateExpression(node.Express)
 }
 
 func (e *Evaluater) EvaluateExpression(node bind.BoundExpression) any {
@@ -45,16 +78,16 @@ func (e *Evaluater) evaluateLiteralExpression(node *bind.BoundLiteralExpression)
 }
 
 func (e *Evaluater) evaluateVariableExpression(node *bind.BoundVariableExpression) any {
-	v := e.vm.GetValue(node.Variable.Name)
+	v := e.vm[*node.Variable]
 	if v == nil {
 		panic(fmt.Sprintf("Undefined Variable %s", node.Variable.Name))
 	}
-	return v.Value
+	return v
 }
 
 func (e *Evaluater) evaluateAssignmentExpression(node *bind.BoundAssignmentExpression) any {
 	value := e.EvaluateExpression(node.Express)
-	e.vm.Add(node.Variable, value)
+	e.vm[*node.Variable] = value
 	return value
 }
 

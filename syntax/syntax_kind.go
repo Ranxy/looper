@@ -19,10 +19,22 @@ const (
 	SyntaxKindBangEqualToken          // !=
 	SyntaxKindOpenParenthesisToken    //(
 	SyntaxKindCloseParenthesisToken   //)
+	SyntaxKindOpenBraceToken          //{
+	SyntaxKindCloseBraceToken         //}
 	SyntaxKindIdentifierToken
 
 	SyntaxKindTrueKeywords  // True
 	SyntaxKindFalseKeywords //False
+	SyntaxKindLetKeywords
+	SyntaxKindVarKeywords
+
+	//Nodes
+	SyntaxKindCompilationUnit
+
+	//Statement
+	SyntaxKindBlockStatement
+	SyntaxKindVariableDeclaration
+	SyntaxKindExpressStatement
 
 	SyntaxKindLiteralExpress
 	SyntaxKindNameExpress
@@ -41,33 +53,43 @@ func (k SyntaxKind) String() string {
 }
 
 var syntaxKindKeyMap = map[SyntaxKind]string{
-	SyntaxKindBadToken:                "SyntaxKindBadToken",
-	SyntaxKindEofToken:                "SyntaxKindEofToken",
-	SyntaxKindWhiteSpaceToken:         "SyntaxKindWhiteSpaceToken",
-	SyntaxKindNumberToken:             "SyntaxKindNumberToken",
-	SyntaxKindPlusToken:               "SyntaxKindPluxToken",
-	SyntaxKindMinusToken:              "SyntaxKindMinusToken",
-	SyntaxKindStarToken:               "SyntaxKindStarToken",
-	SyntaxKindSlashToken:              "SyntaxKindSlashToken",
-	SyntaxKindBangToken:               "SyntaxKindBangToken",
-	SyntaxKindEqualToken:              "SyntaxKindEqualToken",
-	SyntaxKindAmpersandAmpersandToken: "SyntaxKindAmpersandAmpersandToken",
-	SyntaxKindPipePileToken:           "SyntaxKindPipePileToken",
-	SyntaxKindEqualEqualToken:         "SyntaxKindEqualEqualToken",
-	SyntaxKindBangEqualToken:          "SyntaxKindBangEqualToken",
-	SyntaxKindOpenParenthesisToken:    "SyntaxKindOpenParenthesisToken",
-	SyntaxKindCloseParenthesisToken:   "SyntaxKindCloseParenthesisToken",
-	SyntaxKindIdentifierToken:         "SyntaxKindIdentifierToken",
+	SyntaxKindBadToken:                "BadToken",
+	SyntaxKindEofToken:                "EofToken",
+	SyntaxKindWhiteSpaceToken:         "WhiteSpaceToken",
+	SyntaxKindNumberToken:             "NumberToken",
+	SyntaxKindPlusToken:               "PluxToken",
+	SyntaxKindMinusToken:              "MinusToken",
+	SyntaxKindStarToken:               "StarToken",
+	SyntaxKindSlashToken:              "SlashToken",
+	SyntaxKindBangToken:               "BangToken",
+	SyntaxKindEqualToken:              "EqualToken",
+	SyntaxKindAmpersandAmpersandToken: "AmpersandAmpersandToken",
+	SyntaxKindPipePileToken:           "PipePileToken",
+	SyntaxKindEqualEqualToken:         "EqualEqualToken",
+	SyntaxKindBangEqualToken:          "BangEqualToken",
+	SyntaxKindOpenParenthesisToken:    "OpenParenthesisToken",
+	SyntaxKindCloseParenthesisToken:   "CloseParenthesisToken",
+	SyntaxKindOpenBraceToken:          "OpenBraceToken",
+	SyntaxKindCloseBraceToken:         "CloseBraceToken",
+	SyntaxKindIdentifierToken:         "IdentifierToken",
 
-	SyntaxKindTrueKeywords:  "SyntaxKindTrueKeywords",
-	SyntaxKindFalseKeywords: "SyntaxKindFalseKeywords",
+	SyntaxKindTrueKeywords:  "TrueKeywords",
+	SyntaxKindFalseKeywords: "FalseKeywords",
+	SyntaxKindLetKeywords:   "LetKeywords",
+	SyntaxKindVarKeywords:   "VarKeywords",
 
-	SyntaxKindLiteralExpress:       "SyntaxKindLiteralExpress",
-	SyntaxKindNameExpress:          "SyntaxKindNameExpress",
-	SyntaxKindUnaryExpress:         "SyntaxKindUnaryExpress",
-	SyntaxKindBinaryExpress:        "SyntaxKindBinaryExpress",
-	SyntaxKindParenthesizedExpress: "SyntaxKindParenthesizedExpress",
-	SyntaxKindAssignmentExpress:    "SyntaxKindAssignmentExpress",
+	SyntaxKindCompilationUnit: "CompilationUnit",
+
+	SyntaxKindBlockStatement:      "BlockStatement",
+	SyntaxKindVariableDeclaration: "VariableDeclaration",
+	SyntaxKindExpressStatement:    "ExpressStatement",
+
+	SyntaxKindLiteralExpress:       "LiteralExpress",
+	SyntaxKindNameExpress:          "NameExpress",
+	SyntaxKindUnaryExpress:         "UnaryExpress",
+	SyntaxKindBinaryExpress:        "BinaryExpress",
+	SyntaxKindParenthesizedExpress: "ParenthesizedExpress",
+	SyntaxKindAssignmentExpress:    "AssignmentExpress",
 }
 
 func (k SyntaxKind) Text() string {
@@ -95,7 +117,11 @@ var syntaxKindTextMap = map[SyntaxKind]string{
 	SyntaxKindBangEqualToken:          "!=",
 	SyntaxKindOpenParenthesisToken:    "(",
 	SyntaxKindCloseParenthesisToken:   ")",
+	SyntaxKindOpenBraceToken:          "{",
+	SyntaxKindCloseBraceToken:         "}",
 
 	SyntaxKindTrueKeywords:  "true",
 	SyntaxKindFalseKeywords: "false",
+	SyntaxKindLetKeywords:   "let",
+	SyntaxKindVarKeywords:   "var",
 }

@@ -11,8 +11,8 @@ type SyntaxToken struct {
 	Value    any
 }
 
-func (s SyntaxToken) GetChildren() []Express {
-	return []Express{}
+func (s SyntaxToken) GetChildren() []SyntaxNode {
+	return []SyntaxNode{}
 }
 func (e SyntaxToken) Kind() SyntaxKind {
 	return e.kind

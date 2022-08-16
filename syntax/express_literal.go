@@ -1,7 +1,6 @@
 package syntax
 
 type LiteralExpress struct {
-	kind    SyntaxKind
 	Literal SyntaxToken
 	Value   any
 }
@@ -9,7 +8,6 @@ type LiteralExpress struct {
 func NewLiteralExpress(literal SyntaxToken) *LiteralExpress {
 
 	return &LiteralExpress{
-		kind:    SyntaxKindLiteralExpress,
 		Literal: literal,
 		Value:   literal.Value,
 	}
@@ -17,14 +15,13 @@ func NewLiteralExpress(literal SyntaxToken) *LiteralExpress {
 func NewLiteralValueExpress(literal SyntaxToken, value any) *LiteralExpress {
 
 	return &LiteralExpress{
-		kind:    SyntaxKindLiteralExpress,
 		Literal: literal,
 		Value:   value,
 	}
 }
-func (e *LiteralExpress) GetChildren() []Express {
-	return []Express{e.Literal}
+func (e *LiteralExpress) GetChildren() []SyntaxNode {
+	return []SyntaxNode{e.Literal}
 }
 func (e *LiteralExpress) Kind() SyntaxKind {
-	return e.kind
+	return SyntaxKindLiteralExpress
 }

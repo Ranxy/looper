@@ -6,8 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Ranxy/looper/bind"
-	"github.com/Ranxy/looper/evaluator"
+	"github.com/Ranxy/looper/compilation"
 	"github.com/Ranxy/looper/syntax"
 	"github.com/Ranxy/looper/texts"
 )
@@ -17,7 +16,8 @@ func main() {
 
 	reader := bufio.NewReader(os.Stdin)
 
-	vm := bind.NewVariableManage()
+	vm := make(map[syntax.VariableSymbol]any)
+	var previous *compilation.Compilation
 
 	textBuild := strings.Builder{}
 
@@ -45,8 +45,14 @@ func main() {
 				}
 				continue
 			}
+			if text == "#reset" {
+				previous = nil
+				vm = make(map[syntax.VariableSymbol]any)
+				fmt.Println("Success")
+				continue
+			}
 			if text == "#dump" {
-				fmt.Print(vm.Dump())
+				fmt.Print(vm)
 				continue
 			}
 			if text == "" {
@@ -60,23 +66,28 @@ func main() {
 
 		sourceText := texts.NewTextSource([]rune(text))
 
-		tree := syntax.NewParser(sourceText).Parse()
+		tree := syntax.ParseToTree(sourceText)
 
 		if showTree {
-			tree.Print(os.Stdout)
+			err = tree.Print(os.Stdout)
+			if err != nil {
+				panic(fmt.Sprintf("ShowTreeFailed %v", err))
+			}
 		}
 		if len(tree.Diagnostics.List) != 0 {
 			tree.Diagnostics.PrintWithSource(sourceText)
+			tree.Diagnostics.Reset()
 		} else {
-			b := bind.NewBinder(vm)
-			boundExpress := b.BindExpression(tree.Root)
-			if len(b.Diagnostics.List) != 0 {
-				b.Diagnostics.PrintWithSource(sourceText)
+			cm := compilation.NewCompliation(previous, tree)
+
+			res := cm.Evaluate(vm)
+			if res.Diagnostic.Has() {
+				res.Diagnostic.PrintWithSource(sourceText)
+				res.Diagnostic.Reset()
 			} else {
-				eval := evaluator.NewEvaluater(boundExpress, vm)
-				res := eval.Evaluate()
-				fmt.Println(res)
+				fmt.Println(res.Value)
 			}
+			previous = cm
 		}
 
 		textBuild.Reset()

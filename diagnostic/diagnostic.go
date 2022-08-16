@@ -59,8 +59,11 @@ func NewDiagnostics() *DiagnosticBag {
 }
 func MergeDiagnostics(b *DiagnosticBag) *DiagnosticBag {
 	res := NewDiagnostics()
-	res.Merge(b)
+	res = res.Merge(b)
 	return res
+}
+func (b *DiagnosticBag) Has() bool {
+	return len(b.List) != 0
 }
 
 func (b *DiagnosticBag) Print(codeLine string) {
@@ -76,13 +79,17 @@ func (b *DiagnosticBag) PrintWithSource(source *texts.TextSource) {
 		runeIdx := d.Span.Start() - line.Start + 1
 		lineText := source.StringSpan(line.Span())
 		lineOut := fmt.Sprintf("(%d, %d): ", idx+1, runeIdx)
-		fmt.Printf(lineOut)
+		fmt.Print(lineOut)
 		fmt.Print(d.StringWithLine(len(lineOut), lineText))
 	}
 }
+func (b *DiagnosticBag) Reset() {
+	b.List = b.List[0:0]
+}
 
-func (b *DiagnosticBag) Merge(bag *DiagnosticBag) {
-	b.List = append(b.List, bag.List...)
+func (b *DiagnosticBag) Merge(bag *DiagnosticBag) *DiagnosticBag {
+	list := append(b.List, bag.List...)
+	return &DiagnosticBag{List: list}
 }
 
 func (b *DiagnosticBag) Report(span texts.TextSpan, message string) {
@@ -116,5 +123,20 @@ func (b *DiagnosticBag) UndefinedBinaryOperator(span texts.TextSpan, operatorTex
 
 func (b *DiagnosticBag) UndefinedName(span texts.TextSpan, name string) {
 	message := fmt.Sprintf("Variable '%s' doesn't exist.", name)
+	b.Report(span, message)
+}
+
+func (b *DiagnosticBag) CannotAssign(span texts.TextSpan, name string) {
+	message := fmt.Sprintf("Variable '%s' is readonly and can not assign.", name)
+	b.Report(span, message)
+}
+
+func (b *DiagnosticBag) CannotConvert(span texts.TextSpan, expect, actual reflect.Kind) {
+	message := fmt.Sprintf("Cannot convert '%s' to '%s'.", expect, actual)
+	b.Report(span, message)
+}
+
+func (b *DiagnosticBag) VariableAlreadyDeclared(span texts.TextSpan, name string) {
+	message := fmt.Sprintf("Variable '%s' is already declared.", name)
 	b.Report(span, message)
 }

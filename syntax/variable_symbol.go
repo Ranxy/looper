@@ -3,13 +3,15 @@ package syntax
 import "reflect"
 
 type VariableSymbol struct {
-	Name string
-	Type reflect.Kind
+	Name       string
+	IsReadOnly bool
+	Type       reflect.Kind
 }
 
-func NewVariableSymbol(name string, tp reflect.Kind) *VariableSymbol {
+func NewVariableSymbol(name string, readOnly bool, tp reflect.Kind) *VariableSymbol {
 	return &VariableSymbol{
-		Name: name,
-		Type: tp,
+		Name:       name,
+		IsReadOnly: readOnly,
+		Type:       tp,
 	}
 }

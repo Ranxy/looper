@@ -1,6 +1,8 @@
 package texts
 
-import "unicode"
+import (
+	"unicode"
+)
 
 type TextSource struct {
 	Text  []rune
@@ -38,7 +40,7 @@ func (s *TextSource) ParserLines(text []rune) {
 			lineStart = pos
 		}
 	}
-	if pos > lineStart {
+	if pos >= lineStart {
 		s.addLine(pos, lineStart, 0)
 	}
 }

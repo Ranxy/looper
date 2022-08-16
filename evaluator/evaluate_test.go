@@ -48,17 +48,17 @@ func TestEvaluate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.text, func(t *testing.T) {
-			vm := bind.NewVariableManage()
 			textSource := texts.NewTextSource([]rune(tt.text))
-			tree := syntax.NewParser(textSource).Parse()
+			tree := syntax.ParseToTree(textSource)
 
-			bound := bind.NewBinder(vm)
-			boundTree := bound.BindExpression(tree.Root)
-			if len(bound.Diagnostics.List) != 0 {
-				bound.Diagnostics.Print(tt.text)
+			boundTree := bind.BindGlobalScope(nil, tree.Root)
+			if len(boundTree.Diagnostic.List) != 0 {
+				boundTree.Diagnostic.Print(tt.text)
 				t.FailNow()
 			}
-			ev := NewEvaluater(boundTree, vm)
+			vm := make(map[syntax.VariableSymbol]any)
+
+			ev := NewEvaluater(boundTree.Statements, vm)
 			got := ev.Evaluate()
 			require.Equal(t, tt.want, got)
 		})
@@ -118,14 +118,16 @@ func TestEvaluate_bool(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.text, func(t *testing.T) {
-			vm := bind.NewVariableManage()
 			textSource := texts.NewTextSource([]rune(tt.text))
-			tree := syntax.NewParser(textSource).Parse()
-			bound := bind.NewBinder(vm)
-			boundTree := bound.BindExpression(tree.Root)
-			require.Zero(t, len(bound.Diagnostics.List))
+			tree := syntax.ParseToTree(textSource)
+			boundTree := bind.BindGlobalScope(nil, tree.Root)
+			if len(boundTree.Diagnostic.List) != 0 {
+				boundTree.Diagnostic.Print(tt.text)
+				t.FailNow()
+			}
+			vm := make(map[syntax.VariableSymbol]any)
 
-			ev := NewEvaluater(boundTree, vm)
+			ev := NewEvaluater(boundTree.Statements, vm)
 			got := ev.Evaluate()
 			require.Equal(t, tt.want, got)
 		})
@@ -133,28 +135,36 @@ func TestEvaluate_bool(t *testing.T) {
 }
 
 func TestEvaluate_variable(t *testing.T) {
-	vm := bind.NewVariableManage()
+	vm := make(map[syntax.VariableSymbol]any)
 
-	ev_variable(vm, t, "a=3", int64(3))
-	ev_variable(vm, t, "-a", int64(-3))
-	ev_variable(vm, t, "a+2", int64(5))
+	var bt *bind.BoundGlobalScope
 
-	ev_variable(vm, t, "a==3", true)
+	bt = ev_variable(bt, vm, t, "var a = 1+1", int64(2))
+	bt = ev_variable(bt, vm, t, "a=3", int64(3))
+	bt = ev_variable(bt, vm, t, "-a", int64(-3))
+	bt = ev_variable(bt, vm, t, "a+2", int64(5))
 
-	ev_variable(vm, t, "a=a+a+1", int64(7))
-	ev_variable(vm, t, "b=(a==7)", true)
-	ev_variable(vm, t, "b==false", false)
+	bt = ev_variable(bt, vm, t, "a==3", true)
+
+	bt = ev_variable(bt, vm, t, "a=a+a+1", int64(7))
+	bt = ev_variable(bt, vm, t, "var b = false", false)
+	bt = ev_variable(bt, vm, t, "b=(a==7)", true)
+	_ = ev_variable(bt, vm, t, "b==false", false)
+
 }
 
-func ev_variable(vm bind.VariableManage, t *testing.T, text string, want any) {
+func ev_variable(previous *bind.BoundGlobalScope, vm map[syntax.VariableSymbol]any, t *testing.T, text string, want any) *bind.BoundGlobalScope {
 	textSource := texts.NewTextSource([]rune(text))
-	tree := syntax.NewParser(textSource).Parse()
-	bound := bind.NewBinder(vm)
-	boundTree := bound.BindExpression(tree.Root)
-	bound.Diagnostics.Print(text)
-	require.Zero(t, len(bound.Diagnostics.List))
+	tree := syntax.ParseToTree(textSource)
+	boundTree := bind.BindGlobalScope(previous, tree.Root)
+	if len(boundTree.Diagnostic.List) != 0 {
+		boundTree.Diagnostic.Print(text)
+		t.FailNow()
+	}
+	ev := NewEvaluater(boundTree.Statements, vm)
 
-	ev := NewEvaluater(boundTree, vm)
 	got := ev.Evaluate()
 	require.Equal(t, want, got)
+
+	return boundTree
 }

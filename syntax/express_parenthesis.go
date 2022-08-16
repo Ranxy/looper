@@ -3,7 +3,6 @@ package syntax
 import "fmt"
 
 type ParenthesisExpress struct {
-	kind  SyntaxKind
 	Open  SyntaxToken
 	Close SyntaxToken
 	Expr  Express
@@ -12,19 +11,18 @@ type ParenthesisExpress struct {
 func NewParenthesisExpress(open SyntaxToken, expr Express, close SyntaxToken) *ParenthesisExpress {
 
 	return &ParenthesisExpress{
-		kind:  SyntaxKindParenthesizedExpress,
 		Open:  open,
 		Close: close,
 		Expr:  expr,
 	}
 }
 
-func (e *ParenthesisExpress) GetChildren() []Express {
-	return []Express{e.Open, e.Expr, e.Close}
+func (e *ParenthesisExpress) GetChildren() []SyntaxNode {
+	return []SyntaxNode{e.Open, e.Expr, e.Close}
 }
 
 func (e *ParenthesisExpress) Kind() SyntaxKind {
-	return e.kind
+	return SyntaxKindParenthesizedExpress
 }
 func (e *ParenthesisExpress) String() string {
 	return fmt.Sprintf("ParenthesisExpress:  Expr %s", e.Expr)

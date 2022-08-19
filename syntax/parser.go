@@ -77,6 +77,8 @@ func (p *Parser) ParseStatement() Statement {
 		fallthrough
 	case SyntaxKindVarKeywords:
 		return p.ParseVariableDeclaration()
+	case SyntaxKindIfKeywords:
+		return p.ParseIfStatement()
 	default:
 		return p.ParseExpressStatement()
 	}
@@ -86,8 +88,12 @@ func (p *Parser) ParseBlockStatement() *BlockStatement {
 	var statements = make([]Statement, 0)
 	openBraceToken := p.MatchToken(SyntaxKindOpenBraceToken)
 	for p.Current().Kind() != SyntaxKindEofToken && p.Current().Kind() != SyntaxKindCloseBraceToken {
+		start := p.Current()
 		statement := p.ParseStatement()
 		statements = append(statements, statement)
+		if start == p.Current() {
+			p.NextToken()
+		}
 	}
 	closeBraceToken := p.MatchToken(SyntaxKindCloseBraceToken)
 
@@ -108,6 +114,24 @@ func (p *Parser) ParseVariableDeclaration() Statement {
 	initializer := p.ParserExpress()
 
 	return NewVariableDeclarationSyntax(keyword, identifier, equals, initializer)
+}
+
+func (p *Parser) ParseIfStatement() Statement {
+	keywords := p.MatchToken(SyntaxKindIfKeywords)
+	condition := p.ParserExpress()
+	statement := p.ParseStatement()
+	elseClause := p.ParseElseClause()
+
+	return NewIfStatement(keywords, condition, statement, elseClause)
+}
+
+func (p *Parser) ParseElseClause() *ElseClauseSyntax {
+	if p.Current().Kind() != SyntaxKindElseKeywords {
+		return nil
+	}
+	keywords := p.NextToken()
+	statement := p.ParseStatement()
+	return NewElseClause(keywords, statement)
 }
 
 func (p *Parser) ParseExpressStatement() *ExpressStatement {

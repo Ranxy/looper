@@ -27,6 +27,8 @@ const (
 	SyntaxKindFalseKeywords //False
 	SyntaxKindLetKeywords
 	SyntaxKindVarKeywords
+	SyntaxKindIfKeywords
+	SyntaxKindElseKeywords
 
 	//Nodes
 	SyntaxKindCompilationUnit
@@ -34,6 +36,7 @@ const (
 	//Statement
 	SyntaxKindBlockStatement
 	SyntaxKindVariableDeclaration
+	SyntaxKindIfStatement
 	SyntaxKindExpressStatement
 
 	SyntaxKindLiteralExpress
@@ -77,6 +80,8 @@ var syntaxKindKeyMap = map[SyntaxKind]string{
 	SyntaxKindFalseKeywords: "FalseKeywords",
 	SyntaxKindLetKeywords:   "LetKeywords",
 	SyntaxKindVarKeywords:   "VarKeywords",
+	SyntaxKindIfKeywords:    "IfKeywords",
+	SyntaxKindElseKeywords:  "ElseKeywords",
 
 	SyntaxKindCompilationUnit: "CompilationUnit",
 
@@ -124,4 +129,6 @@ var syntaxKindTextMap = map[SyntaxKind]string{
 	SyntaxKindFalseKeywords: "false",
 	SyntaxKindLetKeywords:   "let",
 	SyntaxKindVarKeywords:   "var",
+	SyntaxKindIfKeywords:    "if",
+	SyntaxKindElseKeywords:  "else",
 }

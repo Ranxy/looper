@@ -32,10 +32,23 @@ func (e *Evaluater) EvaluateStatement(node bind.Boundstatement) {
 		e.EvaluateBlockStatement(node.(*bind.BoundBlockStatements))
 	case bind.BoundNodeKindVariableDeclaration:
 		e.EvaluateVariableDeclaration(node.(*bind.BoundVariableDeclaration))
+	case bind.BoundNodeKindIfStatement:
+		e.EvaluateIfStatement(node.(*bind.BoundIfStatements))
 	case bind.BoundNodeKindExpressionStatement:
 		e.EvaluateExpressionStatement(node.(*bind.BoundExpressStatements))
 	default:
 		panic(fmt.Sprintf("Unexceped Node %v", node.Kind()))
+	}
+}
+
+func (e *Evaluater) EvaluateIfStatement(node *bind.BoundIfStatements) {
+	cond := e.EvaluateExpression(node.Condition).(bool)
+	if cond {
+		e.EvaluateStatement(node.ThenStatement)
+	} else if node.ElseStatement != nil {
+		e.EvaluateStatement(node.ElseStatement)
+	} else {
+		e.lastValue = 0 //todo use unit type
 	}
 }
 

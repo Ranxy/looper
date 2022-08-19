@@ -3,6 +3,7 @@ package bind
 import (
 	"container/list"
 	"fmt"
+	"reflect"
 
 	"github.com/Ranxy/looper/diagnostic"
 	"github.com/Ranxy/looper/syntax"
@@ -60,6 +61,14 @@ func CreateParentScope(previous *BoundGlobalScope) *BoundScope {
 	return parent
 }
 
+func (b *Binder) BindExpressionAndCheckType(express syntax.Express, targetType reflect.Kind) BoundExpression {
+	result := b.BindExpression(express)
+	if result.Type() != targetType {
+		b.Diagnostics.CannotConvert(syntax.SyntaxNodeSpan(express), result.Type(), targetType)
+	}
+	return result
+}
+
 func (b *Binder) BindExpression(express syntax.Express) BoundExpression {
 	switch express.Kind() {
 	case syntax.SyntaxKindLiteralExpress:
@@ -85,11 +94,24 @@ func (b *Binder) BindStatement(s syntax.Statement) Boundstatement {
 		return b.BindBlockStatement(s.(*syntax.BlockStatement))
 	case syntax.SyntaxKindVariableDeclaration:
 		return b.BindVariableDeclaration(s.(*syntax.VariableDeclarationSyntax))
+	case syntax.SyntaxKindIfStatement:
+		return b.BindIfStatement(s.(*syntax.IfStatement))
 	case syntax.SyntaxKindExpressStatement:
 		return b.BindExpressionStatement(s.(*syntax.ExpressStatement))
 	default:
 		panic(fmt.Sprintf("Unexceped syntax %s", s.Kind()))
 	}
+}
+
+func (b *Binder) BindIfStatement(s *syntax.IfStatement) Boundstatement {
+	condition := b.BindExpressionAndCheckType(s.Condition, reflect.Bool)
+	thenStatement := b.BindStatement(s.ThenStatement)
+	var elseStatement Boundstatement
+	if s.ElseClause != nil {
+		elseStatement = b.BindStatement(s.ElseClause.ElseStatement)
+	}
+
+	return NewBoundIfStatements(condition, thenStatement, elseStatement)
 }
 
 func (b *Binder) BindBlockStatement(s *syntax.BlockStatement) Boundstatement {
@@ -130,6 +152,9 @@ func (b *Binder) BindLiteralExpress(express *syntax.LiteralExpress) BoundExpress
 
 func (b *Binder) BindNameExpress(express *syntax.NameExpress) BoundExpression {
 	name := express.Identifier.Text
+	if name == "" {
+		return NewBoundLiteralExpression(0)
+	}
 	variable, has := b.scope.TryLookup(name)
 	if !has {
 		b.Diagnostics.UndefinedName(express.Identifier.Span(), name)

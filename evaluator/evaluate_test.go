@@ -1,6 +1,7 @@
 package evaluator
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/Ranxy/looper/bind"
@@ -43,6 +44,16 @@ func TestEvaluate(t *testing.T) {
 		{
 			text:    "-(1 * 2) -3",
 			want:    int64(-5),
+			wantErr: false,
+		},
+		{
+			text:    "{ var a = 0 if a == 2 a = 3 else a = 6 a }",
+			want:    int64(6),
+			wantErr: false,
+		},
+		{
+			text:    "{ var a = 7 if a == 2 a = 3 a }",
+			want:    int64(7),
 			wantErr: false,
 		},
 	}
@@ -149,6 +160,11 @@ func TestEvaluate_variable(t *testing.T) {
 	bt = ev_variable(bt, vm, t, "a=a+a+1", int64(7))
 	bt = ev_variable(bt, vm, t, "var b = false", false)
 	bt = ev_variable(bt, vm, t, "b=(a==7)", true)
+	bt = ev_variable(bt, vm, t, "var c = 5", int64(5))
+	bt = ev_variable(bt, vm, t, "if(a==7){c = 2}else{c = 3}", int64(2))
+	bt = ev_variable(bt, vm, t, "c == 3", false)
+	bt = ev_variable(bt, vm, t, "if(c == 3){c = 10}", 0)
+	bt = ev_variable(bt, vm, t, "c == 2", true)
 	_ = ev_variable(bt, vm, t, "b==false", false)
 
 }
@@ -164,7 +180,7 @@ func ev_variable(previous *bind.BoundGlobalScope, vm map[syntax.VariableSymbol]a
 	ev := NewEvaluater(boundTree.Statements, vm)
 
 	got := ev.Evaluate()
-	require.Equal(t, want, got)
+	require.Equal(t, want, got, fmt.Sprintf("Text %s failed", text))
 
 	return boundTree
 }

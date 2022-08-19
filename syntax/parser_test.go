@@ -31,3 +31,12 @@ func TestNewParser_parser_bool(t *testing.T) {
 	err := tree.Print(os.Stdout)
 	require.NoError(t, err)
 }
+
+func TestNewParser_parser_if(t *testing.T) {
+	expr := "if(a+1 == 2){var b = 0}else{var b = 3}"
+	source := texts.NewTextSource([]rune(expr))
+	tree := newSyntaxTree(source)
+	require.Zero(t, len(tree.Diagnostics.List))
+	err := tree.Print(os.Stdout)
+	require.NoError(t, err)
+}

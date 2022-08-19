@@ -11,5 +11,6 @@ const (
 
 	BoundNodeKindBlockStatement
 	BoundNodeKindVariableDeclaration
+	BoundNodeKindIfStatement
 	BoundNodeKindExpressionStatement
 )

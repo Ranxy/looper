@@ -35,6 +35,10 @@ func GetKeyWordsKind(text string) SyntaxKind {
 		return SyntaxKindLetKeywords
 	case "var":
 		return SyntaxKindVarKeywords
+	case "if":
+		return SyntaxKindIfKeywords
+	case "else":
+		return SyntaxKindElseKeywords
 	default:
 		return SyntaxKindIdentifierToken
 	}

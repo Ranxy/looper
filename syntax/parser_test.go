@@ -12,45 +12,45 @@ func TestCase(t *testing.T) {
 	tests := []struct {
 		text string
 	}{
-		// {
-		// 	text: "1 + 2",
-		// },
-		// {
-		// 	text: "10 - 2 * 3",
-		// },
-		// {
-		// 	text: "1 + 2 * (3 -1 )",
-		// },
-		// {
-		// 	text: "-2",
-		// },
-		// {
-		// 	text: "1+-2",
-		// },
-		// {
-		// 	text: "-(1 * 2) -3",
-		// },
-		// {
-		// 	text: "1 < 2",
-		// },
-		// {
-		// 	text: "1 <= 2",
-		// },
-		// {
-		// 	text: "1 > 2",
-		// },
-		// {
-		// 	text: "1 >= 2",
-		// },
-		// {
-		// 	text: "{ var a = 0 if a == 2 a = 3 else a = 6 a }",
-		// },
-		// {
-		// 	text: "{ var a = 7 if a == 2 a = 3 a }",
-		// },
-		// {
-		// 	text: "{ var i = 10 var result = 0 while i != 0 { result = result + i i = i - 1} result }",
-		// },
+		{
+			text: "1 + 2",
+		},
+		{
+			text: "10 - 2 * 3",
+		},
+		{
+			text: "1 + 2 * (3 -1 )",
+		},
+		{
+			text: "-2",
+		},
+		{
+			text: "1+-2",
+		},
+		{
+			text: "-(1 * 2) -3",
+		},
+		{
+			text: "1 < 2",
+		},
+		{
+			text: "1 <= 2",
+		},
+		{
+			text: "1 > 2",
+		},
+		{
+			text: "1 >= 2",
+		},
+		{
+			text: "{ var a = 0 if a == 2 a = 3 else a = 6 a }",
+		},
+		{
+			text: "{ var a = 7 if a == 2 a = 3 a }",
+		},
+		{
+			text: "{ var i = 10 var result = 0 while i != 0 { result = result + i i = i - 1} result }",
+		},
 		{
 			text: "{ var result = 0 for var i = 1; i < 5; i=i+1 { result = result + i } result }",
 		},

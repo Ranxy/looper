@@ -87,6 +87,9 @@ func (l *Lexer) NextToken() SyntaxToken {
 	case '}':
 		l._kind = SyntaxKindCloseBraceToken
 		l.next(1)
+	case ';':
+		l._kind = syntaxKindSemicolon
+		l.next(1)
 
 	case '&':
 		if l.Lookahead() == '&' {
@@ -112,6 +115,22 @@ func (l *Lexer) NextToken() SyntaxToken {
 			l.next(2)
 		} else {
 			l._kind = SyntaxKindBangToken
+			l.next(1)
+		}
+	case '<':
+		if l.Lookahead() == '=' {
+			l._kind = SyntaxKindLessEqualToken
+			l.next(2)
+		} else {
+			l._kind = SyntaxKindLessToken
+			l.next(1)
+		}
+	case '>':
+		if l.Lookahead() == '=' {
+			l._kind = SyntaxKindGreatEqualToken
+			l.next(2)
+		} else {
+			l._kind = SyntaxKindGreatToken
 			l.next(1)
 		}
 	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':

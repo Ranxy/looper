@@ -34,10 +34,28 @@ func (e *Evaluater) EvaluateStatement(node bind.Boundstatement) {
 		e.EvaluateVariableDeclaration(node.(*bind.BoundVariableDeclaration))
 	case bind.BoundNodeKindIfStatement:
 		e.EvaluateIfStatement(node.(*bind.BoundIfStatements))
+	case bind.BoundNodeKindWhileStatement:
+		e.EvaluateWhileStatement(node.(*bind.BoundWhileStatements))
+	case bind.BoundNodeKindForStatement:
+		e.EvaluateForStatement(node.(*bind.BoundForStatements))
 	case bind.BoundNodeKindExpressionStatement:
 		e.EvaluateExpressionStatement(node.(*bind.BoundExpressStatements))
 	default:
 		panic(fmt.Sprintf("Unexceped Node %v", node.Kind()))
+	}
+}
+
+func (e *Evaluater) EvaluateForStatement(node *bind.BoundForStatements) {
+	e.EvaluateStatement(node.InitCondition)
+	for e.EvaluateExpression(node.EndCondition).(bool) {
+		e.EvaluateStatement(node.Body)
+		e.EvaluateStatement(node.UpdateCondition)
+	}
+}
+
+func (e *Evaluater) EvaluateWhileStatement(node *bind.BoundWhileStatements) {
+	for e.EvaluateExpression(node.Condition).(bool) {
+		e.EvaluateStatement(node.Body)
 	}
 }
 
@@ -139,6 +157,15 @@ func (e *Evaluater) evaluateBinaryExpression(node *bind.BoundBinaryExpression) a
 		return left == right
 	case bind.BoundBinaryKindNotEquals:
 		return left != right
+	case bind.BoundBinaryKindLess:
+		return left.(int64) < right.(int64)
+	case bind.BoundBinaryKindLessEqual:
+		return left.(int64) <= right.(int64)
+	case bind.BoundBinaryKindGreat:
+		return left.(int64) > right.(int64)
+	case bind.BoundBinaryKindGreatEqual:
+		return left.(int64) >= right.(int64)
+
 	default:
 		panic(fmt.Sprintf("Unexceped binary operator:%q and", node.Op))
 	}

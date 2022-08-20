@@ -96,11 +96,29 @@ func (b *Binder) BindStatement(s syntax.Statement) Boundstatement {
 		return b.BindVariableDeclaration(s.(*syntax.VariableDeclarationSyntax))
 	case syntax.SyntaxKindIfStatement:
 		return b.BindIfStatement(s.(*syntax.IfStatement))
+	case syntax.SyntaxKindWhileStatement:
+		return b.BindWhileStatement(s.(*syntax.WhileStatement))
+	case syntax.SyntaxkindForStatement:
+		return b.BindForStatement(s.(*syntax.ForStatement))
 	case syntax.SyntaxKindExpressStatement:
 		return b.BindExpressionStatement(s.(*syntax.ExpressStatement))
 	default:
 		panic(fmt.Sprintf("Unexceped syntax %s", s.Kind()))
 	}
+}
+
+func (b *Binder) BindForStatement(s *syntax.ForStatement) Boundstatement {
+	initCond := b.BindStatement(s.InitCondition)
+	endCond := b.BindExpressionAndCheckType(s.EndCondition, reflect.Bool)
+	updateCond := b.BindStatement(s.UpdateCondition)
+	body := b.BindStatement(s.Body)
+	return NewBoundForStatements(initCond, endCond, updateCond, body)
+}
+
+func (b *Binder) BindWhileStatement(s *syntax.WhileStatement) Boundstatement {
+	condition := b.BindExpressionAndCheckType(s.Condition, reflect.Bool)
+	body := b.BindStatement(s.Body)
+	return NewBoundWhileStatements(condition, body)
 }
 
 func (b *Binder) BindIfStatement(s *syntax.IfStatement) Boundstatement {

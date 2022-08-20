@@ -14,7 +14,9 @@ func GetBinaryOperatorPrecedence(kind SyntaxKind) int {
 		return 5
 	case SyntaxKindPlusToken, SyntaxKindMinusToken:
 		return 4
-	case SyntaxKindEqualEqualToken, SyntaxKindBangEqualToken:
+	case SyntaxKindEqualEqualToken, SyntaxKindBangEqualToken,
+		SyntaxKindLessToken, SyntaxKindLessEqualToken,
+		SyntaxKindGreatToken, SyntaxKindGreatEqualToken:
 		return 3
 	case SyntaxKindAmpersandAmpersandToken:
 		return 2
@@ -39,6 +41,10 @@ func GetKeyWordsKind(text string) SyntaxKind {
 		return SyntaxKindIfKeywords
 	case "else":
 		return SyntaxKindElseKeywords
+	case "while":
+		return SyntaxKindWhileKeywords
+	case "for":
+		return SyntaxkindForKeywords
 	default:
 		return SyntaxKindIdentifierToken
 	}

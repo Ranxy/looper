@@ -79,6 +79,10 @@ func (p *Parser) ParseStatement() Statement {
 		return p.ParseVariableDeclaration()
 	case SyntaxKindIfKeywords:
 		return p.ParseIfStatement()
+	case SyntaxKindWhileKeywords:
+		return p.ParseWhileStatement()
+	case SyntaxkindForKeywords:
+		return p.ParseForStatement()
 	default:
 		return p.ParseExpressStatement()
 	}
@@ -114,6 +118,26 @@ func (p *Parser) ParseVariableDeclaration() Statement {
 	initializer := p.ParserExpress()
 
 	return NewVariableDeclarationSyntax(keyword, identifier, equals, initializer)
+}
+
+func (p *Parser) ParseForStatement() Statement {
+	keywords := p.MatchToken(SyntaxkindForKeywords)
+	initCondition := p.ParseStatement()
+	firstSemicolon := p.MatchToken(syntaxKindSemicolon)
+	endCondtion := p.ParserExpress()
+	secondSemicolon := p.MatchToken(syntaxKindSemicolon)
+	updateCondtion := p.ParseStatement()
+	statement := p.ParseStatement()
+
+	return NewForStatement(keywords, initCondition, firstSemicolon, endCondtion, secondSemicolon, updateCondtion, statement)
+}
+
+func (p *Parser) ParseWhileStatement() Statement {
+	keywords := p.MatchToken(SyntaxKindWhileKeywords)
+	condition := p.ParserExpress()
+	statement := p.ParseStatement()
+
+	return NewWhileStatement(keywords, condition, statement)
 }
 
 func (p *Parser) ParseIfStatement() Statement {

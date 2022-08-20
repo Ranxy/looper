@@ -63,6 +63,18 @@ var binaryMatchParam = map[binaryMatchType]func() *BoundBinaryOperator{
 	{syntax.SyntaxKindBangEqualToken, reflect.Bool, reflect.Bool}: func() *BoundBinaryOperator {
 		return &BoundBinaryOperator{syntax.SyntaxKindBangEqualToken, BoundBinaryKindNotEquals, reflect.Bool, reflect.Bool, reflect.Bool}
 	},
+	{syntax.SyntaxKindLessToken, reflect.Int64, reflect.Int64}: func() *BoundBinaryOperator {
+		return &BoundBinaryOperator{syntax.SyntaxKindLessToken, BoundBinaryKindLess, reflect.Int64, reflect.Int64, reflect.Bool}
+	},
+	{syntax.SyntaxKindLessEqualToken, reflect.Int64, reflect.Int64}: func() *BoundBinaryOperator {
+		return &BoundBinaryOperator{syntax.SyntaxKindLessEqualToken, BoundBinaryKindLessEqual, reflect.Int64, reflect.Int64, reflect.Bool}
+	},
+	{syntax.SyntaxKindGreatToken, reflect.Int64, reflect.Int64}: func() *BoundBinaryOperator {
+		return &BoundBinaryOperator{syntax.SyntaxKindGreatToken, BoundBinaryKindGreat, reflect.Int64, reflect.Int64, reflect.Bool}
+	},
+	{syntax.SyntaxKindGreatEqualToken, reflect.Int64, reflect.Int64}: func() *BoundBinaryOperator {
+		return &BoundBinaryOperator{syntax.SyntaxKindGreatEqualToken, BoundBinaryKindGreatEqual, reflect.Int64, reflect.Int64, reflect.Bool}
+	},
 }
 
 type BoundBinaryOperatorKind int
@@ -76,4 +88,8 @@ const (
 	BoundBinaryKindLogicalOr
 	BoundBinaryKindEquals
 	BoundBinaryKindNotEquals
+	BoundBinaryKindLess
+	BoundBinaryKindLessEqual
+	BoundBinaryKindGreat
+	BoundBinaryKindGreatEqual
 )

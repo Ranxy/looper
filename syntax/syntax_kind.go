@@ -17,10 +17,15 @@ const (
 	SyntaxKindPipePileToken           // ||
 	SyntaxKindEqualEqualToken         // ==
 	SyntaxKindBangEqualToken          // !=
+	SyntaxKindLessToken               // <
+	SyntaxKindLessEqualToken          // <=
+	SyntaxKindGreatToken              // >
+	SyntaxKindGreatEqualToken         //>=
 	SyntaxKindOpenParenthesisToken    //(
 	SyntaxKindCloseParenthesisToken   //)
 	SyntaxKindOpenBraceToken          //{
 	SyntaxKindCloseBraceToken         //}
+	syntaxKindSemicolon               // ;
 	SyntaxKindIdentifierToken
 
 	SyntaxKindTrueKeywords  // True
@@ -29,6 +34,8 @@ const (
 	SyntaxKindVarKeywords
 	SyntaxKindIfKeywords
 	SyntaxKindElseKeywords
+	SyntaxKindWhileKeywords
+	SyntaxkindForKeywords
 
 	//Nodes
 	SyntaxKindCompilationUnit
@@ -37,6 +44,8 @@ const (
 	SyntaxKindBlockStatement
 	SyntaxKindVariableDeclaration
 	SyntaxKindIfStatement
+	SyntaxKindWhileStatement
+	SyntaxkindForStatement
 	SyntaxKindExpressStatement
 
 	SyntaxKindLiteralExpress
@@ -70,10 +79,15 @@ var syntaxKindKeyMap = map[SyntaxKind]string{
 	SyntaxKindPipePileToken:           "PipePileToken",
 	SyntaxKindEqualEqualToken:         "EqualEqualToken",
 	SyntaxKindBangEqualToken:          "BangEqualToken",
+	SyntaxKindLessToken:               "SyntaxKindLessToken",
+	SyntaxKindLessEqualToken:          "SyntaxKindLessEqualToken",
+	SyntaxKindGreatToken:              "SyntaxKindGreatToken",
+	SyntaxKindGreatEqualToken:         "SyntaxKindGreatEqualToken",
 	SyntaxKindOpenParenthesisToken:    "OpenParenthesisToken",
 	SyntaxKindCloseParenthesisToken:   "CloseParenthesisToken",
 	SyntaxKindOpenBraceToken:          "OpenBraceToken",
 	SyntaxKindCloseBraceToken:         "CloseBraceToken",
+	syntaxKindSemicolon:               "Semicolon",
 	SyntaxKindIdentifierToken:         "IdentifierToken",
 
 	SyntaxKindTrueKeywords:  "TrueKeywords",
@@ -82,11 +96,16 @@ var syntaxKindKeyMap = map[SyntaxKind]string{
 	SyntaxKindVarKeywords:   "VarKeywords",
 	SyntaxKindIfKeywords:    "IfKeywords",
 	SyntaxKindElseKeywords:  "ElseKeywords",
+	SyntaxKindWhileKeywords: "WhileKeywords",
+	SyntaxkindForKeywords:   "ForKeywords",
 
 	SyntaxKindCompilationUnit: "CompilationUnit",
 
 	SyntaxKindBlockStatement:      "BlockStatement",
 	SyntaxKindVariableDeclaration: "VariableDeclaration",
+	SyntaxKindIfStatement:         "IfStatement",
+	SyntaxKindWhileStatement:      "WhileStatement",
+	SyntaxkindForStatement:        "ForStatement",
 	SyntaxKindExpressStatement:    "ExpressStatement",
 
 	SyntaxKindLiteralExpress:       "LiteralExpress",
@@ -120,10 +139,15 @@ var syntaxKindTextMap = map[SyntaxKind]string{
 	SyntaxKindPipePileToken:           "||",
 	SyntaxKindEqualEqualToken:         "==",
 	SyntaxKindBangEqualToken:          "!=",
+	SyntaxKindLessToken:               "<",
+	SyntaxKindLessEqualToken:          "<=",
+	SyntaxKindGreatToken:              ">",
+	SyntaxKindGreatEqualToken:         ">=",
 	SyntaxKindOpenParenthesisToken:    "(",
 	SyntaxKindCloseParenthesisToken:   ")",
 	SyntaxKindOpenBraceToken:          "{",
 	SyntaxKindCloseBraceToken:         "}",
+	syntaxKindSemicolon:               ";",
 
 	SyntaxKindTrueKeywords:  "true",
 	SyntaxKindFalseKeywords: "false",
@@ -131,4 +155,6 @@ var syntaxKindTextMap = map[SyntaxKind]string{
 	SyntaxKindVarKeywords:   "var",
 	SyntaxKindIfKeywords:    "if",
 	SyntaxKindElseKeywords:  "else",
+	SyntaxKindWhileKeywords: "while",
+	SyntaxkindForKeywords:   "for",
 }

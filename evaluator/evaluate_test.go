@@ -47,6 +47,46 @@ func TestEvaluate(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			text:    "1 < 2",
+			want:    true,
+			wantErr: false,
+		},
+		{
+			text:    "1 <= 2",
+			want:    true,
+			wantErr: false,
+		},
+		{
+			text:    "2 <= 2",
+			want:    true,
+			wantErr: false,
+		},
+		{
+			text:    "3 < 2",
+			want:    false,
+			wantErr: false,
+		},
+		{
+			text:    "1 > 2",
+			want:    false,
+			wantErr: false,
+		},
+		{
+			text:    "2 > 2",
+			want:    false,
+			wantErr: false,
+		},
+		{
+			text:    "2 >= 2",
+			want:    true,
+			wantErr: false,
+		},
+		{
+			text:    "3 > 2",
+			want:    true,
+			wantErr: false,
+		},
+		{
 			text:    "{ var a = 0 if a == 2 a = 3 else a = 6 a }",
 			want:    int64(6),
 			wantErr: false,
@@ -55,6 +95,18 @@ func TestEvaluate(t *testing.T) {
 			text:    "{ var a = 7 if a == 2 a = 3 a }",
 			want:    int64(7),
 			wantErr: false,
+		},
+		{
+			text: "{ var i = 10 var result = 0 while i != 0 { result = result + i i = i - 1} result }",
+			want: int64(55),
+		},
+		{
+			text: "{ var result = 0 for var i = 1; i < 5; i = i + 1 { result = result + 1 } result }",
+			want: int64(4),
+		},
+		{
+			text: "{var i = 0 var result = 0 for i = 1; i < 5 ;i = i + 1 { result = result + 1 } result }",
+			want: int64(4),
 		},
 	}
 	for _, tt := range tests {

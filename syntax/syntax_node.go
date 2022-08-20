@@ -1,6 +1,8 @@
 package syntax
 
-import "github.com/Ranxy/looper/texts"
+import (
+	"github.com/Ranxy/looper/texts"
+)
 
 type SyntaxNode interface {
 	GetChildren() []SyntaxNode

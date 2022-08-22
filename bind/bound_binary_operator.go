@@ -75,6 +75,17 @@ var binaryMatchParam = map[binaryMatchType]func() *BoundBinaryOperator{
 	{syntax.SyntaxKindGreatEqualToken, reflect.Int64, reflect.Int64}: func() *BoundBinaryOperator {
 		return &BoundBinaryOperator{syntax.SyntaxKindGreatEqualToken, BoundBinaryKindGreatEqual, reflect.Int64, reflect.Int64, reflect.Bool}
 	},
+
+	//bitwise
+	{syntax.SyntaxKindAmpersandToken, reflect.Int64, reflect.Int64}: func() *BoundBinaryOperator {
+		return &BoundBinaryOperator{syntax.SyntaxKindAmpersandToken, BoundBinaryKindBitwiseAnd, reflect.Int64, reflect.Int64, reflect.Int64}
+	},
+	{syntax.SyntaxKindPipeToken, reflect.Int64, reflect.Int64}: func() *BoundBinaryOperator {
+		return &BoundBinaryOperator{syntax.SyntaxKindPipeToken, BoundBinaryKindBitwiseOr, reflect.Int64, reflect.Int64, reflect.Int64}
+	},
+	{syntax.SyntaxKindHatToken, reflect.Int64, reflect.Int64}: func() *BoundBinaryOperator {
+		return &BoundBinaryOperator{syntax.SyntaxKindHatToken, BoundBinaryKindBitwiseXor, reflect.Int64, reflect.Int64, reflect.Int64}
+	},
 }
 
 type BoundBinaryOperatorKind int
@@ -86,6 +97,9 @@ const (
 	BoundBinaryKindDivision
 	BoundBinaryKindLogicalAnd
 	BoundBinaryKindLogicalOr
+	BoundBinaryKindBitwiseAnd
+	BoundBinaryKindBitwiseOr
+	BoundBinaryKindBitwiseXor
 	BoundBinaryKindEquals
 	BoundBinaryKindNotEquals
 	BoundBinaryKindLess

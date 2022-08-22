@@ -27,6 +27,8 @@ func BindBoundUnaryOperator(syntaxKind syntax.SyntaxKind, operandType reflect.Ki
 		return newBoundUnaryOperator(syntaxKind, BoundUnaryOperatorKindNegation, reflect.Int64)
 	} else if syntaxKind == syntax.SyntaxKindBangToken && operandType == reflect.Bool {
 		return newBoundUnaryOperator(syntaxKind, BoundUnaryOperatorKindLogicalNegation, reflect.Bool)
+	} else if syntaxKind == syntax.SyntaxKindTildeToken && operandType == reflect.Int64 {
+		return newBoundUnaryOperator(syntaxKind, BoundUnaryOperatorKindBitwiseOnesComplement, reflect.Int64)
 	} else {
 		return nil
 	}
@@ -38,4 +40,5 @@ const (
 	BoundUnaryOperatorKindIdentity BoundUnaryOperatorKind = iota
 	BoundUnaryOperatorKindNegation
 	BoundUnaryOperatorKindLogicalNegation
+	BoundUnaryOperatorKindBitwiseOnesComplement
 )

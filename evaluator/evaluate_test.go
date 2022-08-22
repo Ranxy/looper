@@ -87,6 +87,26 @@ func TestEvaluate(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			text: "~1",
+			want: int64(^1),
+		},
+		{
+			text: "1 & 2",
+			want: int64(1 & 2),
+		},
+		{
+			text: "1 | 2",
+			want: int64(1 | 2),
+		},
+		{
+			text: "1 ^ 2",
+			want: int64(1 ^ 2),
+		},
+		{
+			text: "1 & 2 | 3 ^ ~ 4",
+			want: int64(1&2 | 3 ^ ^4),
+		},
+		{
 			text:    "{ var a = 0 if a == 2 a = 3 else a = 6 a }",
 			want:    int64(6),
 			wantErr: false,

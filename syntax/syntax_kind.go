@@ -25,8 +25,14 @@ const (
 	SyntaxKindCloseParenthesisToken   //)
 	SyntaxKindOpenBraceToken          //{
 	SyntaxKindCloseBraceToken         //}
-	syntaxKindSemicolon               // ;
+	SyntaxKindSemicolon               // ;
 	SyntaxKindIdentifierToken
+
+	//bitwise operators
+	SyntaxKindTildeToken     // ~
+	SyntaxKindHatToken       // ^
+	SyntaxKindAmpersandToken // &
+	SyntaxKindPipeToken      // |
 
 	SyntaxKindTrueKeywords  // True
 	SyntaxKindFalseKeywords //False
@@ -87,8 +93,13 @@ var syntaxKindKeyMap = map[SyntaxKind]string{
 	SyntaxKindCloseParenthesisToken:   "CloseParenthesisToken",
 	SyntaxKindOpenBraceToken:          "OpenBraceToken",
 	SyntaxKindCloseBraceToken:         "CloseBraceToken",
-	syntaxKindSemicolon:               "Semicolon",
+	SyntaxKindSemicolon:               "Semicolon",
 	SyntaxKindIdentifierToken:         "IdentifierToken",
+
+	SyntaxKindTildeToken:     "TildeToken",
+	SyntaxKindHatToken:       "HatToken",
+	SyntaxKindAmpersandToken: "AmpersandToken",
+	SyntaxKindPipeToken:      "PipeToken",
 
 	SyntaxKindTrueKeywords:  "TrueKeywords",
 	SyntaxKindFalseKeywords: "FalseKeywords",
@@ -147,7 +158,12 @@ var syntaxKindTextMap = map[SyntaxKind]string{
 	SyntaxKindCloseParenthesisToken:   ")",
 	SyntaxKindOpenBraceToken:          "{",
 	SyntaxKindCloseBraceToken:         "}",
-	syntaxKindSemicolon:               ";",
+	SyntaxKindSemicolon:               ";",
+
+	SyntaxKindTildeToken:     "~",
+	SyntaxKindHatToken:       "^",
+	SyntaxKindAmpersandToken: "&",
+	SyntaxKindPipeToken:      "|",
 
 	SyntaxKindTrueKeywords:  "true",
 	SyntaxKindFalseKeywords: "false",

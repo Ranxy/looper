@@ -14,5 +14,8 @@ const (
 	BoundNodeKindIfStatement
 	BoundNodeKindWhileStatement
 	BoundNodeKindForStatement
+	BoundNodeKindLabelStatement
+	BoundNodeKindGotoStatement
+	BoundNodeKindConditionalGotoStatement
 	BoundNodeKindExpressionStatement
 )

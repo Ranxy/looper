@@ -4,17 +4,18 @@ import (
 	"fmt"
 
 	"github.com/Ranxy/looper/bind"
+	"github.com/Ranxy/looper/label"
 	"github.com/Ranxy/looper/syntax"
 )
 
 type Evaluater struct {
-	root bind.Boundstatement
+	root *bind.BoundBlockStatements
 	vm   map[syntax.VariableSymbol]any
 
 	lastValue any
 }
 
-func NewEvaluater(root bind.BoundExpression, vm map[syntax.VariableSymbol]any) *Evaluater {
+func NewEvaluater(root *bind.BoundBlockStatements, vm map[syntax.VariableSymbol]any) *Evaluater {
 	return &Evaluater{
 		root: root,
 		vm:   vm,
@@ -22,7 +23,49 @@ func NewEvaluater(root bind.BoundExpression, vm map[syntax.VariableSymbol]any) *
 }
 
 func (e *Evaluater) Evaluate() any {
-	e.EvaluateStatement(e.root)
+	labelToIndex := make(map[*label.LabelSymbol]int)
+	for i := range e.root.Statement {
+		if bls, ok := e.root.Statement[i].(*bind.LabelStatement); ok {
+			labelToIndex[bls.Label] = i + 1
+		}
+	}
+	index := 0
+	for index < len(e.root.Statement) {
+		s := e.root.Statement[index]
+		switch s.Kind() {
+		case bind.BoundNodeKindVariableDeclaration:
+			e.EvaluateVariableDeclaration(s.(*bind.BoundVariableDeclaration))
+			index += 1
+		case bind.BoundNodeKindExpressionStatement:
+			e.EvaluateExpressionStatement(s.(*bind.BoundExpressStatements))
+			index += 1
+		case bind.BoundNodeKindIfStatement:
+			e.EvaluateIfStatement(s.(*bind.BoundIfStatements))
+			index += 1
+		case bind.BoundNodeKindWhileStatement:
+			e.EvaluateWhileStatement(s.(*bind.BoundWhileStatements))
+			index += 1
+		case bind.BoundNodeKindForStatement:
+			e.EvaluateForStatement(s.(*bind.BoundForStatements))
+			index += 1
+		case bind.BoundNodeKindGotoStatement:
+			gts := s.(*bind.GotoStatement)
+			index = labelToIndex[gts.Label]
+		case bind.BoundNodeKindConditionalGotoStatement:
+			cgts := s.(*bind.ConditionalGotoStatement)
+			conditon := e.EvaluateExpression(cgts.Condition).(bool)
+			if conditon && !cgts.JumpIfFalse || !conditon && cgts.JumpIfFalse {
+				index = labelToIndex[cgts.Label]
+			} else {
+				index += 1
+			}
+		case bind.BoundNodeKindLabelStatement:
+			index += 1
+		default:
+			panic(fmt.Sprintf("Uncxcepted node %v", s.Kind()))
+		}
+	}
+
 	return e.lastValue
 }
 

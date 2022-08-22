@@ -1,6 +1,7 @@
 package compilation
 
 import (
+	"io"
 	"sync/atomic"
 
 	"github.com/Ranxy/looper/bind"
@@ -56,4 +57,8 @@ func (c *Compilation) Evaluate(variables map[syntax.VariableSymbol]any) *evaluat
 		Diagnostic: diagnostics,
 		Value:      value,
 	}
+}
+
+func (c *Compilation) Print(w io.Writer) error {
+	return bind.PrintBoundTree(w, c.GlobalScope().Statements)
 }

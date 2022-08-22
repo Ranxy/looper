@@ -1,6 +1,9 @@
 package bind
 
-import "reflect"
+import (
+	"fmt"
+	"reflect"
+)
 
 type BoundLiteralExpression struct {
 	Value any
@@ -17,4 +20,13 @@ func (b *BoundLiteralExpression) Kind() BoundNodeKind {
 }
 func (b *BoundLiteralExpression) Type() reflect.Kind {
 	return reflect.TypeOf(b.Value).Kind()
+}
+
+func (b *BoundLiteralExpression) GetChildren() []BoundNode {
+	return []BoundNode{}
+
+}
+
+func (b *BoundLiteralExpression) GetProperties() []fmt.Stringer {
+	return []fmt.Stringer{&literalValue{v: b.Value}}
 }

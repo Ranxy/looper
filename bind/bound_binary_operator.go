@@ -1,6 +1,7 @@
 package bind
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/Ranxy/looper/syntax"
@@ -24,6 +25,10 @@ func BindBoundBinaryOperator(syntaxKind syntax.SyntaxKind, leftType, rightType r
 		return nil
 	}
 	return f()
+}
+
+func (b *BoundBinaryOperator) String() string {
+	return b.Kind.String()
 }
 
 type binaryMatchType struct {
@@ -107,3 +112,30 @@ const (
 	BoundBinaryKindGreat
 	BoundBinaryKindGreatEqual
 )
+
+func (b BoundBinaryOperatorKind) String() string {
+	str, has := boundBinaryKindStrMap[b]
+	if has {
+		return str
+	} else {
+		return fmt.Sprintf("Unexcepted_BoundBinaryOperatorKind_%d", b)
+	}
+}
+
+var boundBinaryKindStrMap = map[BoundBinaryOperatorKind]string{
+	BoundBinaryKindAddition:       "BoundBinaryKindAddition",
+	BoundBinaryKindSubtraction:    "BoundBinaryKindSubtraction",
+	BoundBinaryKindMultiplication: "BoundBinaryKindMultiplication",
+	BoundBinaryKindDivision:       "BoundBinaryKindDivision",
+	BoundBinaryKindLogicalAnd:     "BoundBinaryKindLogicalAnd",
+	BoundBinaryKindLogicalOr:      "BoundBinaryKindLogicalOr",
+	BoundBinaryKindBitwiseAnd:     "BoundBinaryKindBitwiseAnd",
+	BoundBinaryKindBitwiseOr:      "BoundBinaryKindBitwiseOr",
+	BoundBinaryKindBitwiseXor:     "BoundBinaryKindBitwiseXor",
+	BoundBinaryKindEquals:         "BoundBinaryKindEquals",
+	BoundBinaryKindNotEquals:      "BoundBinaryKindNotEquals",
+	BoundBinaryKindLess:           "BoundBinaryKindLess",
+	BoundBinaryKindLessEqual:      "BoundBinaryKindLessEqual",
+	BoundBinaryKindGreat:          "BoundBinaryKindGreat",
+	BoundBinaryKindGreatEqual:     "BoundBinaryKindGreatEqual",
+}

@@ -1,6 +1,9 @@
 package bind
 
-import "reflect"
+import (
+	"fmt"
+	"reflect"
+)
 
 type BoundWhileStatements struct {
 	Condition BoundExpression
@@ -19,4 +22,10 @@ func (b *BoundWhileStatements) Kind() BoundNodeKind {
 }
 func (b *BoundWhileStatements) Type() reflect.Kind {
 	return reflect.Invalid
+}
+func (b *BoundWhileStatements) GetChildren() []BoundNode {
+	return []BoundNode{b.Condition, b.Body}
+}
+func (b *BoundWhileStatements) GetProperties() []fmt.Stringer {
+	return []fmt.Stringer{}
 }

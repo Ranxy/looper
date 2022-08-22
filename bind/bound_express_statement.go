@@ -1,6 +1,7 @@
 package bind
 
 import (
+	"fmt"
 	"reflect"
 )
 
@@ -19,4 +20,13 @@ func (b *BoundExpressStatements) Kind() BoundNodeKind {
 }
 func (b *BoundExpressStatements) Type() reflect.Kind {
 	return reflect.Invalid
+}
+
+func (b *BoundExpressStatements) GetChildren() []BoundNode {
+	return []BoundNode{b.Express}
+
+}
+
+func (b *BoundExpressStatements) GetProperties() []fmt.Stringer {
+	return []fmt.Stringer{}
 }

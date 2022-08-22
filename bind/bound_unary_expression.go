@@ -1,6 +1,9 @@
 package bind
 
-import "reflect"
+import (
+	"fmt"
+	"reflect"
+)
 
 type BoundUnaryExpression struct {
 	Op      *BoundUnaryOperator
@@ -18,4 +21,12 @@ func (b *BoundUnaryExpression) Type() reflect.Kind {
 }
 func (b *BoundUnaryExpression) Kind() BoundNodeKind {
 	return BoundNodeKindUnaryExpress
+}
+
+func (b *BoundUnaryExpression) GetChildren() []BoundNode {
+	return []BoundNode{b.Operand}
+
+}
+func (b *BoundUnaryExpression) GetProperties() []fmt.Stringer {
+	return []fmt.Stringer{}
 }

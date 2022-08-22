@@ -1,6 +1,9 @@
 package bind
 
-import "reflect"
+import (
+	"fmt"
+	"reflect"
+)
 
 type BoundBinaryExpression struct {
 	Left  BoundExpression
@@ -21,4 +24,11 @@ func (b *BoundBinaryExpression) Type() reflect.Kind {
 }
 func (b *BoundBinaryExpression) Kind() BoundNodeKind {
 	return BoundNodeKindBinaryExpress
+}
+func (b *BoundBinaryExpression) GetChildren() []BoundNode {
+	return []BoundNode{b.Left, b.Right}
+}
+
+func (b *BoundBinaryExpression) GetProperties() []fmt.Stringer {
+	return []fmt.Stringer{}
 }

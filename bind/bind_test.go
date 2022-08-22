@@ -1,6 +1,7 @@
 package bind
 
 import (
+	"os"
 	"testing"
 
 	"github.com/Ranxy/looper/syntax"
@@ -100,10 +101,13 @@ func TestBinder_BindExpression(t *testing.T) {
 }
 
 func TestBinder_BindifStatement(t *testing.T) {
-	text := "let a = 2; if(-a == 1){ b = 2}else{ b = 3}"
+	text := "{var b = 0{let a = 2+1 { if(-a == 1){ b = 2}else{ b = 3}}}}"
 	textSource := texts.NewTextSource([]rune(text))
 	tree := syntax.ParseToTree(textSource)
 	boundTree := BindGlobalScope(nil, tree.Root)
+
+	err := PrintBoundTree(os.Stdout, boundTree.Statements)
+	require.NoError(t, err)
 
 	t.Log(boundTree.Diagnostic)
 	t.Log(boundTree.Variables)

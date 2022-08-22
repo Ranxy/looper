@@ -1,6 +1,7 @@
 package bind
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/Ranxy/looper/syntax"
@@ -21,4 +22,10 @@ func (b *BoundVariableExpression) Kind() BoundNodeKind {
 }
 func (b *BoundVariableExpression) Type() reflect.Kind {
 	return b.Variable.Type
+}
+func (b *BoundVariableExpression) GetChildren() []BoundNode {
+	return []BoundNode{}
+}
+func (b *BoundVariableExpression) GetProperties() []fmt.Stringer {
+	return []fmt.Stringer{b.Variable}
 }

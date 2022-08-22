@@ -1,6 +1,7 @@
 package bind
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/Ranxy/looper/label"
@@ -21,4 +22,10 @@ func (b *LabelStatement) Kind() BoundNodeKind {
 }
 func (b *LabelStatement) Type() reflect.Kind {
 	return reflect.Invalid
+}
+func (b *LabelStatement) GetChildren() []BoundNode {
+	return []BoundNode{}
+}
+func (b *LabelStatement) GetProperties() []fmt.Stringer {
+	return []fmt.Stringer{b.Label}
 }

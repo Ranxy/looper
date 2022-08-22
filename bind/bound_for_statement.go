@@ -1,6 +1,9 @@
 package bind
 
-import "reflect"
+import (
+	"fmt"
+	"reflect"
+)
 
 type BoundForStatements struct {
 	InitCondition   Boundstatement
@@ -23,4 +26,13 @@ func (b *BoundForStatements) Kind() BoundNodeKind {
 }
 func (b *BoundForStatements) Type() reflect.Kind {
 	return reflect.Invalid
+}
+
+func (b *BoundForStatements) GetChildren() []BoundNode {
+	return []BoundNode{b.InitCondition, b.UpdateCondition, b.EndCondition, b.Body}
+
+}
+
+func (b *BoundForStatements) GetProperties() []fmt.Stringer {
+	return []fmt.Stringer{}
 }

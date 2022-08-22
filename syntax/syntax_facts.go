@@ -2,7 +2,7 @@ package syntax
 
 func GetUnaryOperatorPrecedence(kind SyntaxKind) int {
 	switch kind {
-	case SyntaxKindPlusToken, SyntaxKindMinusToken, SyntaxKindBangToken:
+	case SyntaxKindPlusToken, SyntaxKindMinusToken, SyntaxKindBangToken, SyntaxKindTildeToken:
 		return 6
 	default:
 		return 0
@@ -18,9 +18,9 @@ func GetBinaryOperatorPrecedence(kind SyntaxKind) int {
 		SyntaxKindLessToken, SyntaxKindLessEqualToken,
 		SyntaxKindGreatToken, SyntaxKindGreatEqualToken:
 		return 3
-	case SyntaxKindAmpersandAmpersandToken:
+	case SyntaxKindAmpersandAmpersandToken, SyntaxKindAmpersandToken:
 		return 2
-	case SyntaxKindPipePileToken:
+	case SyntaxKindPipePileToken, SyntaxKindPipeToken, SyntaxKindHatToken:
 		return 1
 	default:
 		return 0

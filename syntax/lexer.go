@@ -88,18 +88,30 @@ func (l *Lexer) NextToken() SyntaxToken {
 		l._kind = SyntaxKindCloseBraceToken
 		l.next(1)
 	case ';':
-		l._kind = syntaxKindSemicolon
+		l._kind = SyntaxKindSemicolon
+		l.next(1)
+	case '~':
+		l._kind = SyntaxKindTildeToken
+		l.next(1)
+	case '^':
+		l._kind = SyntaxKindHatToken
 		l.next(1)
 
 	case '&':
 		if l.Lookahead() == '&' {
 			l._kind = SyntaxKindAmpersandAmpersandToken
 			l.next(2)
+		} else {
+			l._kind = SyntaxKindAmpersandToken
+			l.next(1)
 		}
 	case '|':
 		if l.Lookahead() == '|' {
 			l._kind = SyntaxKindPipePileToken
 			l.next(2)
+		} else {
+			l._kind = SyntaxKindPipeToken
+			l.next(1)
 		}
 	case '=':
 		if l.Lookahead() == '=' {

@@ -131,6 +131,8 @@ func (e *Evaluater) evaluateUnaryExpression(node *bind.BoundUnaryExpression) any
 		return -(operand.(int64))
 	case bind.BoundUnaryOperatorKindLogicalNegation:
 		return !(operand.(bool))
+	case bind.BoundUnaryOperatorKindBitwiseOnesComplement:
+		return ^(operand.(int64))
 	default:
 		panic(fmt.Sprintf("Unexceped unary operator:%v", node.Op))
 	}
@@ -165,6 +167,12 @@ func (e *Evaluater) evaluateBinaryExpression(node *bind.BoundBinaryExpression) a
 		return left.(int64) > right.(int64)
 	case bind.BoundBinaryKindGreatEqual:
 		return left.(int64) >= right.(int64)
+	case bind.BoundBinaryKindBitwiseAnd:
+		return left.(int64) & right.(int64)
+	case bind.BoundBinaryKindBitwiseOr:
+		return left.(int64) | right.(int64)
+	case bind.BoundBinaryKindBitwiseXor:
+		return left.(int64) ^ right.(int64)
 
 	default:
 		panic(fmt.Sprintf("Unexceped binary operator:%q and", node.Op))

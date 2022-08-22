@@ -123,9 +123,9 @@ func (p *Parser) ParseVariableDeclaration() Statement {
 func (p *Parser) ParseForStatement() Statement {
 	keywords := p.MatchToken(SyntaxkindForKeywords)
 	initCondition := p.ParseStatement()
-	firstSemicolon := p.MatchToken(syntaxKindSemicolon)
+	firstSemicolon := p.MatchToken(SyntaxKindSemicolon)
 	endCondtion := p.ParserExpress()
-	secondSemicolon := p.MatchToken(syntaxKindSemicolon)
+	secondSemicolon := p.MatchToken(SyntaxKindSemicolon)
 	updateCondtion := p.ParseStatement()
 	statement := p.ParseStatement()
 

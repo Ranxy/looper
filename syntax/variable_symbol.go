@@ -15,3 +15,7 @@ func NewVariableSymbol(name string, readOnly bool, tp reflect.Kind) *VariableSym
 		Type:       tp,
 	}
 }
+
+func (v *VariableSymbol) String() string {
+	return v.Name + ":" + v.Type.String()
+}

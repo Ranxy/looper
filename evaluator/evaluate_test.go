@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/Ranxy/looper/bind"
+	"github.com/Ranxy/looper/optimize"
 	"github.com/Ranxy/looper/syntax"
 	"github.com/Ranxy/looper/texts"
 	"github.com/stretchr/testify/require"
@@ -141,7 +142,8 @@ func TestEvaluate(t *testing.T) {
 			}
 			vm := make(map[syntax.VariableSymbol]any)
 
-			ev := NewEvaluater(boundTree.Statements, vm)
+			blockStatements := optimize.FlattenStatement(boundTree.Statements)
+			ev := NewEvaluater(blockStatements, vm)
 			got := ev.Evaluate()
 			require.Equal(t, tt.want, got)
 		})
@@ -210,7 +212,8 @@ func TestEvaluate_bool(t *testing.T) {
 			}
 			vm := make(map[syntax.VariableSymbol]any)
 
-			ev := NewEvaluater(boundTree.Statements, vm)
+			blockStatements := optimize.FlattenStatement(boundTree.Statements)
+			ev := NewEvaluater(blockStatements, vm)
 			got := ev.Evaluate()
 			require.Equal(t, tt.want, got)
 		})
@@ -249,7 +252,8 @@ func ev_variable(previous *bind.BoundGlobalScope, vm map[syntax.VariableSymbol]a
 		boundTree.Diagnostic.Print(text)
 		t.FailNow()
 	}
-	ev := NewEvaluater(boundTree.Statements, vm)
+	blockStatements := optimize.FlattenStatement(boundTree.Statements)
+	ev := NewEvaluater(blockStatements, vm)
 
 	got := ev.Evaluate()
 	require.Equal(t, want, got, fmt.Sprintf("Text %s failed", text))

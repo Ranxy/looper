@@ -5,6 +5,7 @@ import (
 
 	"github.com/Ranxy/looper/bind"
 	"github.com/Ranxy/looper/evaluator"
+	"github.com/Ranxy/looper/optimize"
 	"github.com/Ranxy/looper/syntax"
 )
 
@@ -47,7 +48,9 @@ func (c *Compilation) Evaluate(variables map[syntax.VariableSymbol]any) *evaluat
 			Value:      nil,
 		}
 	}
-	eval := evaluator.NewEvaluater(c.GlobalScope().Statements, variables)
+	blockStatements := optimize.FlattenStatement(c.GlobalScope().Statements)
+
+	eval := evaluator.NewEvaluater(blockStatements, variables)
 	value := eval.Evaluate()
 	return &evaluator.EvaluateResult{
 		Diagnostic: diagnostics,

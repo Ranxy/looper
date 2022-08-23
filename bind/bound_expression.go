@@ -1,10 +1,19 @@
 package bind
 
-import "reflect"
+import (
+	"fmt"
+	"reflect"
+)
 
 type BoundNode interface {
 	Type() reflect.Kind
 	Kind() BoundNodeKind
+	NodePrint
+}
+
+type NodePrint interface {
+	GetChildren() []BoundNode
+	GetProperties() []fmt.Stringer
 }
 
 type BoundExpression interface {

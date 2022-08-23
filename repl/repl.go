@@ -13,6 +13,7 @@ import (
 
 func main() {
 	showTree := false
+	showProgram := false
 
 	reader := bufio.NewReader(os.Stdin)
 
@@ -42,6 +43,15 @@ func main() {
 					fmt.Println("Showing parse tree")
 				} else {
 					fmt.Println("Not showing parse tree")
+				}
+				continue
+			}
+			if text == "#showProgram" {
+				showProgram = !showProgram
+				if showProgram {
+					fmt.Println("Showing bind tree")
+				} else {
+					fmt.Println("Not showing bind tree")
 				}
 				continue
 			}
@@ -79,6 +89,13 @@ func main() {
 			tree.Diagnostics.Reset()
 		} else {
 			cm := compilation.NewCompliation(previous, tree)
+
+			if showProgram {
+				err := cm.Print(os.Stdout)
+				if err != nil {
+					panic(fmt.Sprintf("ShowBoundTreeFailed %v", err))
+				}
+			}
 
 			res := cm.Evaluate(vm)
 			if res.Diagnostic.Has() {

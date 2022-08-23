@@ -1,6 +1,7 @@
 package bind
 
 import (
+	"fmt"
 	"reflect"
 )
 
@@ -19,4 +20,16 @@ func (b *BoundBlockStatements) Kind() BoundNodeKind {
 }
 func (b *BoundBlockStatements) Type() reflect.Kind {
 	return reflect.Invalid
+}
+
+func (b *BoundBlockStatements) GetChildren() []BoundNode {
+	res := []BoundNode{}
+	for _, s := range b.Statement {
+		res = append(res, s)
+	}
+	return res
+}
+
+func (b *BoundBlockStatements) GetProperties() []fmt.Stringer {
+	return []fmt.Stringer{}
 }

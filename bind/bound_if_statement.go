@@ -1,6 +1,9 @@
 package bind
 
-import "reflect"
+import (
+	"fmt"
+	"reflect"
+)
 
 type BoundIfStatements struct {
 	Condition     BoundExpression
@@ -21,4 +24,13 @@ func (b *BoundIfStatements) Kind() BoundNodeKind {
 }
 func (b *BoundIfStatements) Type() reflect.Kind {
 	return reflect.Invalid
+}
+
+func (b *BoundIfStatements) GetChildren() []BoundNode {
+	return []BoundNode{b.Condition, b.ThenStatement, b.ElseStatement}
+
+}
+
+func (b *BoundIfStatements) GetProperties() []fmt.Stringer {
+	return []fmt.Stringer{}
 }

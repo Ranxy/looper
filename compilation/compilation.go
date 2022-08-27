@@ -49,14 +49,15 @@ func (c *Compilation) Evaluate(variables map[syntax.VariableSymbol]any) *evaluat
 			Value:      nil,
 		}
 	}
-	blockStatements := optimize.FlattenStatement(c.GlobalScope().Statements)
-
-	eval := evaluator.NewEvaluater(blockStatements, variables)
+	eval := evaluator.NewEvaluater(c.GetStatement(), variables)
 	value := eval.Evaluate()
 	return &evaluator.EvaluateResult{
 		Diagnostic: diagnostics,
 		Value:      value,
 	}
+}
+func (c *Compilation) GetStatement() *bind.BoundBlockStatements {
+	return optimize.Lower(c.GlobalScope().Statements)
 }
 
 func (c *Compilation) Print(w io.Writer) error {

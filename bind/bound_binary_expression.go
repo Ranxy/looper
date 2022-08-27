@@ -30,5 +30,5 @@ func (b *BoundBinaryExpression) GetChildren() []BoundNode {
 }
 
 func (b *BoundBinaryExpression) GetProperties() []fmt.Stringer {
-	return []fmt.Stringer{}
+	return []fmt.Stringer{b.Op}
 }

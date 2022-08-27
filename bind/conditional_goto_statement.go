@@ -13,9 +13,11 @@ type ConditionalGotoStatement struct {
 	JumpIfFalse bool
 }
 
-func NewConditionalGotoSymbol(label *label.LabelSymbol) *ConditionalGotoStatement {
+func NewConditionalGotoSymbol(label *label.LabelSymbol, condition BoundExpression, jumpIfFalse bool) *ConditionalGotoStatement {
 	return &ConditionalGotoStatement{
-		Label: label,
+		Label:       label,
+		Condition:   condition,
+		JumpIfFalse: jumpIfFalse,
 	}
 }
 
@@ -29,5 +31,5 @@ func (b *ConditionalGotoStatement) GetChildren() []BoundNode {
 	return []BoundNode{b.Condition}
 }
 func (b *ConditionalGotoStatement) GetProperties() []fmt.Stringer {
-	return []fmt.Stringer{b.Label, boolStringer(b.JumpIfFalse)}
+	return []fmt.Stringer{b.Label, newBookStringer(b.JumpIfFalse)}
 }

@@ -1,6 +1,7 @@
 package bind
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/Ranxy/looper/syntax"
@@ -21,8 +22,19 @@ func newBoundUnaryOperator(syntaxKind syntax.SyntaxKind, kind BoundUnaryOperator
 }
 
 func (b *BoundUnaryOperator) String() string {
-	return reflect.TypeOf(b).Name()
+	if str, has := operandTypeNameMap[b.Kind]; has {
+		return str
+	}
+	return fmt.Sprintf("Unexcepted_BoundUnaryOperatorKind_%d", b)
 }
+
+var operandTypeNameMap = map[BoundUnaryOperatorKind]string{
+	BoundUnaryOperatorKindIdentity:              "Identity",
+	BoundUnaryOperatorKindNegation:              "Negation",
+	BoundUnaryOperatorKindLogicalNegation:       "LogicalNegation",
+	BoundUnaryOperatorKindBitwiseOnesComplement: "BitwiseOnesComplement",
+}
+
 func BindBoundUnaryOperator(syntaxKind syntax.SyntaxKind, operandType reflect.Kind) *BoundUnaryOperator {
 	if syntaxKind == syntax.SyntaxKindPlusToken && operandType == reflect.Int64 {
 		return newBoundUnaryOperator(syntaxKind, BoundUnaryOperatorKindIdentity, reflect.Int64)

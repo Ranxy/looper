@@ -142,7 +142,7 @@ func TestEvaluate(t *testing.T) {
 			}
 			vm := make(map[syntax.VariableSymbol]any)
 
-			blockStatements := optimize.FlattenStatement(boundTree.Statements)
+			blockStatements := optimize.Lower(boundTree.Statements)
 			ev := NewEvaluater(blockStatements, vm)
 			got := ev.Evaluate()
 			require.Equal(t, tt.want, got)
@@ -212,7 +212,7 @@ func TestEvaluate_bool(t *testing.T) {
 			}
 			vm := make(map[syntax.VariableSymbol]any)
 
-			blockStatements := optimize.FlattenStatement(boundTree.Statements)
+			blockStatements := optimize.Lower(boundTree.Statements)
 			ev := NewEvaluater(blockStatements, vm)
 			got := ev.Evaluate()
 			require.Equal(t, tt.want, got)
@@ -236,9 +236,9 @@ func TestEvaluate_variable(t *testing.T) {
 	bt = ev_variable(bt, vm, t, "var b = false", false)
 	bt = ev_variable(bt, vm, t, "b=(a==7)", true)
 	bt = ev_variable(bt, vm, t, "var c = 5", int64(5))
-	bt = ev_variable(bt, vm, t, "if(a==7){c = 2}else{c = 3}", int64(2))
+	bt = ev_variable(bt, vm, t, "{if(a==7){c = 2}else{c = 3} c}", int64(2))
 	bt = ev_variable(bt, vm, t, "c == 3", false)
-	bt = ev_variable(bt, vm, t, "if(c == 3){c = 10}", 0)
+	bt = ev_variable(bt, vm, t, "{if(c == 3){c = 10} c}", int64(2))
 	bt = ev_variable(bt, vm, t, "c == 2", true)
 	_ = ev_variable(bt, vm, t, "b==false", false)
 
@@ -252,7 +252,7 @@ func ev_variable(previous *bind.BoundGlobalScope, vm map[syntax.VariableSymbol]a
 		boundTree.Diagnostic.Print(text)
 		t.FailNow()
 	}
-	blockStatements := optimize.FlattenStatement(boundTree.Statements)
+	blockStatements := optimize.Lower(boundTree.Statements)
 	ev := NewEvaluater(blockStatements, vm)
 
 	got := ev.Evaluate()

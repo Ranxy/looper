@@ -28,5 +28,5 @@ func (b *BoundUnaryExpression) GetChildren() []BoundNode {
 
 }
 func (b *BoundUnaryExpression) GetProperties() []fmt.Stringer {
-	return []fmt.Stringer{}
+	return []fmt.Stringer{b.Op}
 }

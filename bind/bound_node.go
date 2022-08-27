@@ -56,8 +56,12 @@ func (b BoundNodeKind) String() string {
 
 type boolStringer bool
 
-func (b boolStringer) String() string {
-	return strconv.FormatBool(bool(b))
+func (b *boolStringer) String() string {
+	return strconv.FormatBool(bool(*b))
+}
+func newBookStringer(b bool) *boolStringer {
+	x := boolStringer(b)
+	return &x
 }
 
 type literalValue struct {
@@ -159,9 +163,9 @@ func prettyPrint(w io.Writer, node BoundNode, indent string, isLast bool) error 
 func NodeText(node BoundNode) string {
 	switch v := node.(type) {
 	case *BoundBinaryExpression:
-		return v.Op.String()
+		return v.Kind().String()
 	case *BoundUnaryExpression:
-		return v.Op.String()
+		return v.Kind().String()
 	default:
 		if v != nil {
 			return v.Kind().String()

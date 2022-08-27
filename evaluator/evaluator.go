@@ -39,15 +39,6 @@ func (e *Evaluater) Evaluate() any {
 		case bind.BoundNodeKindExpressionStatement:
 			e.EvaluateExpressionStatement(s.(*bind.BoundExpressStatements))
 			index += 1
-		case bind.BoundNodeKindIfStatement:
-			e.EvaluateIfStatement(s.(*bind.BoundIfStatements))
-			index += 1
-		case bind.BoundNodeKindWhileStatement:
-			e.EvaluateWhileStatement(s.(*bind.BoundWhileStatements))
-			index += 1
-		case bind.BoundNodeKindForStatement:
-			e.EvaluateForStatement(s.(*bind.BoundForStatements))
-			index += 1
 		case bind.BoundNodeKindGotoStatement:
 			gts := s.(*bind.GotoStatement)
 			index = labelToIndex[gts.Label]
@@ -67,56 +58,6 @@ func (e *Evaluater) Evaluate() any {
 	}
 
 	return e.lastValue
-}
-
-func (e *Evaluater) EvaluateStatement(node bind.Boundstatement) {
-	switch node.Kind() {
-	case bind.BoundNodeKindBlockStatement:
-		e.EvaluateBlockStatement(node.(*bind.BoundBlockStatements))
-	case bind.BoundNodeKindVariableDeclaration:
-		e.EvaluateVariableDeclaration(node.(*bind.BoundVariableDeclaration))
-	case bind.BoundNodeKindIfStatement:
-		e.EvaluateIfStatement(node.(*bind.BoundIfStatements))
-	case bind.BoundNodeKindWhileStatement:
-		e.EvaluateWhileStatement(node.(*bind.BoundWhileStatements))
-	case bind.BoundNodeKindForStatement:
-		e.EvaluateForStatement(node.(*bind.BoundForStatements))
-	case bind.BoundNodeKindExpressionStatement:
-		e.EvaluateExpressionStatement(node.(*bind.BoundExpressStatements))
-	default:
-		panic(fmt.Sprintf("Unexceped Node %v", node.Kind()))
-	}
-}
-
-func (e *Evaluater) EvaluateForStatement(node *bind.BoundForStatements) {
-	e.EvaluateStatement(node.InitCondition)
-	for e.EvaluateExpression(node.EndCondition).(bool) {
-		e.EvaluateStatement(node.Body)
-		e.EvaluateStatement(node.UpdateCondition)
-	}
-}
-
-func (e *Evaluater) EvaluateWhileStatement(node *bind.BoundWhileStatements) {
-	for e.EvaluateExpression(node.Condition).(bool) {
-		e.EvaluateStatement(node.Body)
-	}
-}
-
-func (e *Evaluater) EvaluateIfStatement(node *bind.BoundIfStatements) {
-	cond := e.EvaluateExpression(node.Condition).(bool)
-	if cond {
-		e.EvaluateStatement(node.ThenStatement)
-	} else if node.ElseStatement != nil {
-		e.EvaluateStatement(node.ElseStatement)
-	} else {
-		e.lastValue = 0 //todo use unit type
-	}
-}
-
-func (e *Evaluater) EvaluateBlockStatement(node *bind.BoundBlockStatements) {
-	for _, statement := range node.Statement {
-		e.EvaluateStatement(statement)
-	}
 }
 
 func (e *Evaluater) EvaluateVariableDeclaration(node *bind.BoundVariableDeclaration) {

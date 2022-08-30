@@ -140,3 +140,7 @@ func (b *DiagnosticBag) VariableAlreadyDeclared(span texts.TextSpan, name string
 	message := fmt.Sprintf("Variable '%s' is already declared.", name)
 	b.Report(span, message)
 }
+
+func (b *DiagnosticBag) ReportUnterminatedString(span texts.TextSpan) {
+	b.Report(span, "Unterminated string literal.")
+}

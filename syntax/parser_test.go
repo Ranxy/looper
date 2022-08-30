@@ -58,6 +58,15 @@ func TestCase(t *testing.T) {
 			text: "1 & 2 | 3 ^ ~ 4",
 		},
 		{
+			text: `"hello" + "world"`,
+		},
+		{
+			text: `{var a = "hello" a+ "world"}`,
+		},
+		{
+			text: `{var a = ""}`,
+		},
+		{
 			text: "{ var a = 0 if a == 2 a = 3 else a = 6 a }",
 		},
 		{

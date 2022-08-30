@@ -91,6 +91,17 @@ var binaryMatchParam = map[binaryMatchType]func() *BoundBinaryOperator{
 	{syntax.SyntaxKindHatToken, symbol.TypeInt, symbol.TypeInt}: func() *BoundBinaryOperator {
 		return &BoundBinaryOperator{syntax.SyntaxKindHatToken, BoundBinaryKindBitwiseXor, symbol.TypeInt, symbol.TypeInt, symbol.TypeInt}
 	},
+
+	// string operator
+	{syntax.SyntaxKindPlusToken, symbol.TypeString, symbol.TypeString}: func() *BoundBinaryOperator {
+		return &BoundBinaryOperator{syntax.SyntaxKindPlusToken, BoundBinaryKindStringAdd, symbol.TypeString, symbol.TypeString, symbol.TypeString}
+	},
+	{syntax.SyntaxKindEqualEqualToken, symbol.TypeString, symbol.TypeString}: func() *BoundBinaryOperator {
+		return &BoundBinaryOperator{syntax.SyntaxKindEqualEqualToken, BoundBinaryKindStringEqual, symbol.TypeString, symbol.TypeString, symbol.TypeBool}
+	},
+	{syntax.SyntaxKindBangEqualToken, symbol.TypeString, symbol.TypeString}: func() *BoundBinaryOperator {
+		return &BoundBinaryOperator{syntax.SyntaxKindBangEqualToken, BoundBinaryKindStringNotEqual, symbol.TypeString, symbol.TypeString, symbol.TypeBool}
+	},
 }
 
 type BoundBinaryOperatorKind int
@@ -111,6 +122,9 @@ const (
 	BoundBinaryKindLessEqual
 	BoundBinaryKindGreat
 	BoundBinaryKindGreatEqual
+	BoundBinaryKindStringAdd
+	BoundBinaryKindStringEqual
+	BoundBinaryKindStringNotEqual
 )
 
 func (b BoundBinaryOperatorKind) String() string {
@@ -138,4 +152,5 @@ var boundBinaryKindStrMap = map[BoundBinaryOperatorKind]string{
 	BoundBinaryKindLessEqual:      "BoundBinaryKindLessEqual",
 	BoundBinaryKindGreat:          "BoundBinaryKindGreat",
 	BoundBinaryKindGreatEqual:     "BoundBinaryKindGreatEqual",
+	BoundBinaryKindStringAdd:      "BoundBinaryKindStringAdd",
 }

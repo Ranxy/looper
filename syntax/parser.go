@@ -219,6 +219,17 @@ func (p *Parser) parsePrimaryExpress() Express {
 			value := keywords.Kind() == SyntaxKindTrueKeywords
 			return NewLiteralValueExpress(keywords, value)
 		}
+	case SyntaxKindNumberToken:
+		{
+			number := p.MatchToken(SyntaxKindNumberToken)
+			return NewLiteralExpress(number)
+		}
+
+	case SyntaxKindStringToken:
+		{
+			str := p.MatchToken(SyntaxKindStringToken)
+			return NewLiteralExpress(str)
+		}
 	case SyntaxKindIdentifierToken:
 		{
 			identifierToken := p.NextToken()
@@ -226,8 +237,8 @@ func (p *Parser) parsePrimaryExpress() Express {
 		}
 	default:
 		{
-			number := p.MatchToken(SyntaxKindNumberToken)
-			return NewLiteralExpress(number)
+			identifierToken := p.NextToken()
+			return NewNameExpress(identifierToken)
 		}
 	}
 

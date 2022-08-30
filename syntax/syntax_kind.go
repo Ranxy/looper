@@ -7,6 +7,7 @@ const (
 	SyntaxKindEofToken
 	SyntaxKindWhiteSpaceToken
 	SyntaxKindNumberToken             // 12
+	SyntaxKindStringToken             //"abc"
 	SyntaxKindPlusToken               //+
 	SyntaxKindMinusToken              //-
 	SyntaxKindStarToken               //*

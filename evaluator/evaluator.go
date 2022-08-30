@@ -156,7 +156,12 @@ func (e *Evaluater) evaluateBinaryExpression(node *bind.BoundBinaryExpression) a
 		return left.(int64) | right.(int64)
 	case bind.BoundBinaryKindBitwiseXor:
 		return left.(int64) ^ right.(int64)
-
+	case bind.BoundBinaryKindStringAdd:
+		return left.(string) + right.(string)
+	case bind.BoundBinaryKindStringEqual:
+		return left.(string) == right.(string)
+	case bind.BoundBinaryKindStringNotEqual:
+		return left.(string) != right.(string)
 	default:
 		panic(fmt.Sprintf("Unexceped binary operator:%q and", node.Op))
 	}

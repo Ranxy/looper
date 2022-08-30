@@ -2,16 +2,15 @@ package bind
 
 import (
 	"fmt"
-	"reflect"
 
-	"github.com/Ranxy/looper/syntax"
+	"github.com/Ranxy/looper/symbol"
 )
 
 type BoundVariableExpression struct {
-	Variable *syntax.VariableSymbol
+	Variable *symbol.VariableSymbol
 }
 
-func NewBoundVariableExpression(variable *syntax.VariableSymbol) *BoundVariableExpression {
+func NewBoundVariableExpression(variable *symbol.VariableSymbol) *BoundVariableExpression {
 	return &BoundVariableExpression{
 		Variable: variable,
 	}
@@ -20,7 +19,7 @@ func NewBoundVariableExpression(variable *syntax.VariableSymbol) *BoundVariableE
 func (b *BoundVariableExpression) Kind() BoundNodeKind {
 	return BoundNodeKindVariableExpress
 }
-func (b *BoundVariableExpression) Type() reflect.Kind {
+func (b *BoundVariableExpression) Type() *symbol.TypeSymbol {
 	return b.Variable.Type
 }
 func (b *BoundVariableExpression) GetChildren() []BoundNode {

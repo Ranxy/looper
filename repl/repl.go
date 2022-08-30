@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/Ranxy/looper/compilation"
+	"github.com/Ranxy/looper/symbol"
 	"github.com/Ranxy/looper/syntax"
 	"github.com/Ranxy/looper/texts"
 )
@@ -17,7 +18,7 @@ func main() {
 
 	reader := bufio.NewReader(os.Stdin)
 
-	vm := make(map[syntax.VariableSymbol]any)
+	vm := make(map[symbol.VariableSymbol]any)
 	var previous *compilation.Compilation
 
 	textBuild := strings.Builder{}
@@ -57,7 +58,7 @@ func main() {
 			}
 			if text == "#reset" {
 				previous = nil
-				vm = make(map[syntax.VariableSymbol]any)
+				vm = make(map[symbol.VariableSymbol]any)
 				fmt.Println("Success")
 				continue
 			}

@@ -2,18 +2,18 @@ package bind
 
 import (
 	"fmt"
-	"reflect"
 
+	"github.com/Ranxy/looper/symbol"
 	"github.com/Ranxy/looper/syntax"
 )
 
 type BoundUnaryOperator struct {
 	syntaxKind  syntax.SyntaxKind
 	Kind        BoundUnaryOperatorKind
-	operandType reflect.Kind
+	operandType *symbol.TypeSymbol
 }
 
-func newBoundUnaryOperator(syntaxKind syntax.SyntaxKind, kind BoundUnaryOperatorKind, operandType reflect.Kind) *BoundUnaryOperator {
+func newBoundUnaryOperator(syntaxKind syntax.SyntaxKind, kind BoundUnaryOperatorKind, operandType *symbol.TypeSymbol) *BoundUnaryOperator {
 	return &BoundUnaryOperator{
 		syntaxKind:  syntaxKind,
 		Kind:        kind,
@@ -25,7 +25,7 @@ func (b *BoundUnaryOperator) String() string {
 	if str, has := operandTypeNameMap[b.Kind]; has {
 		return str
 	}
-	return fmt.Sprintf("Unexcepted_BoundUnaryOperatorKind_%d", b)
+	return fmt.Sprintf("Unexcepted_BoundUnaryOperatorKind_%d", b.Kind)
 }
 
 var operandTypeNameMap = map[BoundUnaryOperatorKind]string{
@@ -35,15 +35,15 @@ var operandTypeNameMap = map[BoundUnaryOperatorKind]string{
 	BoundUnaryOperatorKindBitwiseOnesComplement: "BitwiseOnesComplement",
 }
 
-func BindBoundUnaryOperator(syntaxKind syntax.SyntaxKind, operandType reflect.Kind) *BoundUnaryOperator {
-	if syntaxKind == syntax.SyntaxKindPlusToken && operandType == reflect.Int64 {
-		return newBoundUnaryOperator(syntaxKind, BoundUnaryOperatorKindIdentity, reflect.Int64)
-	} else if syntaxKind == syntax.SyntaxKindMinusToken && operandType == reflect.Int64 {
-		return newBoundUnaryOperator(syntaxKind, BoundUnaryOperatorKindNegation, reflect.Int64)
-	} else if syntaxKind == syntax.SyntaxKindBangToken && operandType == reflect.Bool {
-		return newBoundUnaryOperator(syntaxKind, BoundUnaryOperatorKindLogicalNegation, reflect.Bool)
-	} else if syntaxKind == syntax.SyntaxKindTildeToken && operandType == reflect.Int64 {
-		return newBoundUnaryOperator(syntaxKind, BoundUnaryOperatorKindBitwiseOnesComplement, reflect.Int64)
+func BindBoundUnaryOperator(syntaxKind syntax.SyntaxKind, operandType *symbol.TypeSymbol) *BoundUnaryOperator {
+	if syntaxKind == syntax.SyntaxKindPlusToken && operandType == symbol.TypeInt {
+		return newBoundUnaryOperator(syntaxKind, BoundUnaryOperatorKindIdentity, symbol.TypeInt)
+	} else if syntaxKind == syntax.SyntaxKindMinusToken && operandType == symbol.TypeInt {
+		return newBoundUnaryOperator(syntaxKind, BoundUnaryOperatorKindNegation, symbol.TypeInt)
+	} else if syntaxKind == syntax.SyntaxKindBangToken && operandType == symbol.TypeBool {
+		return newBoundUnaryOperator(syntaxKind, BoundUnaryOperatorKindLogicalNegation, symbol.TypeBool)
+	} else if syntaxKind == syntax.SyntaxKindTildeToken && operandType == symbol.TypeInt {
+		return newBoundUnaryOperator(syntaxKind, BoundUnaryOperatorKindBitwiseOnesComplement, symbol.TypeInt)
 	} else {
 		return nil
 	}

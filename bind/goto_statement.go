@@ -2,16 +2,15 @@ package bind
 
 import (
 	"fmt"
-	"reflect"
 
-	"github.com/Ranxy/looper/label"
+	"github.com/Ranxy/looper/symbol"
 )
 
 type GotoStatement struct {
-	Label *label.LabelSymbol
+	Label *BoundLabel
 }
 
-func NewGotoSymbol(label *label.LabelSymbol) *GotoStatement {
+func NewGotoSymbol(label *BoundLabel) *GotoStatement {
 	return &GotoStatement{
 		Label: label,
 	}
@@ -20,8 +19,8 @@ func NewGotoSymbol(label *label.LabelSymbol) *GotoStatement {
 func (b *GotoStatement) Kind() BoundNodeKind {
 	return BoundNodeKindGotoStatement
 }
-func (b *GotoStatement) Type() reflect.Kind {
-	return reflect.Invalid
+func (b *GotoStatement) Type() *symbol.TypeSymbol {
+	return symbol.TypeUnkonw
 }
 
 func (b *GotoStatement) GetChildren() []BoundNode {

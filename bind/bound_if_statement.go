@@ -2,7 +2,8 @@ package bind
 
 import (
 	"fmt"
-	"reflect"
+
+	"github.com/Ranxy/looper/symbol"
 )
 
 type BoundIfStatements struct {
@@ -22,8 +23,8 @@ func NewBoundIfStatements(condition BoundExpression, thenStatement, elseStatemen
 func (b *BoundIfStatements) Kind() BoundNodeKind {
 	return BoundNodeKindIfStatement
 }
-func (b *BoundIfStatements) Type() reflect.Kind {
-	return reflect.Invalid
+func (b *BoundIfStatements) Type() *symbol.TypeSymbol {
+	return symbol.TypeUnkonw
 }
 
 func (b *BoundIfStatements) GetChildren() []BoundNode {

@@ -2,7 +2,8 @@ package bind
 
 import (
 	"fmt"
-	"reflect"
+
+	"github.com/Ranxy/looper/symbol"
 )
 
 type BoundExpressStatements struct {
@@ -18,8 +19,8 @@ func NewBoundExpressStatements(express BoundExpression) *BoundExpressStatements 
 func (b *BoundExpressStatements) Kind() BoundNodeKind {
 	return BoundNodeKindExpressionStatement
 }
-func (b *BoundExpressStatements) Type() reflect.Kind {
-	return reflect.Invalid
+func (b *BoundExpressStatements) Type() *symbol.TypeSymbol {
+	return symbol.TypeUnkonw
 }
 
 func (b *BoundExpressStatements) GetChildren() []BoundNode {

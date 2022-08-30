@@ -25,6 +25,8 @@ func (b *BoundLiteralExpression) Type() *symbol.TypeSymbol {
 		return symbol.TypeInt
 	case bool:
 		return symbol.TypeBool
+	case string:
+		return symbol.TypeString
 	default:
 		return symbol.TypeUnkonw
 	}

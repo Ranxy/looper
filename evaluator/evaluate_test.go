@@ -221,6 +221,54 @@ func TestEvaluate_bool(t *testing.T) {
 	}
 }
 
+func TestEvaluate_string(t *testing.T) {
+	tests := []struct {
+		text    string
+		want    any
+		wantErr bool
+	}{
+		{
+			text:    `"hello" + " "+ "world"`,
+			want:    "hello world",
+			wantErr: false,
+		},
+		{
+			text:    `{var a = "" a+ "foo"}`,
+			want:    "foo",
+			wantErr: false,
+		},
+		{
+			text:    `{ var res = 0 var a = "foo" if a =="foo"{res = 1}else{res = 2} res}`,
+			want:    int64(1),
+			wantErr: false,
+		},
+		{
+			text:    `{var res = "" {for var i = 0;i<10; i=i+1{res = res + "f"}} res}`,
+			want:    "ffffffffff",
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.text, func(t *testing.T) {
+			textSource := texts.NewTextSource([]rune(tt.text))
+			tree := syntax.ParseToTree(textSource)
+			boundTree := bind.BindGlobalScope(nil, tree.Root)
+			if len(boundTree.Diagnostic.List) != 0 {
+				boundTree.Diagnostic.Print(tt.text)
+				t.FailNow()
+			}
+			vm := make(map[symbol.VariableSymbol]any)
+
+			blockStatements := optimize.Lower(boundTree.Statements)
+
+			// bind.PrintBoundTree(os.Stdout, blockStatements)
+			ev := NewEvaluater(blockStatements, vm)
+			got := ev.Evaluate()
+			require.Equal(t, tt.want, got)
+		})
+	}
+}
+
 func TestEvaluate_variable(t *testing.T) {
 	vm := make(map[symbol.VariableSymbol]any)
 

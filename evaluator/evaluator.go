@@ -4,18 +4,17 @@ import (
 	"fmt"
 
 	"github.com/Ranxy/looper/bind"
-	"github.com/Ranxy/looper/label"
-	"github.com/Ranxy/looper/syntax"
+	"github.com/Ranxy/looper/symbol"
 )
 
 type Evaluater struct {
 	root *bind.BoundBlockStatements
-	vm   map[syntax.VariableSymbol]any
+	vm   map[symbol.VariableSymbol]any
 
 	lastValue any
 }
 
-func NewEvaluater(root *bind.BoundBlockStatements, vm map[syntax.VariableSymbol]any) *Evaluater {
+func NewEvaluater(root *bind.BoundBlockStatements, vm map[symbol.VariableSymbol]any) *Evaluater {
 	return &Evaluater{
 		root: root,
 		vm:   vm,
@@ -23,7 +22,7 @@ func NewEvaluater(root *bind.BoundBlockStatements, vm map[syntax.VariableSymbol]
 }
 
 func (e *Evaluater) Evaluate() any {
-	labelToIndex := make(map[*label.LabelSymbol]int)
+	labelToIndex := make(map[*bind.BoundLabel]int)
 	for i := range e.root.Statement {
 		if bls, ok := e.root.Statement[i].(*bind.LabelStatement); ok {
 			labelToIndex[bls.Label] = i + 1

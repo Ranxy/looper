@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/Ranxy/looper/bind"
-	"github.com/Ranxy/looper/label"
 )
 
 var _ Rewrite = &LowerRewrite{}
@@ -21,10 +20,10 @@ func Lower(statement bind.Boundstatement) *bind.BoundBlockStatements {
 	return FlattenStatement(res)
 }
 
-func (l *LowerRewrite) GenerateLabel() *label.LabelSymbol {
+func (l *LowerRewrite) GenerateLabel() *bind.BoundLabel {
 	name := fmt.Sprintf("Label%d", l.labelCount)
 	l.labelCount += 1
-	return label.NewLabelSymbol(name)
+	return bind.NewBoundLabel(name)
 }
 
 func (l *LowerRewrite) RewriteIfStatement(w Rewrite, node *bind.BoundIfStatements) bind.Boundstatement {

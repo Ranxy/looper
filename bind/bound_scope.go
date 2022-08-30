@@ -1,20 +1,22 @@
 package bind
 
-import "github.com/Ranxy/looper/syntax"
+import (
+	"github.com/Ranxy/looper/symbol"
+)
 
 type BoundScope struct {
 	Parent    *BoundScope
-	variables map[string]*syntax.VariableSymbol
+	variables map[string]*symbol.VariableSymbol
 }
 
 func NewBoundScope(parent *BoundScope) *BoundScope {
 	return &BoundScope{
 		Parent:    parent,
-		variables: map[string]*syntax.VariableSymbol{},
+		variables: map[string]*symbol.VariableSymbol{},
 	}
 }
 
-func (s *BoundScope) TryDeclare(variable *syntax.VariableSymbol) bool {
+func (s *BoundScope) TryDeclare(variable *symbol.VariableSymbol) bool {
 	if _, has := s.variables[variable.Name]; has {
 		return false
 	}
@@ -22,7 +24,7 @@ func (s *BoundScope) TryDeclare(variable *syntax.VariableSymbol) bool {
 	return true
 }
 
-func (s *BoundScope) TryLookup(name string) (*syntax.VariableSymbol, bool) {
+func (s *BoundScope) TryLookup(name string) (*symbol.VariableSymbol, bool) {
 	if v, has := s.variables[name]; has {
 		return v, true
 	}
@@ -32,8 +34,8 @@ func (s *BoundScope) TryLookup(name string) (*syntax.VariableSymbol, bool) {
 	return s.Parent.TryLookup(name)
 }
 
-func (s *BoundScope) GetDeclareVariables() []*syntax.VariableSymbol {
-	res := make([]*syntax.VariableSymbol, 0, len(s.variables))
+func (s *BoundScope) GetDeclareVariables() []*symbol.VariableSymbol {
+	res := make([]*symbol.VariableSymbol, 0, len(s.variables))
 	for _, v := range s.variables {
 		res = append(res, v)
 	}

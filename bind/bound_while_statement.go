@@ -2,7 +2,8 @@ package bind
 
 import (
 	"fmt"
-	"reflect"
+
+	"github.com/Ranxy/looper/symbol"
 )
 
 type BoundWhileStatements struct {
@@ -20,8 +21,8 @@ func NewBoundWhileStatements(condition BoundExpression, body Boundstatement) *Bo
 func (b *BoundWhileStatements) Kind() BoundNodeKind {
 	return BoundNodeKindWhileStatement
 }
-func (b *BoundWhileStatements) Type() reflect.Kind {
-	return reflect.Invalid
+func (b *BoundWhileStatements) Type() *symbol.TypeSymbol {
+	return symbol.TypeUnkonw
 }
 func (b *BoundWhileStatements) GetChildren() []BoundNode {
 	return []BoundNode{b.Condition, b.Body}

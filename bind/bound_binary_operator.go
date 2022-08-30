@@ -2,20 +2,20 @@ package bind
 
 import (
 	"fmt"
-	"reflect"
 
+	"github.com/Ranxy/looper/symbol"
 	"github.com/Ranxy/looper/syntax"
 )
 
 type BoundBinaryOperator struct {
 	SyntaxKind syntax.SyntaxKind
 	Kind       BoundBinaryOperatorKind
-	LeftType   reflect.Kind
-	RightType  reflect.Kind
-	Type       reflect.Kind
+	LeftType   *symbol.TypeSymbol
+	RightType  *symbol.TypeSymbol
+	Type       *symbol.TypeSymbol
 }
 
-func BindBoundBinaryOperator(syntaxKind syntax.SyntaxKind, leftType, rightType reflect.Kind) *BoundBinaryOperator {
+func BindBoundBinaryOperator(syntaxKind syntax.SyntaxKind, leftType, rightType *symbol.TypeSymbol) *BoundBinaryOperator {
 	f, has := binaryMatchParam[binaryMatchType{
 		SyntaxKind: syntaxKind,
 		LeftType:   leftType,
@@ -33,63 +33,63 @@ func (b *BoundBinaryOperator) String() string {
 
 type binaryMatchType struct {
 	SyntaxKind syntax.SyntaxKind
-	LeftType   reflect.Kind
-	RightType  reflect.Kind
+	LeftType   *symbol.TypeSymbol
+	RightType  *symbol.TypeSymbol
 }
 
 var binaryMatchParam = map[binaryMatchType]func() *BoundBinaryOperator{
-	{syntax.SyntaxKindPlusToken, reflect.Int64, reflect.Int64}: func() *BoundBinaryOperator {
-		return &BoundBinaryOperator{syntax.SyntaxKindPlusToken, BoundBinaryKindAddition, reflect.Int64, reflect.Int64, reflect.Int64}
+	{syntax.SyntaxKindPlusToken, symbol.TypeInt, symbol.TypeInt}: func() *BoundBinaryOperator {
+		return &BoundBinaryOperator{syntax.SyntaxKindPlusToken, BoundBinaryKindAddition, symbol.TypeInt, symbol.TypeInt, symbol.TypeInt}
 	},
-	{syntax.SyntaxKindMinusToken, reflect.Int64, reflect.Int64}: func() *BoundBinaryOperator {
-		return &BoundBinaryOperator{syntax.SyntaxKindMinusToken, BoundBinaryKindSubtraction, reflect.Int64, reflect.Int64, reflect.Int64}
+	{syntax.SyntaxKindMinusToken, symbol.TypeInt, symbol.TypeInt}: func() *BoundBinaryOperator {
+		return &BoundBinaryOperator{syntax.SyntaxKindMinusToken, BoundBinaryKindSubtraction, symbol.TypeInt, symbol.TypeInt, symbol.TypeInt}
 	},
-	{syntax.SyntaxKindStarToken, reflect.Int64, reflect.Int64}: func() *BoundBinaryOperator {
-		return &BoundBinaryOperator{syntax.SyntaxKindStarToken, BoundBinaryKindMultiplication, reflect.Int64, reflect.Int64, reflect.Int64}
+	{syntax.SyntaxKindStarToken, symbol.TypeInt, symbol.TypeInt}: func() *BoundBinaryOperator {
+		return &BoundBinaryOperator{syntax.SyntaxKindStarToken, BoundBinaryKindMultiplication, symbol.TypeInt, symbol.TypeInt, symbol.TypeInt}
 	},
-	{syntax.SyntaxKindSlashToken, reflect.Int64, reflect.Int64}: func() *BoundBinaryOperator {
-		return &BoundBinaryOperator{syntax.SyntaxKindSlashToken, BoundBinaryKindDivision, reflect.Int64, reflect.Int64, reflect.Int64}
+	{syntax.SyntaxKindSlashToken, symbol.TypeInt, symbol.TypeInt}: func() *BoundBinaryOperator {
+		return &BoundBinaryOperator{syntax.SyntaxKindSlashToken, BoundBinaryKindDivision, symbol.TypeInt, symbol.TypeInt, symbol.TypeInt}
 	},
-	{syntax.SyntaxKindEqualEqualToken, reflect.Int64, reflect.Int64}: func() *BoundBinaryOperator {
-		return &BoundBinaryOperator{syntax.SyntaxKindEqualEqualToken, BoundBinaryKindEquals, reflect.Int64, reflect.Int64, reflect.Bool}
+	{syntax.SyntaxKindEqualEqualToken, symbol.TypeInt, symbol.TypeInt}: func() *BoundBinaryOperator {
+		return &BoundBinaryOperator{syntax.SyntaxKindEqualEqualToken, BoundBinaryKindEquals, symbol.TypeInt, symbol.TypeInt, symbol.TypeBool}
 	},
-	{syntax.SyntaxKindBangEqualToken, reflect.Int64, reflect.Int64}: func() *BoundBinaryOperator {
-		return &BoundBinaryOperator{syntax.SyntaxKindBangEqualToken, BoundBinaryKindNotEquals, reflect.Int64, reflect.Int64, reflect.Bool}
+	{syntax.SyntaxKindBangEqualToken, symbol.TypeInt, symbol.TypeInt}: func() *BoundBinaryOperator {
+		return &BoundBinaryOperator{syntax.SyntaxKindBangEqualToken, BoundBinaryKindNotEquals, symbol.TypeInt, symbol.TypeInt, symbol.TypeBool}
 	},
-	{syntax.SyntaxKindAmpersandAmpersandToken, reflect.Bool, reflect.Bool}: func() *BoundBinaryOperator {
-		return &BoundBinaryOperator{syntax.SyntaxKindAmpersandAmpersandToken, BoundBinaryKindLogicalAnd, reflect.Bool, reflect.Bool, reflect.Bool}
+	{syntax.SyntaxKindAmpersandAmpersandToken, symbol.TypeBool, symbol.TypeBool}: func() *BoundBinaryOperator {
+		return &BoundBinaryOperator{syntax.SyntaxKindAmpersandAmpersandToken, BoundBinaryKindLogicalAnd, symbol.TypeBool, symbol.TypeBool, symbol.TypeBool}
 	},
-	{syntax.SyntaxKindPipePileToken, reflect.Bool, reflect.Bool}: func() *BoundBinaryOperator {
-		return &BoundBinaryOperator{syntax.SyntaxKindPipePileToken, BoundBinaryKindLogicalOr, reflect.Bool, reflect.Bool, reflect.Bool}
+	{syntax.SyntaxKindPipePileToken, symbol.TypeBool, symbol.TypeBool}: func() *BoundBinaryOperator {
+		return &BoundBinaryOperator{syntax.SyntaxKindPipePileToken, BoundBinaryKindLogicalOr, symbol.TypeBool, symbol.TypeBool, symbol.TypeBool}
 	},
-	{syntax.SyntaxKindEqualEqualToken, reflect.Bool, reflect.Bool}: func() *BoundBinaryOperator {
-		return &BoundBinaryOperator{syntax.SyntaxKindEqualEqualToken, BoundBinaryKindEquals, reflect.Bool, reflect.Bool, reflect.Bool}
+	{syntax.SyntaxKindEqualEqualToken, symbol.TypeBool, symbol.TypeBool}: func() *BoundBinaryOperator {
+		return &BoundBinaryOperator{syntax.SyntaxKindEqualEqualToken, BoundBinaryKindEquals, symbol.TypeBool, symbol.TypeBool, symbol.TypeBool}
 	},
-	{syntax.SyntaxKindBangEqualToken, reflect.Bool, reflect.Bool}: func() *BoundBinaryOperator {
-		return &BoundBinaryOperator{syntax.SyntaxKindBangEqualToken, BoundBinaryKindNotEquals, reflect.Bool, reflect.Bool, reflect.Bool}
+	{syntax.SyntaxKindBangEqualToken, symbol.TypeBool, symbol.TypeBool}: func() *BoundBinaryOperator {
+		return &BoundBinaryOperator{syntax.SyntaxKindBangEqualToken, BoundBinaryKindNotEquals, symbol.TypeBool, symbol.TypeBool, symbol.TypeBool}
 	},
-	{syntax.SyntaxKindLessToken, reflect.Int64, reflect.Int64}: func() *BoundBinaryOperator {
-		return &BoundBinaryOperator{syntax.SyntaxKindLessToken, BoundBinaryKindLess, reflect.Int64, reflect.Int64, reflect.Bool}
+	{syntax.SyntaxKindLessToken, symbol.TypeInt, symbol.TypeInt}: func() *BoundBinaryOperator {
+		return &BoundBinaryOperator{syntax.SyntaxKindLessToken, BoundBinaryKindLess, symbol.TypeInt, symbol.TypeInt, symbol.TypeBool}
 	},
-	{syntax.SyntaxKindLessEqualToken, reflect.Int64, reflect.Int64}: func() *BoundBinaryOperator {
-		return &BoundBinaryOperator{syntax.SyntaxKindLessEqualToken, BoundBinaryKindLessEqual, reflect.Int64, reflect.Int64, reflect.Bool}
+	{syntax.SyntaxKindLessEqualToken, symbol.TypeInt, symbol.TypeInt}: func() *BoundBinaryOperator {
+		return &BoundBinaryOperator{syntax.SyntaxKindLessEqualToken, BoundBinaryKindLessEqual, symbol.TypeInt, symbol.TypeInt, symbol.TypeBool}
 	},
-	{syntax.SyntaxKindGreatToken, reflect.Int64, reflect.Int64}: func() *BoundBinaryOperator {
-		return &BoundBinaryOperator{syntax.SyntaxKindGreatToken, BoundBinaryKindGreat, reflect.Int64, reflect.Int64, reflect.Bool}
+	{syntax.SyntaxKindGreatToken, symbol.TypeInt, symbol.TypeInt}: func() *BoundBinaryOperator {
+		return &BoundBinaryOperator{syntax.SyntaxKindGreatToken, BoundBinaryKindGreat, symbol.TypeInt, symbol.TypeInt, symbol.TypeBool}
 	},
-	{syntax.SyntaxKindGreatEqualToken, reflect.Int64, reflect.Int64}: func() *BoundBinaryOperator {
-		return &BoundBinaryOperator{syntax.SyntaxKindGreatEqualToken, BoundBinaryKindGreatEqual, reflect.Int64, reflect.Int64, reflect.Bool}
+	{syntax.SyntaxKindGreatEqualToken, symbol.TypeInt, symbol.TypeInt}: func() *BoundBinaryOperator {
+		return &BoundBinaryOperator{syntax.SyntaxKindGreatEqualToken, BoundBinaryKindGreatEqual, symbol.TypeInt, symbol.TypeInt, symbol.TypeBool}
 	},
 
 	//bitwise
-	{syntax.SyntaxKindAmpersandToken, reflect.Int64, reflect.Int64}: func() *BoundBinaryOperator {
-		return &BoundBinaryOperator{syntax.SyntaxKindAmpersandToken, BoundBinaryKindBitwiseAnd, reflect.Int64, reflect.Int64, reflect.Int64}
+	{syntax.SyntaxKindAmpersandToken, symbol.TypeInt, symbol.TypeInt}: func() *BoundBinaryOperator {
+		return &BoundBinaryOperator{syntax.SyntaxKindAmpersandToken, BoundBinaryKindBitwiseAnd, symbol.TypeInt, symbol.TypeInt, symbol.TypeInt}
 	},
-	{syntax.SyntaxKindPipeToken, reflect.Int64, reflect.Int64}: func() *BoundBinaryOperator {
-		return &BoundBinaryOperator{syntax.SyntaxKindPipeToken, BoundBinaryKindBitwiseOr, reflect.Int64, reflect.Int64, reflect.Int64}
+	{syntax.SyntaxKindPipeToken, symbol.TypeInt, symbol.TypeInt}: func() *BoundBinaryOperator {
+		return &BoundBinaryOperator{syntax.SyntaxKindPipeToken, BoundBinaryKindBitwiseOr, symbol.TypeInt, symbol.TypeInt, symbol.TypeInt}
 	},
-	{syntax.SyntaxKindHatToken, reflect.Int64, reflect.Int64}: func() *BoundBinaryOperator {
-		return &BoundBinaryOperator{syntax.SyntaxKindHatToken, BoundBinaryKindBitwiseXor, reflect.Int64, reflect.Int64, reflect.Int64}
+	{syntax.SyntaxKindHatToken, symbol.TypeInt, symbol.TypeInt}: func() *BoundBinaryOperator {
+		return &BoundBinaryOperator{syntax.SyntaxKindHatToken, BoundBinaryKindBitwiseXor, symbol.TypeInt, symbol.TypeInt, symbol.TypeInt}
 	},
 }
 

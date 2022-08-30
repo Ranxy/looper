@@ -2,7 +2,8 @@ package bind
 
 import (
 	"fmt"
-	"reflect"
+
+	"github.com/Ranxy/looper/symbol"
 )
 
 type BoundBinaryExpression struct {
@@ -19,7 +20,7 @@ func NewBoundBinaryExpression(left BoundExpression, op *BoundBinaryOperator, rig
 	}
 }
 
-func (b *BoundBinaryExpression) Type() reflect.Kind {
+func (b *BoundBinaryExpression) Type() *symbol.TypeSymbol {
 	return b.Op.Type
 }
 func (b *BoundBinaryExpression) Kind() BoundNodeKind {

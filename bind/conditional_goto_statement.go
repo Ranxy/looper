@@ -2,18 +2,17 @@ package bind
 
 import (
 	"fmt"
-	"reflect"
 
-	"github.com/Ranxy/looper/label"
+	"github.com/Ranxy/looper/symbol"
 )
 
 type ConditionalGotoStatement struct {
-	Label       *label.LabelSymbol
+	Label       *BoundLabel
 	Condition   BoundExpression
 	JumpIfFalse bool
 }
 
-func NewConditionalGotoSymbol(label *label.LabelSymbol, condition BoundExpression, jumpIfFalse bool) *ConditionalGotoStatement {
+func NewConditionalGotoSymbol(label *BoundLabel, condition BoundExpression, jumpIfFalse bool) *ConditionalGotoStatement {
 	return &ConditionalGotoStatement{
 		Label:       label,
 		Condition:   condition,
@@ -24,8 +23,8 @@ func NewConditionalGotoSymbol(label *label.LabelSymbol, condition BoundExpressio
 func (b *ConditionalGotoStatement) Kind() BoundNodeKind {
 	return BoundNodeKindConditionalGotoStatement
 }
-func (b *ConditionalGotoStatement) Type() reflect.Kind {
-	return reflect.Invalid
+func (b *ConditionalGotoStatement) Type() *symbol.TypeSymbol {
+	return symbol.TypeUnkonw
 }
 func (b *ConditionalGotoStatement) GetChildren() []BoundNode {
 	return []BoundNode{b.Condition}

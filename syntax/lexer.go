@@ -1,11 +1,11 @@
 package syntax
 
 import (
-	"reflect"
 	"strconv"
 	"unicode"
 
 	"github.com/Ranxy/looper/diagnostic"
+	"github.com/Ranxy/looper/symbol"
 	"github.com/Ranxy/looper/texts"
 )
 
@@ -176,7 +176,7 @@ func (l *Lexer) readDigit() {
 	text := l.text.StringSub(l._start, l.pos)
 	v, err := strconv.ParseInt(text, 10, 64)
 	if err != nil {
-		l.diagnostics.InvalidNumber(texts.NewTextSpan(l._start, l.pos-l._start), text, reflect.Int64)
+		l.diagnostics.InvalidNumber(texts.NewTextSpan(l._start, l.pos-l._start), text, symbol.TypeInt)
 	}
 
 	l._value = v

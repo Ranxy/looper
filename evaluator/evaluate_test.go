@@ -6,6 +6,7 @@ import (
 
 	"github.com/Ranxy/looper/bind"
 	"github.com/Ranxy/looper/optimize"
+	"github.com/Ranxy/looper/symbol"
 	"github.com/Ranxy/looper/syntax"
 	"github.com/Ranxy/looper/texts"
 	"github.com/stretchr/testify/require"
@@ -140,7 +141,7 @@ func TestEvaluate(t *testing.T) {
 				boundTree.Diagnostic.Print(tt.text)
 				t.FailNow()
 			}
-			vm := make(map[syntax.VariableSymbol]any)
+			vm := make(map[symbol.VariableSymbol]any)
 
 			blockStatements := optimize.Lower(boundTree.Statements)
 			ev := NewEvaluater(blockStatements, vm)
@@ -210,7 +211,7 @@ func TestEvaluate_bool(t *testing.T) {
 				boundTree.Diagnostic.Print(tt.text)
 				t.FailNow()
 			}
-			vm := make(map[syntax.VariableSymbol]any)
+			vm := make(map[symbol.VariableSymbol]any)
 
 			blockStatements := optimize.Lower(boundTree.Statements)
 			ev := NewEvaluater(blockStatements, vm)
@@ -221,7 +222,7 @@ func TestEvaluate_bool(t *testing.T) {
 }
 
 func TestEvaluate_variable(t *testing.T) {
-	vm := make(map[syntax.VariableSymbol]any)
+	vm := make(map[symbol.VariableSymbol]any)
 
 	var bt *bind.BoundGlobalScope
 
@@ -244,7 +245,7 @@ func TestEvaluate_variable(t *testing.T) {
 
 }
 
-func ev_variable(previous *bind.BoundGlobalScope, vm map[syntax.VariableSymbol]any, t *testing.T, text string, want any) *bind.BoundGlobalScope {
+func ev_variable(previous *bind.BoundGlobalScope, vm map[symbol.VariableSymbol]any, t *testing.T, text string, want any) *bind.BoundGlobalScope {
 	textSource := texts.NewTextSource([]rune(text))
 	tree := syntax.ParseToTree(textSource)
 	boundTree := bind.BindGlobalScope(previous, tree.Root)

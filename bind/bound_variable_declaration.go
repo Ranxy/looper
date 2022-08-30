@@ -2,25 +2,24 @@ package bind
 
 import (
 	"fmt"
-	"reflect"
 
-	"github.com/Ranxy/looper/syntax"
+	"github.com/Ranxy/looper/symbol"
 )
 
 type BoundVariableDeclaration struct {
-	Variable    *syntax.VariableSymbol
+	Variable    *symbol.VariableSymbol
 	Initializer BoundExpression
 }
 
-func NewBoundVariableDeclaration(variable *syntax.VariableSymbol, initializer BoundExpression) *BoundVariableDeclaration {
+func NewBoundVariableDeclaration(variable *symbol.VariableSymbol, initializer BoundExpression) *BoundVariableDeclaration {
 	return &BoundVariableDeclaration{
 		Variable:    variable,
 		Initializer: initializer,
 	}
 }
 
-func (b *BoundVariableDeclaration) Type() reflect.Kind {
-	return reflect.Invalid
+func (b *BoundVariableDeclaration) Type() *symbol.TypeSymbol {
+	return symbol.TypeUnkonw
 }
 func (b *BoundVariableDeclaration) Kind() BoundNodeKind {
 	return BoundNodeKindVariableDeclaration

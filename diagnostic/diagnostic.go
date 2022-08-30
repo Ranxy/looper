@@ -2,9 +2,9 @@ package diagnostic
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 
+	"github.com/Ranxy/looper/symbol"
 	"github.com/Ranxy/looper/texts"
 )
 
@@ -96,7 +96,7 @@ func (b *DiagnosticBag) Report(span texts.TextSpan, message string) {
 	b.List = append(b.List, Diagnostic{span, message})
 }
 
-func (b *DiagnosticBag) InvalidNumber(span texts.TextSpan, text string, tp reflect.Kind) {
+func (b *DiagnosticBag) InvalidNumber(span texts.TextSpan, text string, tp *symbol.TypeSymbol) {
 	message := fmt.Sprintf("The number %s isn't valid %s.", text, tp)
 	b.Report(span, message)
 }
@@ -106,17 +106,17 @@ func (b *DiagnosticBag) BadCharacter(pos int, c rune) {
 	b.Report(span, message)
 }
 
-func (b *DiagnosticBag) UnexpectedToken(span texts.TextSpan, actualKind, expectedKind reflect.Kind) {
+func (b *DiagnosticBag) UnexpectedToken(span texts.TextSpan, actualKind, expectedKind *symbol.TypeSymbol) {
 	message := fmt.Sprintf("Unexpected token %s, expected %s.", actualKind, expectedKind)
 	b.Report(span, message)
 }
 
-func (b *DiagnosticBag) UndefinedUnaryOperator(span texts.TextSpan, operatorText string, operandType reflect.Kind) {
+func (b *DiagnosticBag) UndefinedUnaryOperator(span texts.TextSpan, operatorText string, operandType *symbol.TypeSymbol) {
 	message := fmt.Sprintf("Unary operator %s is not defined for type %s.", operatorText, operandType)
 	b.Report(span, message)
 }
 
-func (b *DiagnosticBag) UndefinedBinaryOperator(span texts.TextSpan, operatorText string, leftType, rightType reflect.Kind) {
+func (b *DiagnosticBag) UndefinedBinaryOperator(span texts.TextSpan, operatorText string, leftType, rightType *symbol.TypeSymbol) {
 	message := fmt.Sprintf("Binary operator %s is not defined for type %s and %s.", operatorText, leftType, rightType)
 	b.Report(span, message)
 }
@@ -131,7 +131,7 @@ func (b *DiagnosticBag) CannotAssign(span texts.TextSpan, name string) {
 	b.Report(span, message)
 }
 
-func (b *DiagnosticBag) CannotConvert(span texts.TextSpan, expect, actual reflect.Kind) {
+func (b *DiagnosticBag) CannotConvert(span texts.TextSpan, expect, actual *symbol.TypeSymbol) {
 	message := fmt.Sprintf("Cannot convert '%s' to '%s'.", expect, actual)
 	b.Report(span, message)
 }

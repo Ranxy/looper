@@ -7,6 +7,7 @@ import (
 	"github.com/Ranxy/looper/bind"
 	"github.com/Ranxy/looper/evaluator"
 	"github.com/Ranxy/looper/optimize"
+	"github.com/Ranxy/looper/symbol"
 	"github.com/Ranxy/looper/syntax"
 )
 
@@ -40,7 +41,7 @@ func (c *Compilation) GlobalScope() *bind.BoundGlobalScope {
 	return gs
 }
 
-func (c *Compilation) Evaluate(variables map[syntax.VariableSymbol]any) *evaluator.EvaluateResult {
+func (c *Compilation) Evaluate(variables map[symbol.VariableSymbol]any) *evaluator.EvaluateResult {
 	c.GlobalScope().Diagnostic = c.GlobalScope().Diagnostic.Merge(c.SyntaxTree.Diagnostics)
 	diagnostics := c.GlobalScope().Diagnostic
 	if len(diagnostics.List) > 0 {

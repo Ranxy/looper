@@ -2,11 +2,12 @@ package bind
 
 import (
 	"fmt"
-	"reflect"
+
+	"github.com/Ranxy/looper/symbol"
 )
 
 type BoundNode interface {
-	Type() reflect.Kind
+	Type() *symbol.TypeSymbol
 	Kind() BoundNodeKind
 	NodePrint
 }

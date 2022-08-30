@@ -3,9 +3,9 @@ package bind
 import (
 	"container/list"
 	"fmt"
-	"reflect"
 
 	"github.com/Ranxy/looper/diagnostic"
+	"github.com/Ranxy/looper/symbol"
 	"github.com/Ranxy/looper/syntax"
 )
 
@@ -61,7 +61,7 @@ func CreateParentScope(previous *BoundGlobalScope) *BoundScope {
 	return parent
 }
 
-func (b *Binder) BindExpressionAndCheckType(express syntax.Express, targetType reflect.Kind) BoundExpression {
+func (b *Binder) BindExpressionAndCheckType(express syntax.Express, targetType *symbol.TypeSymbol) BoundExpression {
 	result := b.BindExpression(express)
 	if result.Type() != targetType {
 		b.Diagnostics.CannotConvert(syntax.SyntaxNodeSpan(express), result.Type(), targetType)
@@ -109,20 +109,20 @@ func (b *Binder) BindStatement(s syntax.Statement) Boundstatement {
 
 func (b *Binder) BindForStatement(s *syntax.ForStatement) Boundstatement {
 	initCond := b.BindStatement(s.InitCondition)
-	endCond := b.BindExpressionAndCheckType(s.EndCondition, reflect.Bool)
+	endCond := b.BindExpressionAndCheckType(s.EndCondition, symbol.TypeBool)
 	updateCond := b.BindStatement(s.UpdateCondition)
 	body := b.BindStatement(s.Body)
 	return NewBoundForStatements(initCond, endCond, updateCond, body)
 }
 
 func (b *Binder) BindWhileStatement(s *syntax.WhileStatement) Boundstatement {
-	condition := b.BindExpressionAndCheckType(s.Condition, reflect.Bool)
+	condition := b.BindExpressionAndCheckType(s.Condition, symbol.TypeBool)
 	body := b.BindStatement(s.Body)
 	return NewBoundWhileStatements(condition, body)
 }
 
 func (b *Binder) BindIfStatement(s *syntax.IfStatement) Boundstatement {
-	condition := b.BindExpressionAndCheckType(s.Condition, reflect.Bool)
+	condition := b.BindExpressionAndCheckType(s.Condition, symbol.TypeBool)
 	thenStatement := b.BindStatement(s.ThenStatement)
 	var elseStatement Boundstatement
 	if s.ElseClause != nil {
@@ -146,7 +146,7 @@ func (b *Binder) BindVariableDeclaration(s *syntax.VariableDeclarationSyntax) Bo
 	name := s.Identifier.Text
 	isReadOnly := s.Keyword.Kind() == syntax.SyntaxKindLetKeywords
 	initializer := b.BindExpression(s.Initializer)
-	variable := syntax.NewVariableSymbol(name, isReadOnly, initializer.Type())
+	variable := symbol.NewVariableSymbol(name, isReadOnly, initializer.Type())
 
 	if !b.scope.TryDeclare(variable) {
 		b.Diagnostics.VariableAlreadyDeclared(s.Identifier.Span(), name)

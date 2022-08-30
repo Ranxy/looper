@@ -2,7 +2,8 @@ package bind
 
 import (
 	"fmt"
-	"reflect"
+
+	"github.com/Ranxy/looper/symbol"
 )
 
 type BoundBlockStatements struct {
@@ -18,8 +19,8 @@ func NewBoundBlockStatement(statements []Boundstatement) *BoundBlockStatements {
 func (b *BoundBlockStatements) Kind() BoundNodeKind {
 	return BoundNodeKindBlockStatement
 }
-func (b *BoundBlockStatements) Type() reflect.Kind {
-	return reflect.Invalid
+func (b *BoundBlockStatements) Type() *symbol.TypeSymbol {
+	return symbol.TypeUnkonw
 }
 
 func (b *BoundBlockStatements) GetChildren() []BoundNode {

@@ -9,6 +9,7 @@ type SyntaxToken struct {
 	Position int
 	Text     string
 	Value    any
+	Missing  bool
 }
 
 func (s SyntaxToken) GetChildren() []SyntaxNode {

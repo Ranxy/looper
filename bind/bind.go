@@ -63,7 +63,7 @@ func CreateParentScope(previous *BoundGlobalScope) *BoundScope {
 
 func (b *Binder) BindExpressionAndCheckType(express syntax.Express, targetType *symbol.TypeSymbol) BoundExpression {
 	result := b.BindExpression(express)
-	if result.Type() != targetType {
+	if result.Type() != symbol.TypeUnkonw && targetType != symbol.TypeUnkonw && result.Type() != targetType {
 		b.Diagnostics.CannotConvert(syntax.SyntaxNodeSpan(express), result.Type(), targetType)
 	}
 	return result
@@ -143,14 +143,10 @@ func (b *Binder) BindBlockStatement(s *syntax.BlockStatement) Boundstatement {
 }
 
 func (b *Binder) BindVariableDeclaration(s *syntax.VariableDeclarationSyntax) Boundstatement {
-	name := s.Identifier.Text
+
 	isReadOnly := s.Keyword.Kind() == syntax.SyntaxKindLetKeywords
 	initializer := b.BindExpression(s.Initializer)
-	variable := symbol.NewVariableSymbol(name, isReadOnly, initializer.Type())
-
-	if !b.scope.TryDeclare(variable) {
-		b.Diagnostics.VariableAlreadyDeclared(s.Identifier.Span(), name)
-	}
+	variable := b.BindVariableSymbol(s.Identifier, isReadOnly, initializer.Type())
 
 	return NewBoundVariableDeclaration(variable, initializer)
 }
@@ -169,14 +165,14 @@ func (b *Binder) BindLiteralExpress(express *syntax.LiteralExpress) BoundExpress
 }
 
 func (b *Binder) BindNameExpress(express *syntax.NameExpress) BoundExpression {
-	name := express.Identifier.Text
-	if name == "" {
-		return NewBoundLiteralExpression(0)
+	if express.Identifier.Missing {
+		return NewBoundErrorExpression()
 	}
+	name := express.Identifier.Text
 	variable, has := b.scope.TryLookup(name)
 	if !has {
 		b.Diagnostics.UndefinedName(express.Identifier.Span(), name)
-		return NewBoundLiteralExpression(int64(0))
+		return NewBoundErrorExpression()
 	}
 	return NewBoundVariableExpression(variable)
 }
@@ -205,11 +201,14 @@ func (b *Binder) BindAssignmentExpress(express *syntax.AssignmentExpress) BoundE
 
 func (b *Binder) BindUnaryExpress(express *syntax.UnaryExpress) BoundExpression {
 	boundOperand := b.BindExpression(express.Operand)
+	if boundOperand.Type() == symbol.TypeUnkonw {
+		return NewBoundErrorExpression()
+	}
 	boundOperator := BindBoundUnaryOperator(express.Operator.Kind(), boundOperand.Type())
 
 	if boundOperator == nil {
 		b.Diagnostics.UndefinedUnaryOperator(express.Operator.Span(), express.Operator.Text, boundOperand.Type())
-		return boundOperand
+		return NewBoundErrorExpression()
 	}
 
 	return NewBoundUnaryExpression(boundOperator, boundOperand)
@@ -218,12 +217,31 @@ func (b *Binder) BindUnaryExpress(express *syntax.UnaryExpress) BoundExpression 
 func (b *Binder) BindBinaryOperator(express *syntax.BinaryExpress) BoundExpression {
 	boundLeft := b.BindExpression(express.Left)
 	boundRight := b.BindExpression(express.Right)
+	if boundLeft.Type() == symbol.TypeUnkonw || boundRight.Type() == symbol.TypeUnkonw {
+		return NewBoundErrorExpression()
+	}
+
 	boundOperator := BindBoundBinaryOperator(express.Operator.Kind(), boundLeft.Type(), boundRight.Type())
 
 	if boundOperator == nil {
 		b.Diagnostics.UndefinedBinaryOperator(express.Operator.Span(), express.Operator.Text, boundLeft.Type(), boundRight.Type())
-		return boundLeft
+		return NewBoundErrorExpression()
 	}
 
 	return NewBoundBinaryExpression(boundLeft, boundOperator, boundRight)
+}
+
+func (b *Binder) BindVariableSymbol(identifier syntax.SyntaxToken, isReadOnly bool, tp *symbol.TypeSymbol) *symbol.VariableSymbol {
+	name := identifier.Text
+	if name == "" {
+		name = "?"
+	}
+
+	variable := symbol.NewVariableSymbol(name, isReadOnly, tp)
+
+	if !identifier.Missing && !b.scope.TryDeclare(variable) {
+		b.Diagnostics.VariableAlreadyDeclared(identifier.Span(), name)
+	}
+
+	return variable
 }

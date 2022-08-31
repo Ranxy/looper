@@ -168,7 +168,7 @@ func (l *Lexer) NextToken() SyntaxToken {
 		text = l.text.StringSub(l._start, l.pos)
 	}
 
-	return SyntaxToken{l._kind, l._start, text, l._value}
+	return SyntaxToken{l._kind, l._start, text, l._value, false}
 }
 
 func (l *Lexer) readDigit() {

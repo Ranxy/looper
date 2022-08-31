@@ -10,7 +10,8 @@ import (
 type BoundNodeKind int
 
 const (
-	BoundNodeKindLiteralExpress BoundNodeKind = iota
+	BoundNodeKindErrorExpress BoundNodeKind = iota
+	BoundNodeKindLiteralExpress
 	BoundNodeKindVariableExpress
 	BoundNodeKindAssignmentExpress
 	BoundNodeKindUnaryExpress

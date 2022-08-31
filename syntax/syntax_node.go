@@ -24,3 +24,13 @@ func SyntaxNodeSpan(n SyntaxNode) texts.TextSpan {
 	end := SyntaxNodeSpan(second).End()
 	return texts.NewTextSpan(start, end-start)
 }
+
+func GetLastToken(n SyntaxNode) *SyntaxToken {
+	if t, ok := n.(*SyntaxToken); ok {
+		return t
+	}
+
+	children := n.GetChildren()
+
+	return GetLastToken(children[len(children)-1])
+}

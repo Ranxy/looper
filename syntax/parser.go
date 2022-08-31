@@ -60,7 +60,7 @@ func (p *Parser) MatchToken(kind SyntaxKind) SyntaxToken {
 		return p.NextToken()
 	}
 	p.diagnostics.Report(p.Current().Span(), fmt.Sprintf("Unexpected token %v, expected %v", p.Current().Kind(), kind))
-	return SyntaxToken{kind, p.Current().Position, "", nil}
+	return SyntaxToken{kind, p.Current().Position, "", nil, true}
 }
 
 func (p *Parser) ParseComplitionUnit() *CompliationUnit {
@@ -237,7 +237,7 @@ func (p *Parser) parsePrimaryExpress() Express {
 		}
 	default:
 		{
-			identifierToken := p.NextToken()
+			identifierToken := p.MatchToken(SyntaxKindIdentifierToken)
 			return NewNameExpress(identifierToken)
 		}
 	}

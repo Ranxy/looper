@@ -24,7 +24,7 @@ func (b *BoundIfStatements) Kind() BoundNodeKind {
 	return BoundNodeKindIfStatement
 }
 func (b *BoundIfStatements) Type() *symbol.TypeSymbol {
-	return symbol.TypeUnkonw
+	return symbol.TypeUnit
 }
 
 func (b *BoundIfStatements) GetChildren() []BoundNode {

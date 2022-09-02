@@ -232,8 +232,11 @@ func (p *Parser) parsePrimaryExpress() Express {
 		}
 	case SyntaxKindIdentifierToken:
 		{
-			identifierToken := p.NextToken()
-			return NewNameExpress(identifierToken)
+			if p.Current().Kind() == SyntaxKindIdentifierToken && p.Peek(1).Kind() == SyntaxKindOpenParenthesisToken {
+				return p.ParseCallExpress()
+			} else {
+				return p.ParserNameExpress()
+			}
 		}
 	default:
 		{
@@ -242,4 +245,33 @@ func (p *Parser) parsePrimaryExpress() Express {
 		}
 	}
 
+}
+
+func (p *Parser) ParserNameExpress() Express {
+	identifierToken := p.NextToken()
+	return NewNameExpress(identifierToken)
+}
+
+func (p *Parser) ParseCallExpress() Express {
+	identifierToken := p.NextToken()
+	open := p.MatchToken(SyntaxKindOpenParenthesisToken)
+	params := p.ParseParams()
+	close := p.MatchToken(SyntaxKindCloseParenthesisToken)
+
+	return NewCallExpress(identifierToken, open, *params, close)
+}
+
+func (p *Parser) ParseParams() *SeparatedList {
+	nodeList := make([]SyntaxNode, 0)
+	for p.Current().Kind() != SyntaxKindCloseParenthesisToken && p.Current().Kind() != SyntaxKindEofToken {
+		express := p.ParserExpress()
+
+		nodeList = append(nodeList, express)
+
+		if p.Current().Kind() != SyntaxKindCloseParenthesisToken {
+			comma := p.MatchToken(SyntaxKindCommaToken)
+			nodeList = append(nodeList, comma)
+		}
+	}
+	return NewSeptartedList(nodeList)
 }

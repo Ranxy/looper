@@ -20,7 +20,7 @@ func (b *GotoStatement) Kind() BoundNodeKind {
 	return BoundNodeKindGotoStatement
 }
 func (b *GotoStatement) Type() *symbol.TypeSymbol {
-	return symbol.TypeUnkonw
+	return symbol.TypeUnit
 }
 
 func (b *GotoStatement) GetChildren() []BoundNode {

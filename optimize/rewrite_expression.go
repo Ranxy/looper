@@ -16,6 +16,7 @@ type RewriteExpression interface {
 	RewriteAssignmentExpression(w Rewrite, node *bind.BoundAssignmentExpression) bind.BoundExpression
 	RewriteUnaryExpression(w Rewrite, node *bind.BoundUnaryExpression) bind.BoundExpression
 	RewriteBinaryExpression(w Rewrite, node *bind.BoundBinaryExpression) bind.BoundExpression
+	RewriteCallExpression(w Rewrite, node *bind.BoundCallExpression) bind.BoundExpression
 }
 
 func (b *BasicRewrite) RewriteExpression(w Rewrite, node bind.BoundExpression) bind.BoundExpression {
@@ -30,6 +31,8 @@ func (b *BasicRewrite) RewriteExpression(w Rewrite, node bind.BoundExpression) b
 		return w.RewriteUnaryExpression(w, node.(*bind.BoundUnaryExpression))
 	case bind.BoundNodeKindBinaryExpress:
 		return w.RewriteBinaryExpression(w, node.(*bind.BoundBinaryExpression))
+	case bind.BoundNodeKindCallExpress:
+		return w.RewriteCallExpression(w, node.(*bind.BoundCallExpression))
 	default:
 		panic(fmt.Sprintf("Unexcepted node %s", node.Kind()))
 	}
@@ -67,4 +70,23 @@ func (b *BasicRewrite) RewriteBinaryExpression(w Rewrite, node *bind.BoundBinary
 		return node
 	}
 	return bind.NewBoundBinaryExpression(left, node.Op, right)
+}
+
+func (b *BasicRewrite) RewriteCallExpression(w Rewrite, node *bind.BoundCallExpression) bind.BoundExpression {
+	arguments := []bind.BoundExpression{}
+	change := false
+	for _, arg := range node.Arguments {
+		oldExpress := arg
+		newExpress := w.RewriteExpression(w, arg)
+		if oldExpress != newExpress {
+			change = true
+			arguments = append(arguments, newExpress)
+		} else {
+			arguments = append(arguments, oldExpress)
+		}
+	}
+	if !change {
+		return node
+	}
+	return bind.NewBoundcallExpression(node.Function, arguments)
 }

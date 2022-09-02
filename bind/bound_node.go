@@ -16,6 +16,7 @@ const (
 	BoundNodeKindAssignmentExpress
 	BoundNodeKindUnaryExpress
 	BoundNodeKindBinaryExpress
+	BoundNodeKindCallExpress
 
 	BoundNodeKindBlockStatement
 	BoundNodeKindVariableDeclaration
@@ -34,6 +35,7 @@ var boundNodeKindNameMap = map[BoundNodeKind]string{
 	BoundNodeKindAssignmentExpress: "AssignmentExpress",
 	BoundNodeKindUnaryExpress:      "UnaryExpress",
 	BoundNodeKindBinaryExpress:     "BinaryExpress",
+	BoundNodeKindCallExpress:       "CallExpress",
 
 	BoundNodeKindBlockStatement:           "BlockStatement",
 	BoundNodeKindVariableDeclaration:      "VariableDeclaration",

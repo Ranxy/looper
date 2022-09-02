@@ -144,3 +144,23 @@ func (b *DiagnosticBag) VariableAlreadyDeclared(span texts.TextSpan, name string
 func (b *DiagnosticBag) ReportUnterminatedString(span texts.TextSpan) {
 	b.Report(span, "Unterminated string literal.")
 }
+
+func (b *DiagnosticBag) ExpressionMustReturnValue(span texts.TextSpan) {
+	b.Report(span, "Expression must return a value.")
+}
+
+func (b *DiagnosticBag) UndefinedFunction(span texts.TextSpan, name string) {
+	msg := fmt.Sprintf("Function %s not defined", name)
+	b.Report(span, msg)
+}
+
+func (b *DiagnosticBag) WrongArgumentNumber(span texts.TextSpan, name string, expect, actual int) {
+	msg := fmt.Sprintf("Function %s requires %d arguments, but was given %d", name, expect, actual)
+	b.Report(span, msg)
+}
+
+func (b *DiagnosticBag) WrongArgumentType(span texts.TextSpan, name string, expect, actual *symbol.TypeSymbol) {
+	msg := fmt.Sprintf("Paramenter %s require a value of %s, but was given a value of %s",
+		name, expect.String(), actual.String())
+	b.Report(span, msg)
+}

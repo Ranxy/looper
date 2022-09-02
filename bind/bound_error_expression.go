@@ -17,7 +17,7 @@ func (b *BoundErrorExpression) Kind() BoundNodeKind {
 	return BoundNodeKindErrorExpress
 }
 func (b *BoundErrorExpression) Type() *symbol.TypeSymbol {
-	return symbol.TypeUnkonw
+	return symbol.TypeError
 }
 
 func (b *BoundErrorExpression) GetChildren() []BoundNode {

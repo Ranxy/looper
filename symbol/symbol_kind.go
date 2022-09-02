@@ -5,4 +5,6 @@ type SymbolKind int
 const (
 	SymbolKindVariable SymbolKind = iota
 	SymbolKindType
+	SymbolKindFunction
+	SymbolKindParameter
 )

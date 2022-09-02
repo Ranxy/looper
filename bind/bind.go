@@ -4,6 +4,7 @@ import (
 	"container/list"
 	"fmt"
 
+	"github.com/Ranxy/looper/buildin"
 	"github.com/Ranxy/looper/diagnostic"
 	"github.com/Ranxy/looper/symbol"
 	"github.com/Ranxy/looper/syntax"
@@ -44,7 +45,7 @@ func CreateParentScope(previous *BoundGlobalScope) *BoundScope {
 		previous = previous.Previous
 	}
 
-	var parent *BoundScope
+	parent := CreateRootScope()
 
 	for stack.Len() > 0 {
 		pvi := stack.Back()
@@ -54,22 +55,40 @@ func CreateParentScope(previous *BoundGlobalScope) *BoundScope {
 		pv := pvi.Value.(*BoundGlobalScope)
 		scope := NewBoundScope(parent)
 		for _, v := range pv.Variables {
-			scope.TryDeclare(v)
+			scope.TryDeclareVariable(v)
 		}
 		parent = scope
 	}
 	return parent
 }
 
+func CreateRootScope() *BoundScope {
+	res := NewBoundScope(nil)
+	for _, f := range buildin.AllBuildinFunc {
+		_ = res.TryDeclareFunction(f)
+	}
+	return res
+}
+
 func (b *Binder) BindExpressionAndCheckType(express syntax.Express, targetType *symbol.TypeSymbol) BoundExpression {
-	result := b.BindExpression(express)
-	if result.Type() != symbol.TypeUnkonw && targetType != symbol.TypeUnkonw && result.Type() != targetType {
+	result := b.BindExpressionInternal(express)
+	if result.Type() != symbol.TypeError && targetType != symbol.TypeError && result.Type() != targetType {
 		b.Diagnostics.CannotConvert(syntax.SyntaxNodeSpan(express), result.Type(), targetType)
+		return NewBoundErrorExpression()
 	}
 	return result
 }
 
-func (b *Binder) BindExpression(express syntax.Express) BoundExpression {
+func (b *Binder) BindExpression(express syntax.Express, canBeUnit bool) BoundExpression {
+	result := b.BindExpressionInternal(express)
+	if !canBeUnit && result.Type() == symbol.TypeUnit {
+		b.Diagnostics.ExpressionMustReturnValue(syntax.SyntaxNodeSpan(express))
+		return NewBoundErrorExpression()
+	}
+	return result
+}
+
+func (b *Binder) BindExpressionInternal(express syntax.Express) BoundExpression {
 	switch express.Kind() {
 	case syntax.SyntaxKindLiteralExpress:
 		return b.BindLiteralExpress(express.(*syntax.LiteralExpress))
@@ -80,9 +99,11 @@ func (b *Binder) BindExpression(express syntax.Express) BoundExpression {
 	case syntax.SyntaxKindBinaryExpress:
 		return b.BindBinaryOperator(express.(*syntax.BinaryExpress))
 	case syntax.SyntaxKindParenthesizedExpress:
-		return b.BindExpression(express.(*syntax.ParenthesisExpress).Expr)
+		return b.BindExpressionInternal(express.(*syntax.ParenthesisExpress).Expr)
 	case syntax.SyntaxKindAssignmentExpress:
 		return b.BindAssignmentExpress(express.(*syntax.AssignmentExpress))
+	case syntax.SyntaxKindCallExpress:
+		return b.BindCallExpression(express.(*syntax.CallExpress))
 	default:
 		panic(fmt.Sprintf("unexceped expresss %q", express.Kind()))
 	}
@@ -145,14 +166,14 @@ func (b *Binder) BindBlockStatement(s *syntax.BlockStatement) Boundstatement {
 func (b *Binder) BindVariableDeclaration(s *syntax.VariableDeclarationSyntax) Boundstatement {
 
 	isReadOnly := s.Keyword.Kind() == syntax.SyntaxKindLetKeywords
-	initializer := b.BindExpression(s.Initializer)
+	initializer := b.BindExpression(s.Initializer, false)
 	variable := b.BindVariableSymbol(s.Identifier, isReadOnly, initializer.Type())
 
 	return NewBoundVariableDeclaration(variable, initializer)
 }
 
 func (b *Binder) BindExpressionStatement(es *syntax.ExpressStatement) Boundstatement {
-	expression := b.BindExpression(es.Express)
+	expression := b.BindExpressionInternal(es.Express)
 	return NewBoundExpressStatements(expression)
 }
 
@@ -169,7 +190,7 @@ func (b *Binder) BindNameExpress(express *syntax.NameExpress) BoundExpression {
 		return NewBoundErrorExpression()
 	}
 	name := express.Identifier.Text
-	variable, has := b.scope.TryLookup(name)
+	variable, has := b.scope.TryLookupVariable(name)
 	if !has {
 		b.Diagnostics.UndefinedName(express.Identifier.Span(), name)
 		return NewBoundErrorExpression()
@@ -180,8 +201,8 @@ func (b *Binder) BindNameExpress(express *syntax.NameExpress) BoundExpression {
 func (b *Binder) BindAssignmentExpress(express *syntax.AssignmentExpress) BoundExpression {
 
 	name := express.Identifier.Text
-	boundExpress := b.BindExpression(express.Express)
-	variable, has := b.scope.TryLookup(name)
+	boundExpress := b.BindExpression(express.Express, false)
+	variable, has := b.scope.TryLookupVariable(name)
 	if !has {
 		b.Diagnostics.UndefinedName(express.Identifier.Span(), name)
 		return boundExpress
@@ -200,8 +221,9 @@ func (b *Binder) BindAssignmentExpress(express *syntax.AssignmentExpress) BoundE
 }
 
 func (b *Binder) BindUnaryExpress(express *syntax.UnaryExpress) BoundExpression {
-	boundOperand := b.BindExpression(express.Operand)
-	if boundOperand.Type() == symbol.TypeUnkonw {
+	boundOperand := b.BindExpression(express.Operand, false)
+
+	if boundOperand.Type() == symbol.TypeError {
 		return NewBoundErrorExpression()
 	}
 	boundOperator := BindBoundUnaryOperator(express.Operator.Kind(), boundOperand.Type())
@@ -215,9 +237,10 @@ func (b *Binder) BindUnaryExpress(express *syntax.UnaryExpress) BoundExpression 
 }
 
 func (b *Binder) BindBinaryOperator(express *syntax.BinaryExpress) BoundExpression {
-	boundLeft := b.BindExpression(express.Left)
-	boundRight := b.BindExpression(express.Right)
-	if boundLeft.Type() == symbol.TypeUnkonw || boundRight.Type() == symbol.TypeUnkonw {
+	boundLeft := b.BindExpression(express.Left, false)
+	boundRight := b.BindExpression(express.Right, false)
+
+	if boundLeft.Type() == symbol.TypeError || boundRight.Type() == symbol.TypeError {
 		return NewBoundErrorExpression()
 	}
 
@@ -239,9 +262,43 @@ func (b *Binder) BindVariableSymbol(identifier syntax.SyntaxToken, isReadOnly bo
 
 	variable := symbol.NewVariableSymbol(name, isReadOnly, tp)
 
-	if !identifier.Missing && !b.scope.TryDeclare(variable) {
+	if !identifier.Missing && !b.scope.TryDeclareVariable(variable) {
 		b.Diagnostics.VariableAlreadyDeclared(identifier.Span(), name)
 	}
 
 	return variable
+}
+
+func (b *Binder) BindCallExpression(express *syntax.CallExpress) BoundExpression {
+	boundArguments := []BoundExpression{}
+	arguments := express.Params.List()
+	for _, arg := range arguments {
+		boundArg := b.BindExpression(arg, false)
+		boundArguments = append(boundArguments, boundArg)
+	}
+
+	function, has := b.scope.TryLookupFunction(express.Identifier.Text)
+	if !has {
+		b.Diagnostics.UndefinedFunction(express.Identifier.Span(), express.Identifier.Text)
+		return NewBoundErrorExpression()
+	}
+
+	if len(function.Parameter) != len(boundArguments) {
+		b.Diagnostics.WrongArgumentNumber(syntax.SyntaxNodeSpan(express),
+			function.GetName(), len(function.Parameter), len(boundArguments))
+
+		return NewBoundErrorExpression()
+	}
+
+	for i := 0; i < len(boundArguments); i++ {
+		arg := boundArguments[i]
+		param := function.Parameter[i]
+		if arg.Type() != param.Type {
+			b.Diagnostics.WrongArgumentType(syntax.SyntaxNodeSpan(arguments[i]),
+				param.GetName(), param.Type, arg.Type())
+			return NewBoundErrorExpression()
+		}
+	}
+
+	return NewBoundcallExpression(function, boundArguments)
 }

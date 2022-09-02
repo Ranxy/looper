@@ -17,12 +17,13 @@ func (b *TypeSymbol) GetName() string {
 }
 
 func (v *TypeSymbol) String() string {
-	return "type:" + v.name
+	return v.name
 }
 
 var (
+	TypeError  = NewTypeSymbol("?")
 	TypeString = NewTypeSymbol("string")
 	TypeBool   = NewTypeSymbol("bool")
 	TypeInt    = NewTypeSymbol("int")
-	TypeUnkonw = NewTypeSymbol("?")
+	TypeUnit   = NewTypeSymbol("()")
 )

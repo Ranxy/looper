@@ -28,7 +28,7 @@ func (b *BoundLiteralExpression) Type() *symbol.TypeSymbol {
 	case string:
 		return symbol.TypeString
 	default:
-		return symbol.TypeUnkonw
+		return symbol.TypeError
 	}
 }
 

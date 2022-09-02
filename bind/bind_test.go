@@ -82,6 +82,12 @@ func TestCase(t *testing.T) {
 		{
 			text: "{var i = 0 var result = 0 for i = 1; i < 5; i = i + 1 { result = result + i } result }",
 		},
+		{
+			text: `{print("hello"+"world")}`,
+		},
+		{
+			text: `{let a = randint(2+2)}`,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.text, func(t *testing.T) {

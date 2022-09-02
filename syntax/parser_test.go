@@ -81,6 +81,9 @@ func TestCase(t *testing.T) {
 		{
 			text: "{ var result = 0 for i = 1; i < 5; i=i+1 { result = result + i } result }",
 		},
+		{
+			text: `{print("hello"+"world")}`,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.text, func(t *testing.T) {
@@ -90,6 +93,7 @@ func TestCase(t *testing.T) {
 			if tree.Diagnostics.Has() {
 				tree.Diagnostics.Print(tt.text)
 			}
+			require.Zero(t, len(tree.Diagnostics.List))
 			require.NoError(t, err)
 		})
 	}

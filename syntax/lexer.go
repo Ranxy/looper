@@ -146,6 +146,9 @@ func (l *Lexer) NextToken() SyntaxToken {
 			l._kind = SyntaxKindGreatToken
 			l.next(1)
 		}
+	case ',':
+		l._kind = SyntaxKindCommaToken
+		l.next(1)
 	case '"':
 		l.readString()
 	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':

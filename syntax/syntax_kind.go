@@ -27,6 +27,7 @@ const (
 	SyntaxKindOpenBraceToken          //{
 	SyntaxKindCloseBraceToken         //}
 	SyntaxKindSemicolon               // ;
+	SyntaxKindCommaToken              //,
 	SyntaxKindIdentifierToken
 
 	//bitwise operators
@@ -61,6 +62,7 @@ const (
 	SyntaxKindBinaryExpress
 	SyntaxKindParenthesizedExpress
 	SyntaxKindAssignmentExpress
+	SyntaxKindCallExpress
 )
 
 func (k SyntaxKind) String() string {
@@ -95,6 +97,7 @@ var syntaxKindKeyMap = map[SyntaxKind]string{
 	SyntaxKindOpenBraceToken:          "OpenBraceToken",
 	SyntaxKindCloseBraceToken:         "CloseBraceToken",
 	SyntaxKindSemicolon:               "Semicolon",
+	SyntaxKindCommaToken:              "CommaToken",
 	SyntaxKindIdentifierToken:         "IdentifierToken",
 
 	SyntaxKindTildeToken:     "TildeToken",
@@ -126,6 +129,7 @@ var syntaxKindKeyMap = map[SyntaxKind]string{
 	SyntaxKindBinaryExpress:        "BinaryExpress",
 	SyntaxKindParenthesizedExpress: "ParenthesizedExpress",
 	SyntaxKindAssignmentExpress:    "AssignmentExpress",
+	SyntaxKindCallExpress:          "CallExpress",
 }
 
 func (k SyntaxKind) Text() string {
@@ -160,6 +164,7 @@ var syntaxKindTextMap = map[SyntaxKind]string{
 	SyntaxKindOpenBraceToken:          "{",
 	SyntaxKindCloseBraceToken:         "}",
 	SyntaxKindSemicolon:               ";",
+	SyntaxKindCommaToken:              ",",
 
 	SyntaxKindTildeToken:     "~",
 	SyntaxKindHatToken:       "^",

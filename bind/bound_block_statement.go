@@ -20,7 +20,7 @@ func (b *BoundBlockStatements) Kind() BoundNodeKind {
 	return BoundNodeKindBlockStatement
 }
 func (b *BoundBlockStatements) Type() *symbol.TypeSymbol {
-	return symbol.TypeUnkonw
+	return symbol.TypeUnit
 }
 
 func (b *BoundBlockStatements) GetChildren() []BoundNode {

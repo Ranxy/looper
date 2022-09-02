@@ -19,7 +19,7 @@ func NewBoundVariableDeclaration(variable *symbol.VariableSymbol, initializer Bo
 }
 
 func (b *BoundVariableDeclaration) Type() *symbol.TypeSymbol {
-	return symbol.TypeUnkonw
+	return symbol.TypeUnit
 }
 func (b *BoundVariableDeclaration) Kind() BoundNodeKind {
 	return BoundNodeKindVariableDeclaration

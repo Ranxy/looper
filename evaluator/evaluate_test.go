@@ -2,6 +2,7 @@ package evaluator
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/Ranxy/looper/bind"
@@ -262,6 +263,44 @@ func TestEvaluate_string(t *testing.T) {
 			blockStatements := optimize.Lower(boundTree.Statements)
 
 			// bind.PrintBoundTree(os.Stdout, blockStatements)
+			ev := NewEvaluater(blockStatements, vm)
+			got := ev.Evaluate()
+			require.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestEvaluate_function(t *testing.T) {
+	tests := []struct {
+		text    string
+		want    any
+		wantErr bool
+	}{
+		{
+			text:    `{let a = randint(100)}`,
+			want:    int64(10),
+			wantErr: false,
+		},
+		{
+			text:    `{let a = "hello" { print(a + "world")}}`,
+			want:    nil,
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.text, func(t *testing.T) {
+			textSource := texts.NewTextSource([]rune(tt.text))
+			tree := syntax.ParseToTree(textSource)
+			boundTree := bind.BindGlobalScope(nil, tree.Root)
+			if len(boundTree.Diagnostic.List) != 0 {
+				boundTree.Diagnostic.Print(tt.text)
+				t.FailNow()
+			}
+			vm := make(map[symbol.VariableSymbol]any)
+
+			blockStatements := optimize.Lower(boundTree.Statements)
+
+			bind.PrintBoundTree(os.Stdout, blockStatements)
 			ev := NewEvaluater(blockStatements, vm)
 			got := ev.Evaluate()
 			require.Equal(t, tt.want, got)

@@ -22,7 +22,7 @@ func (b *BoundWhileStatements) Kind() BoundNodeKind {
 	return BoundNodeKindWhileStatement
 }
 func (b *BoundWhileStatements) Type() *symbol.TypeSymbol {
-	return symbol.TypeUnkonw
+	return symbol.TypeUnit
 }
 func (b *BoundWhileStatements) GetChildren() []BoundNode {
 	return []BoundNode{b.Condition, b.Body}

@@ -103,7 +103,9 @@ func main() {
 				res.Diagnostic.PrintWithSource(sourceText)
 				res.Diagnostic.Reset()
 			} else {
-				fmt.Println(res.Value)
+				if res.Value != nil {
+					fmt.Println(res.Value)
+				}
 			}
 			previous = cm
 		}

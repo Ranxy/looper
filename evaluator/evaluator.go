@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Ranxy/looper/bind"
+	"github.com/Ranxy/looper/buildin"
 	"github.com/Ranxy/looper/symbol"
 )
 
@@ -82,6 +83,8 @@ func (e *Evaluater) EvaluateExpression(node bind.BoundExpression) any {
 		return e.evaluateUnaryExpression(n)
 	case *bind.BoundBinaryExpression:
 		return e.evaluateBinaryExpression(n)
+	case *bind.BoundCallExpression:
+		return e.evaluateCallExpression(n)
 	default:
 		panic(fmt.Sprintf("Unexceped node %v", node))
 	}
@@ -164,5 +167,20 @@ func (e *Evaluater) evaluateBinaryExpression(node *bind.BoundBinaryExpression) a
 		return left.(string) != right.(string)
 	default:
 		panic(fmt.Sprintf("Unexceped binary operator:%q and", node.Op))
+	}
+}
+
+func (e *Evaluater) evaluateCallExpression(node *bind.BoundCallExpression) any {
+	if node.Function == buildin.FunctionPrint {
+		msg := e.EvaluateExpression(node.Arguments[0]).(string)
+		buildin.FunctionPrintImpl(msg)
+		return nil
+	} else if node.Function == buildin.FunctionInputStr {
+		return buildin.FunctionInputStrImpl()
+	} else if node.Function == buildin.FunctionRnd {
+		max := e.EvaluateExpression(node.Arguments[0]).(int64)
+		return buildin.FunctionRndImpl(max)
+	} else {
+		panic(fmt.Sprintf("Unexcepted function %s", node.Function.GetName()))
 	}
 }

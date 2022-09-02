@@ -24,7 +24,7 @@ func (b *ConditionalGotoStatement) Kind() BoundNodeKind {
 	return BoundNodeKindConditionalGotoStatement
 }
 func (b *ConditionalGotoStatement) Type() *symbol.TypeSymbol {
-	return symbol.TypeUnkonw
+	return symbol.TypeUnit
 }
 func (b *ConditionalGotoStatement) GetChildren() []BoundNode {
 	return []BoundNode{b.Condition}

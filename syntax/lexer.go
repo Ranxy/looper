@@ -205,6 +205,7 @@ func (l *Lexer) readString() {
 		case '\n':
 			span := texts.NewTextSpan(l._start, 1)
 			l.diagnostics.ReportUnterminatedString(span)
+			done = true
 		case '"': //end
 			l.pos += 1
 			done = true

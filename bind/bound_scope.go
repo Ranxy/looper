@@ -5,67 +5,80 @@ import (
 )
 
 type BoundScope struct {
-	Parent    *BoundScope
-	variables map[string]*symbol.VariableSymbol
-	functions map[string]*symbol.FunctionSymbol
+	Parent  *BoundScope
+	symbols map[string]symbol.Symbol
 }
 
 func NewBoundScope(parent *BoundScope) *BoundScope {
 	return &BoundScope{
-		Parent:    parent,
-		variables: map[string]*symbol.VariableSymbol{},
-		functions: map[string]*symbol.FunctionSymbol{},
+		Parent:  parent,
+		symbols: make(map[string]symbol.Symbol),
 	}
 }
 
-func (s *BoundScope) TryDeclareVariable(variable *symbol.VariableSymbol) bool {
-	if _, has := s.variables[variable.Name]; has {
+func tryDeclare[T symbol.Symbol](s *BoundScope, tSymbol T) bool {
+	if _, has := s.symbols[tSymbol.GetName()]; has {
 		return false
 	}
-	s.variables[variable.Name] = variable
+	s.symbols[tSymbol.GetName()] = tSymbol
 	return true
 }
 
-func (s *BoundScope) TryLookupVariable(name string) (*symbol.VariableSymbol, bool) {
-	if v, has := s.variables[name]; has {
-		return v, true
+func tryLookup[T symbol.Symbol](s *BoundScope, name string) (T, bool) {
+	if v, has := s.symbols[name]; has {
+		if res, ok := v.(T); ok {
+			return res, true
+		}
 	}
 	if s.Parent == nil {
-		return nil, false
+		var zero T
+		return zero, false
 	}
-	return s.Parent.TryLookupVariable(name)
+	return tryLookup[T](s.Parent, name)
+}
+
+// func getDeclare[T symbol.Symbol](s *BoundScope) []T {
+// 	res := make([]T, 0)
+// 	for _, v := range s.symbols {
+// 		if t, ok := v.(T); ok {
+// 			res = append(res, t) //at go1.19,this will got ice https://github.com/golang/go/issues/54302 , will be update if golang fix this.
+// 		}
+// 	}
+// 	return res
+// }
+
+func (s *BoundScope) TryDeclareVariable(variable *symbol.VariableSymbol) bool {
+	return tryDeclare(s, variable)
+}
+
+func (s *BoundScope) TryLookupVariable(name string) (*symbol.VariableSymbol, bool) {
+	return tryLookup[*symbol.VariableSymbol](s, name)
 }
 
 func (s *BoundScope) GetDeclareVariables() []*symbol.VariableSymbol {
-	res := make([]*symbol.VariableSymbol, 0, len(s.variables))
-	for _, v := range s.variables {
-		res = append(res, v)
+	res := make([]*symbol.VariableSymbol, 0)
+	for _, v := range s.symbols {
+		if t, ok := v.(*symbol.VariableSymbol); ok {
+			res = append(res, t)
+		}
 	}
 	return res
 }
 
 func (s *BoundScope) TryDeclareFunction(function *symbol.FunctionSymbol) bool {
-	if _, has := s.functions[function.GetName()]; has {
-		return false
-	}
-	s.functions[function.GetName()] = function
-	return true
+	return tryDeclare(s, function)
 }
 
 func (s *BoundScope) TryLookupFunction(name string) (*symbol.FunctionSymbol, bool) {
-	if v, has := s.functions[name]; has {
-		return v, true
-	}
-	if s.Parent == nil {
-		return nil, false
-	}
-	return s.Parent.TryLookupFunction(name)
+	return tryLookup[*symbol.FunctionSymbol](s, name)
 }
 
 func (s *BoundScope) GetDeclareFunctions() []*symbol.FunctionSymbol {
-	res := make([]*symbol.FunctionSymbol, 0, len(s.functions))
-	for _, v := range s.functions {
-		res = append(res, v)
+	res := make([]*symbol.FunctionSymbol, 0)
+	for _, v := range s.symbols {
+		if t, ok := v.(*symbol.FunctionSymbol); ok {
+			res = append(res, t)
+		}
 	}
 	return res
 }

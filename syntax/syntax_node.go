@@ -4,12 +4,20 @@ import (
 	"github.com/Ranxy/looper/texts"
 )
 
+type MemberSyntax interface {
+	SyntaxNode
+}
+
 type SyntaxNode interface {
 	GetChildren() []SyntaxNode
 	Kind() SyntaxKind
 }
 
 func SyntaxNodeSpan(n SyntaxNode) texts.TextSpan {
+	if st, ok := n.(SyntaxToken); ok {
+		return st.Span()
+	}
+
 	childen := n.GetChildren()
 	if len(childen) == 0 {
 		return texts.NewTextSpan(0, 0)

@@ -23,3 +23,9 @@ func (s *ParameterSymbol) GetName() string {
 func (s *ParameterSymbol) String() string {
 	return s.name + ":" + s.Type.GetName()
 }
+func (v *ParameterSymbol) GetType() *TypeSymbol {
+	return v.Type
+}
+func (v *ParameterSymbol) IsReadOnly() bool {
+	return true
+}

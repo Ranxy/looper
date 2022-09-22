@@ -91,6 +91,9 @@ func (l *Lexer) NextToken() SyntaxToken {
 	case ';':
 		l._kind = SyntaxKindSemicolon
 		l.next(1)
+	case ':':
+		l._kind = SyntaxKindColon
+		l.next(1)
 	case '~':
 		l._kind = SyntaxKindTildeToken
 		l.next(1)

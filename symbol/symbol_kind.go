@@ -3,7 +3,8 @@ package symbol
 type SymbolKind int
 
 const (
-	SymbolKindVariable SymbolKind = iota
+	SymbolKindLocalVariable SymbolKind = iota
+	SymbolKindGlobalVariable
 	SymbolKindType
 	SymbolKindFunction
 	SymbolKindParameter

@@ -19,10 +19,10 @@ func TestFlattenStatement(t *testing.T) {
 		boundTree.Diagnostic.Print(text)
 		t.FailNow()
 	}
-	befor := boundTree.Statements.(*bind.BoundBlockStatements)
-	require.Equal(t, 2, len(befor.Statement))
+	befor := bind.NewBoundBlockStatement(boundTree.Statements)
+	require.Equal(t, 1, len(befor.Statement))
 	require.Len(t, boundTree.Diagnostic.List, 0)
-	BlockStatement := FlattenStatement(boundTree.Statements)
+	BlockStatement := FlattenStatement(bind.NewBoundBlockStatement(boundTree.Statements))
 
 	require.Equal(t, 4, len(BlockStatement.Statement))
 }

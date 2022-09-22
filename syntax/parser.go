@@ -64,7 +64,7 @@ func (p *Parser) MatchToken(kind SyntaxKind) SyntaxToken {
 }
 
 func (p *Parser) ParseComplitionUnit() *CompliationUnit {
-	var statement = p.ParseStatement()
+	var statement = p.ParseMembers()
 	eofToken := p.MatchToken(SyntaxKindEofToken)
 	return NewCompliationUnit(statement, eofToken)
 }
@@ -83,6 +83,9 @@ func (p *Parser) ParseStatement() Statement {
 		return p.ParseWhileStatement()
 	case SyntaxkindForKeywords:
 		return p.ParseForStatement()
+	case SyntaxkindFunctionKeywords:
+		p.diagnostics.Report(p.Current().Span(), "Function must be defined at top level")
+		return p.ParseFunctionDeclaration()
 	default:
 		return p.ParseExpressStatement()
 	}
@@ -114,10 +117,11 @@ func (p *Parser) ParseVariableDeclaration() Statement {
 
 	keyword := p.MatchToken(exprected)
 	identifier := p.MatchToken(SyntaxKindIdentifierToken)
+	optionTypeClause := p.ParseOptionTypeClause()
 	equals := p.MatchToken(SyntaxKindEqualToken)
 	initializer := p.ParserExpress()
 
-	return NewVariableDeclarationSyntax(keyword, identifier, equals, initializer)
+	return NewVariableDeclarationSyntax(keyword, identifier, optionTypeClause, equals, initializer)
 }
 
 func (p *Parser) ParseForStatement() Statement {
@@ -269,9 +273,96 @@ func (p *Parser) ParseParams() *SeparatedList {
 		nodeList = append(nodeList, express)
 
 		if p.Current().Kind() != SyntaxKindCloseParenthesisToken {
+			current := p.Current()
 			comma := p.MatchToken(SyntaxKindCommaToken)
+			if current == p.Current() {
+				p.NextToken()
+			}
 			nodeList = append(nodeList, comma)
 		}
 	}
 	return NewSeptartedList(nodeList)
+}
+
+//parameters
+
+func (p *Parser) ParseOptionTypeClause() *TypeClauseSyntax {
+	if p.Current().Kind() != SyntaxKindColon {
+		return nil
+	}
+	return p.ParseTypeClause()
+}
+
+func (p *Parser) ParseTypeClause() *TypeClauseSyntax {
+	colonToken := p.MatchToken(SyntaxKindColon)
+	identifier := p.MatchToken(SyntaxKindIdentifierToken)
+	return NewTypeClauseSyntax(colonToken, identifier)
+}
+
+func (p *Parser) ParseParameter() *ParameterSyntax {
+	identifier := p.MatchToken(SyntaxKindIdentifierToken)
+	tp := p.ParseTypeClause()
+	return NewParameterSyntax(identifier, tp)
+}
+
+func (p *Parser) ParseParameterList() *SeparatedList {
+	nodeList := make([]SyntaxNode, 0)
+	for p.Current().Kind() != SyntaxKindCloseParenthesisToken && p.Current().Kind() != SyntaxKindEofToken {
+		current := p.Current()
+		parameter := p.ParseParameter()
+		nodeList = append(nodeList, parameter)
+
+		if p.Current().Kind() != SyntaxKindCloseParenthesisToken {
+			comma := p.MatchToken(SyntaxKindCommaToken)
+			nodeList = append(nodeList, comma)
+		}
+		if p.Current() == current {
+			p.NextToken()
+		}
+	}
+	return NewSeptartedList(nodeList)
+}
+
+func (p *Parser) ParseFunctionDeclaration() MemberSyntax {
+	functionKeyword := p.MatchToken(SyntaxkindFunctionKeywords)
+	identifier := p.MatchToken(SyntaxKindIdentifierToken)
+	openParenthesis := p.MatchToken(SyntaxKindOpenParenthesisToken)
+	parameters := p.ParseParameterList()
+	closeParenthesis := p.MatchToken(SyntaxKindCloseParenthesisToken)
+	tp := p.ParseOptionTypeClause()
+	body := p.ParseBlockStatement()
+	return NewFunctionDeclaration(functionKeyword, identifier, openParenthesis, parameters, closeParenthesis, tp, body)
+}
+
+func (p *Parser) ParseMembers() []MemberSyntax {
+	members := make([]MemberSyntax, 0)
+	for p.Current().Kind() != SyntaxKindEofToken {
+		startToken := p.Current()
+		member := p.ParseMember()
+		members = append(members, member)
+
+		// If ParseMember() did not consume any tokens,
+		// we need to skip the current token and continue
+		// in order to avoid an infinite loop.
+		//
+		// We don't need to report an error, because we'll
+		// already tried to parse an expression statement
+		// and reported one.
+		if p.Current() == startToken {
+			p.NextToken()
+		}
+	}
+	return members
+}
+
+func (p *Parser) ParseMember() MemberSyntax {
+	if p.Current().Kind() == SyntaxkindFunctionKeywords {
+		return p.ParseFunctionDeclaration()
+	}
+	return p.ParseGlobalStatement()
+}
+
+func (p *Parser) ParseGlobalStatement() MemberSyntax {
+	statement := p.ParseStatement()
+	return NewGlobalStatement(statement)
 }

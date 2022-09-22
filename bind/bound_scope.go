@@ -47,18 +47,18 @@ func tryLookup[T symbol.Symbol](s *BoundScope, name string) (T, bool) {
 // 	return res
 // }
 
-func (s *BoundScope) TryDeclareVariable(variable *symbol.VariableSymbol) bool {
+func (s *BoundScope) TryDeclareVariable(variable symbol.VariableSymbol) bool {
 	return tryDeclare(s, variable)
 }
 
-func (s *BoundScope) TryLookupVariable(name string) (*symbol.VariableSymbol, bool) {
-	return tryLookup[*symbol.VariableSymbol](s, name)
+func (s *BoundScope) TryLookupVariable(name string) (symbol.VariableSymbol, bool) {
+	return tryLookup[symbol.VariableSymbol](s, name)
 }
 
-func (s *BoundScope) GetDeclareVariables() []*symbol.VariableSymbol {
-	res := make([]*symbol.VariableSymbol, 0)
+func (s *BoundScope) GetDeclareVariables() []symbol.VariableSymbol {
+	res := make([]symbol.VariableSymbol, 0)
 	for _, v := range s.symbols {
-		if t, ok := v.(*symbol.VariableSymbol); ok {
+		if t, ok := v.(symbol.VariableSymbol); ok {
 			res = append(res, t)
 		}
 	}

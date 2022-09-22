@@ -1,26 +1,37 @@
 package symbol
 
-type VariableSymbol struct {
+type VariableSymbol interface {
+	GetName() string
+	String() string
+	Kind() SymbolKind
+	GetType() *TypeSymbol
+	IsReadOnly() bool
+}
+type variableSymbol struct {
 	Name       string
-	IsReadOnly bool
+	isReadOnly bool
 	Type       *TypeSymbol
 }
 
-func NewVariableSymbol(name string, readOnly bool, tp *TypeSymbol) *VariableSymbol {
-	return &VariableSymbol{
+func newVariableSymbol(name string, readOnly bool, tp *TypeSymbol) *variableSymbol {
+	return &variableSymbol{
 		Name:       name,
-		IsReadOnly: readOnly,
+		isReadOnly: readOnly,
 		Type:       tp,
 	}
 }
-func (b *VariableSymbol) Kind() SymbolKind {
-	return SymbolKindVariable
-}
 
-func (b *VariableSymbol) GetName() string {
+func (b *variableSymbol) GetName() string {
 	return b.Name
 }
 
-func (v *VariableSymbol) String() string {
+func (v *variableSymbol) String() string {
 	return v.Name + ":" + v.Type.String()
+}
+func (v *variableSymbol) GetType() *TypeSymbol {
+	return v.Type
+}
+
+func (v *variableSymbol) IsReadOnly() bool {
+	return v.isReadOnly
 }

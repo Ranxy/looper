@@ -7,10 +7,10 @@ import (
 )
 
 type BoundVariableExpression struct {
-	Variable *symbol.VariableSymbol
+	Variable symbol.VariableSymbol
 }
 
-func NewBoundVariableExpression(variable *symbol.VariableSymbol) *BoundVariableExpression {
+func NewBoundVariableExpression(variable symbol.VariableSymbol) *BoundVariableExpression {
 	return &BoundVariableExpression{
 		Variable: variable,
 	}
@@ -20,7 +20,7 @@ func (b *BoundVariableExpression) Kind() BoundNodeKind {
 	return BoundNodeKindVariableExpress
 }
 func (b *BoundVariableExpression) Type() *symbol.TypeSymbol {
-	return b.Variable.Type
+	return b.Variable.GetType()
 }
 func (b *BoundVariableExpression) GetChildren() []BoundNode {
 	return []BoundNode{}

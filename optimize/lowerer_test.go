@@ -21,7 +21,7 @@ func TestLowerRewrite_RewriteIfStatement(t *testing.T) {
 		t.FailNow()
 	}
 
-	lowererStatement := Lower(boundTree.Statements)
+	lowererStatement := Lower(bind.NewBoundBlockStatement(boundTree.Statements))
 
 	err := bind.PrintBoundTree(os.Stdout, lowererStatement)
 	require.NoError(t, err)
@@ -39,7 +39,7 @@ func TestLowerRewrite_BindWhileStatement(t *testing.T) {
 
 	require.False(t, boundTree.Diagnostic.Has())
 
-	lowerWhile := Lower(boundTree.Statements)
+	lowerWhile := Lower(bind.NewBoundBlockStatement(boundTree.Statements))
 
 	err := bind.PrintBoundTree(os.Stdout, lowerWhile)
 	require.NoError(t, err)
@@ -56,7 +56,7 @@ func TestLowerRewrite_BindForStatement(t *testing.T) {
 
 	require.False(t, boundTree.Diagnostic.Has())
 
-	lowerWhile := Lower(boundTree.Statements)
+	lowerWhile := Lower(bind.NewBoundBlockStatement(boundTree.Statements))
 
 	err := bind.PrintBoundTree(os.Stdout, lowerWhile)
 	require.NoError(t, err)

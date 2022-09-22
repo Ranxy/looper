@@ -13,19 +13,42 @@ import (
 type Binder struct {
 	Diagnostics *diagnostic.DiagnosticBag
 	scope       *BoundScope
+	function    *symbol.FunctionSymbol
 }
 
-func NewBinder(parent *BoundScope) *Binder {
-	return &Binder{
+func NewBinder(parent *BoundScope, function *symbol.FunctionSymbol) *Binder {
+	res := &Binder{
 		Diagnostics: diagnostic.NewDiagnostics(),
 		scope:       NewBoundScope(parent),
+		function:    function,
 	}
+	if function != nil {
+		for _, p := range function.Parameter {
+			res.scope.TryDeclareVariable(p)
+		}
+	}
+
+	return res
 }
 
 func BindGlobalScope(previous *BoundGlobalScope, s *syntax.CompliationUnit) *BoundGlobalScope {
 	parentScope := CreateParentScope(previous)
-	binder := NewBinder(parentScope)
-	expression := binder.BindStatement(s.Statement)
+	binder := NewBinder(parentScope, nil)
+
+	for _, member := range s.Statements {
+		if function, ok := member.(*syntax.FunctionDeclarationSyntax); ok {
+			binder.BindFunctionDeclaration(function)
+		}
+	}
+	statements := make([]Boundstatement, 0)
+
+	for _, member := range s.Statements {
+		if gs, ok := member.(*syntax.GlobalStatement); ok {
+			bs := binder.BindStatement(gs.Statement)
+			statements = append(statements, bs)
+		}
+	}
+	functions := binder.scope.GetDeclareFunctions()
 	variables := binder.scope.GetDeclareVariables()
 	diagnostics := binder.Diagnostics
 
@@ -33,7 +56,7 @@ func BindGlobalScope(previous *BoundGlobalScope, s *syntax.CompliationUnit) *Bou
 		diagnostics = diagnostics.Merge(previous.Diagnostic)
 	}
 
-	return NewBoundGlobalScope(previous, diagnostics, variables, expression)
+	return NewBoundGlobalScope(previous, diagnostics, functions, variables, statements)
 }
 
 func CreateParentScope(previous *BoundGlobalScope) *BoundScope {
@@ -54,6 +77,9 @@ func CreateParentScope(previous *BoundGlobalScope) *BoundScope {
 		}
 		pv := pvi.Value.(*BoundGlobalScope)
 		scope := NewBoundScope(parent)
+		for _, f := range pv.Functions {
+			scope.TryDeclareFunction(f)
+		}
 		for _, v := range pv.Variables {
 			scope.TryDeclareVariable(v)
 		}
@@ -166,8 +192,19 @@ func (b *Binder) BindBlockStatement(s *syntax.BlockStatement) Boundstatement {
 func (b *Binder) BindVariableDeclaration(s *syntax.VariableDeclarationSyntax) Boundstatement {
 
 	isReadOnly := s.Keyword.Kind() == syntax.SyntaxKindLetKeywords
+	tp := b.BindTypeClause(s.TypeClause)
 	initializer := b.BindExpression(s.Initializer, false)
-	variable := b.BindVariableSymbol(s.Identifier, isReadOnly, initializer.Type())
+
+	vType := tp
+	if vType == nil {
+		vType = initializer.Type()
+	} else {
+		if vType != initializer.Type() {
+			b.Diagnostics.Report(s.TypeClause.Identifier.Span(), "Not support auto convert type")
+			return NewBoundErrorExpression()
+		}
+	}
+	variable := b.BindVariableSymbol(s.Identifier, isReadOnly, vType)
 
 	return NewBoundVariableDeclaration(variable, initializer)
 }
@@ -207,13 +244,13 @@ func (b *Binder) BindAssignmentExpress(express *syntax.AssignmentExpress) BoundE
 		b.Diagnostics.UndefinedName(express.Identifier.Span(), name)
 		return boundExpress
 	}
-	if variable.IsReadOnly {
+	if variable.IsReadOnly() {
 		b.Diagnostics.CannotAssign(express.Identifier.Span(), name)
 		return boundExpress
 	}
 
-	if boundExpress.Type() != variable.Type {
-		b.Diagnostics.CannotConvert(express.Identifier.Span(), boundExpress.Type(), variable.Type)
+	if boundExpress.Type() != variable.GetType() {
+		b.Diagnostics.CannotConvert(express.Identifier.Span(), boundExpress.Type(), variable.GetType())
 		return boundExpress
 	}
 
@@ -254,13 +291,18 @@ func (b *Binder) BindBinaryOperator(express *syntax.BinaryExpress) BoundExpressi
 	return NewBoundBinaryExpression(boundLeft, boundOperator, boundRight)
 }
 
-func (b *Binder) BindVariableSymbol(identifier syntax.SyntaxToken, isReadOnly bool, tp *symbol.TypeSymbol) *symbol.VariableSymbol {
+func (b *Binder) BindVariableSymbol(identifier syntax.SyntaxToken, isReadOnly bool, tp *symbol.TypeSymbol) symbol.VariableSymbol {
 	name := identifier.Text
 	if name == "" {
 		name = "?"
 	}
 
-	variable := symbol.NewVariableSymbol(name, isReadOnly, tp)
+	var variable symbol.VariableSymbol
+	if b.function == nil {
+		variable = symbol.NewGlobalVariableSymbol(name, isReadOnly, tp)
+	} else {
+		variable = symbol.NewLocalVariableSymbol(name, isReadOnly, tp)
+	}
 
 	if !identifier.Missing && !b.scope.TryDeclareVariable(variable) {
 		b.Diagnostics.VariableAlreadyDeclared(identifier.Span(), name)
@@ -301,4 +343,60 @@ func (b *Binder) BindCallExpression(express *syntax.CallExpress) BoundExpression
 	}
 
 	return NewBoundcallExpression(function, boundArguments)
+}
+
+func (b *Binder) BindFunctionDeclaration(s *syntax.FunctionDeclarationSyntax) {
+	parameters := make([]*symbol.ParameterSymbol, 0)
+
+	existParameterNames := map[string]struct{}{}
+
+	for _, p := range s.ParameterList.List() {
+		parameter := p.(*syntax.ParameterSyntax)
+		name := parameter.Identifier.Text
+		tp := b.BindTypeClause(parameter.Type)
+
+		if _, has := existParameterNames[name]; has {
+			b.Diagnostics.ParameterAlreadyDeclared(parameter.Identifier.Span(), name)
+		} else {
+			ps := symbol.NewParameterSymbol(name, tp)
+			parameters = append(parameters, ps)
+		}
+	}
+
+	resType := b.BindTypeClause(s.Type)
+	if resType == nil {
+		resType = symbol.TypeUnit
+	}
+
+	function := symbol.NewFunctionSymbol(s.Identifier.Text, parameters, resType, s)
+
+	ok := b.scope.TryDeclareFunction(function)
+	if !ok {
+		b.Diagnostics.SymbolAlreadyDeclared(s.Identifier.Span(), function.GetName())
+	}
+}
+
+func (b *Binder) BindTypeClause(s *syntax.TypeClauseSyntax) *symbol.TypeSymbol {
+	if s == nil {
+		return nil
+	}
+
+	tp := lookupType(s.Identifier.Text)
+	if tp == nil {
+		b.Diagnostics.UndefinedType(s.Identifier.Span(), s.Identifier.Text)
+	}
+	return tp
+}
+
+func lookupType(name string) *symbol.TypeSymbol {
+	switch name {
+	case "bool":
+		return symbol.TypeBool
+	case "int":
+		return symbol.TypeInt
+	case "string":
+		return symbol.TypeString
+	default:
+		return symbol.TypeError
+	}
 }

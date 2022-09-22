@@ -1,18 +1,22 @@
 package symbol
 
-import "strings"
+import (
+	"strings"
+)
 
 type FunctionSymbol struct {
-	name      string
-	Parameter []*ParameterSymbol
-	Type      *TypeSymbol
+	name        string
+	Parameter   []*ParameterSymbol
+	Type        *TypeSymbol
+	Declaration any
 }
 
-func NewFunctionSymbol(name string, parameter []*ParameterSymbol, tp *TypeSymbol) *FunctionSymbol {
+func NewFunctionSymbol(name string, parameter []*ParameterSymbol, tp *TypeSymbol, declaration any) *FunctionSymbol {
 	return &FunctionSymbol{
-		name:      name,
-		Parameter: parameter,
-		Type:      tp,
+		name:        name,
+		Parameter:   parameter,
+		Type:        tp,
+		Declaration: declaration,
 	}
 }
 

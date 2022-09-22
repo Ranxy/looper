@@ -1,9 +1,11 @@
-package bind
+package bind_test
 
 import (
 	"os"
 	"testing"
 
+	"github.com/Ranxy/looper/bind"
+	"github.com/Ranxy/looper/bind/program"
 	"github.com/Ranxy/looper/syntax"
 	"github.com/Ranxy/looper/texts"
 	"github.com/stretchr/testify/require"
@@ -93,7 +95,7 @@ func TestCase(t *testing.T) {
 		t.Run(tt.text, func(t *testing.T) {
 			textSource := texts.NewTextSource([]rune(tt.text))
 			tree := syntax.ParseToTree(textSource)
-			boundTree := BindGlobalScope(nil, tree.Root)
+			boundTree := bind.BindGlobalScope(nil, tree.Root)
 			if boundTree.Diagnostic.Has() {
 				boundTree.Diagnostic.Print(tt.text)
 			}
@@ -106,22 +108,24 @@ func TestBinder_BindExpression(t *testing.T) {
 	text := "let a = 2"
 	textSource := texts.NewTextSource([]rune(text))
 	tree := syntax.ParseToTree(textSource)
-	boundTree := BindGlobalScope(nil, tree.Root)
+	boundTree := bind.BindGlobalScope(nil, tree.Root)
 
 	t.Log(boundTree.Diagnostic)
 	t.Log(boundTree.Variables)
 	require.Len(t, boundTree.Variables, 1)
-	require.Equal(t, boundTree.Variables[0].Name, "a")
-	require.Equal(t, boundTree.Variables[0].IsReadOnly, true)
+	require.Equal(t, boundTree.Variables[0].GetName(), "a")
+	require.Equal(t, boundTree.Variables[0].IsReadOnly(), true)
 }
 
 func TestBinder_BindifStatement(t *testing.T) {
 	text := "{var b = 0{let a = 2+1 { if(-a == 1){ b = 2}else{ b = 3}}}}"
 	textSource := texts.NewTextSource([]rune(text))
 	tree := syntax.ParseToTree(textSource)
-	boundTree := BindGlobalScope(nil, tree.Root)
+	boundTree := bind.BindGlobalScope(nil, tree.Root)
 
-	err := PrintBoundTree(os.Stdout, boundTree.Statements)
+	program := program.BindProgram(boundTree)
+
+	err := bind.PrintBoundTree(os.Stdout, program.Statement)
 	require.NoError(t, err)
 
 	t.Log(boundTree.Diagnostic)
@@ -134,10 +138,27 @@ func TestBinder_BindWhileStatement(t *testing.T) {
 	text := "{ var i = 10 var result = 0 while i != 0 { result = result + i i = i - 1} result }"
 	textSource := texts.NewTextSource([]rune(text))
 	tree := syntax.ParseToTree(textSource)
-	boundTree := BindGlobalScope(nil, tree.Root)
-
+	boundTree := bind.BindGlobalScope(nil, tree.Root)
+	program := program.BindProgram(boundTree)
+	err := bind.PrintBoundTree(os.Stdout, program.Statement)
+	require.NoError(t, err)
 	t.Log(boundTree.Diagnostic)
 	t.Log(boundTree.Variables)
 
 	require.False(t, boundTree.Diagnostic.Has())
+}
+
+func TestBinder_BindFunction(t *testing.T) {
+	text := `fn doSomething(x:int, f:string):int{for var i = 0;i<x;i=i+1{print(f)} x} {doSomething(3,"abc") }`
+	textSource := texts.NewTextSource([]rune(text))
+	tree := syntax.ParseToTree(textSource)
+	boundTree := bind.BindGlobalScope(nil, tree.Root)
+	program := program.BindProgram(boundTree)
+	err := bind.PrintBoundTree(os.Stdout, program.Statement)
+	require.NoError(t, err)
+	require.Equal(t, len(program.Functions), 1)
+
+	if program.Diagnostic.Has() {
+		program.Diagnostic.Print(text)
+	}
 }

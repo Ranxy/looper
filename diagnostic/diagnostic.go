@@ -153,6 +153,10 @@ func (b *DiagnosticBag) UndefinedFunction(span texts.TextSpan, name string) {
 	msg := fmt.Sprintf("Function %s not defined", name)
 	b.Report(span, msg)
 }
+func (b *DiagnosticBag) UndefinedType(span texts.TextSpan, name string) {
+	msg := fmt.Sprintf("Type %s not defined", name)
+	b.Report(span, msg)
+}
 
 func (b *DiagnosticBag) WrongArgumentNumber(span texts.TextSpan, name string, expect, actual int) {
 	msg := fmt.Sprintf("Function %s requires %d arguments, but was given %d", name, expect, actual)
@@ -162,5 +166,14 @@ func (b *DiagnosticBag) WrongArgumentNumber(span texts.TextSpan, name string, ex
 func (b *DiagnosticBag) WrongArgumentType(span texts.TextSpan, name string, expect, actual *symbol.TypeSymbol) {
 	msg := fmt.Sprintf("Paramenter %s require a value of %s, but was given a value of %s",
 		name, expect.String(), actual.String())
+	b.Report(span, msg)
+}
+func (b *DiagnosticBag) ParameterAlreadyDeclared(span texts.TextSpan, name string) {
+	msg := fmt.Sprintf("Paramenter %s already declared", name)
+	b.Report(span, msg)
+}
+
+func (b *DiagnosticBag) SymbolAlreadyDeclared(span texts.TextSpan, name string) {
+	msg := fmt.Sprintf("Symbol %s already declared", name)
 	b.Report(span, msg)
 }

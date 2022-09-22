@@ -7,11 +7,11 @@ import (
 )
 
 type BoundAssignmentExpression struct {
-	Variable *symbol.VariableSymbol
+	Variable symbol.VariableSymbol
 	Express  BoundExpression
 }
 
-func NewBoundAssignmentExpression(variable *symbol.VariableSymbol, express BoundExpression) *BoundAssignmentExpression {
+func NewBoundAssignmentExpression(variable symbol.VariableSymbol, express BoundExpression) *BoundAssignmentExpression {
 	return &BoundAssignmentExpression{
 		Variable: variable,
 		Express:  express,

@@ -84,6 +84,15 @@ func TestCase(t *testing.T) {
 		{
 			text: `{print("hello"+"world")}`,
 		},
+		{
+			text: `var x:int = 3`,
+		},
+		{
+			text: `fn xt(x:int):int{x*10} {xt(20)}`,
+		},
+		{
+			text: `fn println(x:string){print(x+"\n")} {println("hello")}`,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.text, func(t *testing.T) {
@@ -136,6 +145,18 @@ func TestNewParser_parser_while(t *testing.T) {
 	expr := "{ var i = 10 var result = 0 while i != 0 { result = result + i i = i - 1} result }"
 	source := texts.NewTextSource([]rune(expr))
 	tree := newSyntaxTree(source)
+	require.Zero(t, len(tree.Diagnostics.List))
+	err := tree.Print(os.Stdout)
+	require.NoError(t, err)
+}
+
+func TestNewParser_parser_function(t *testing.T) {
+	expr := `fn doSomething(x:int, f:string):int{for var i = 0;i<x;i=i+1{print(f)} x}`
+	source := texts.NewTextSource([]rune(expr))
+	tree := newSyntaxTree(source)
+	if len(tree.Diagnostics.List) > 0 {
+		tree.Diagnostics.Print(expr)
+	}
 	require.Zero(t, len(tree.Diagnostics.List))
 	err := tree.Print(os.Stdout)
 	require.NoError(t, err)

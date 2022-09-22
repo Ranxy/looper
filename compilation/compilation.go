@@ -5,8 +5,8 @@ import (
 	"sync/atomic"
 
 	"github.com/Ranxy/looper/bind"
+	"github.com/Ranxy/looper/bind/program"
 	"github.com/Ranxy/looper/evaluator"
-	"github.com/Ranxy/looper/optimize"
 	"github.com/Ranxy/looper/symbol"
 	"github.com/Ranxy/looper/syntax"
 )
@@ -50,17 +50,27 @@ func (c *Compilation) Evaluate(variables map[symbol.VariableSymbol]any) *evaluat
 			Value:      nil,
 		}
 	}
-	eval := evaluator.NewEvaluater(c.GetStatement(), variables)
+	program := program.BindProgram(c.GlobalScope())
+	if program.Diagnostic.Has() {
+		return &evaluator.EvaluateResult{
+			Diagnostic: diagnostics,
+			Value:      nil,
+		}
+	}
+
+	eval := evaluator.NewEvaluater(program, variables)
 	value := eval.Evaluate()
 	return &evaluator.EvaluateResult{
 		Diagnostic: diagnostics,
 		Value:      value,
 	}
 }
-func (c *Compilation) GetStatement() *bind.BoundBlockStatements {
-	return optimize.Lower(c.GlobalScope().Statements)
-}
+
+// func (c *Compilation) GetStatement() *bind.BoundBlockStatements {
+// 	// return optimize.Lower(c.GlobalScope().Statements)
+// }
 
 func (c *Compilation) Print(w io.Writer) error {
-	return bind.PrintBoundTree(w, c.GlobalScope().Statements)
+	program := program.BindProgram(c.GlobalScope())
+	return bind.PrintBoundTree(w, program.Statement)
 }

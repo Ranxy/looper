@@ -1,37 +1,50 @@
 package evaluator
 
 import (
+	"container/list"
 	"fmt"
 
 	"github.com/Ranxy/looper/bind"
+	"github.com/Ranxy/looper/bind/program"
 	"github.com/Ranxy/looper/buildin"
 	"github.com/Ranxy/looper/symbol"
 )
 
+type vStore map[symbol.VariableSymbol]any
+
 type Evaluater struct {
-	root *bind.BoundBlockStatements
-	vm   map[symbol.VariableSymbol]any
+	program *program.BoundProgram
+	global  vStore
+	local   *list.List //stack[map[symbol.VariableSymbol]any]
 
 	lastValue any
 }
 
-func NewEvaluater(root *bind.BoundBlockStatements, vm map[symbol.VariableSymbol]any) *Evaluater {
+func NewEvaluater(program *program.BoundProgram, vm map[symbol.VariableSymbol]any) *Evaluater {
 	return &Evaluater{
-		root: root,
-		vm:   vm,
+		program:   program,
+		global:    vm,
+		local:     &list.List{},
+		lastValue: nil,
 	}
 }
-
 func (e *Evaluater) Evaluate() any {
+	return e.EvaluateStatement(e.program.Statement)
+}
+
+func (e *Evaluater) EvaluateStatement(body *bind.BoundBlockStatements) any {
+	if body == nil {
+		return nil
+	}
 	labelToIndex := make(map[*bind.BoundLabel]int)
-	for i := range e.root.Statement {
-		if bls, ok := e.root.Statement[i].(*bind.LabelStatement); ok {
+	for i := range body.Statement {
+		if bls, ok := body.Statement[i].(*bind.LabelStatement); ok {
 			labelToIndex[bls.Label] = i + 1
 		}
 	}
 	index := 0
-	for index < len(e.root.Statement) {
-		s := e.root.Statement[index]
+	for index < len(body.Statement) {
+		s := body.Statement[index]
 		switch s.Kind() {
 		case bind.BoundNodeKindVariableDeclaration:
 			e.EvaluateVariableDeclaration(s.(*bind.BoundVariableDeclaration))
@@ -62,8 +75,8 @@ func (e *Evaluater) Evaluate() any {
 
 func (e *Evaluater) EvaluateVariableDeclaration(node *bind.BoundVariableDeclaration) {
 	value := e.EvaluateExpression(node.Initializer)
-	e.vm[*node.Variable] = value
 	e.lastValue = value
+	e.Assign(node.Variable, value)
 }
 
 func (e *Evaluater) EvaluateExpressionStatement(node *bind.BoundExpressStatements) {
@@ -95,16 +108,18 @@ func (e *Evaluater) evaluateLiteralExpression(node *bind.BoundLiteralExpression)
 }
 
 func (e *Evaluater) evaluateVariableExpression(node *bind.BoundVariableExpression) any {
-	v := e.vm[*node.Variable]
-	if v == nil {
-		panic(fmt.Sprintf("Undefined Variable %s", node.Variable.Name))
+
+	if node.Variable.Kind() == symbol.SymbolKindGlobalVariable {
+		return e.global[node.Variable]
+	} else {
+		local := e.local.Back().Value.(vStore)
+		return local[node.Variable]
 	}
-	return v
 }
 
 func (e *Evaluater) evaluateAssignmentExpression(node *bind.BoundAssignmentExpression) any {
 	value := e.EvaluateExpression(node.Express)
-	e.vm[*node.Variable] = value
+	e.Assign(node.Variable, value)
 	return value
 }
 
@@ -181,6 +196,28 @@ func (e *Evaluater) evaluateCallExpression(node *bind.BoundCallExpression) any {
 		max := e.EvaluateExpression(node.Arguments[0]).(int64)
 		return buildin.FunctionRndImpl(max)
 	} else {
-		panic(fmt.Sprintf("Unexcepted function %s", node.Function.GetName()))
+		local := vStore{}
+
+		for i, arg := range node.Arguments {
+			parameter := node.Function.Parameter[i]
+			value := e.EvaluateExpression(arg)
+			local[parameter] = value
+		}
+		e.local.PushBack(local)
+
+		statement := e.program.Functions[node.Function]
+		result := e.EvaluateStatement(statement)
+		e.local.Remove(e.local.Back())
+		return result
+	}
+}
+
+func (e *Evaluater) Assign(variable symbol.VariableSymbol, value any) {
+	if variable.Kind() == symbol.SymbolKindGlobalVariable {
+		e.global[variable] = value
+	} else {
+		lmr := e.local.Back()
+		lm := lmr.Value.(vStore)
+		lm[variable] = value
 	}
 }

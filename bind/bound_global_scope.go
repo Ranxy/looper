@@ -8,17 +8,22 @@ import (
 type BoundGlobalScope struct {
 	Previous   *BoundGlobalScope
 	Diagnostic *diagnostic.DiagnosticBag
-	Variables  []*symbol.VariableSymbol
-	Statements Boundstatement
+	Functions  []*symbol.FunctionSymbol
+	Variables  []symbol.VariableSymbol
+	Statements []Boundstatement
 }
 
 func NewBoundGlobalScope(previous *BoundGlobalScope,
-	diagnostic *diagnostic.DiagnosticBag, variables []*symbol.VariableSymbol, statement Boundstatement) *BoundGlobalScope {
+	diagnostic *diagnostic.DiagnosticBag,
+	functions []*symbol.FunctionSymbol,
+	variables []symbol.VariableSymbol,
+	statements []Boundstatement) *BoundGlobalScope {
 
 	return &BoundGlobalScope{
 		Previous:   previous,
 		Diagnostic: diagnostic,
+		Functions:  functions,
 		Variables:  variables,
-		Statements: statement,
+		Statements: statements,
 	}
 }

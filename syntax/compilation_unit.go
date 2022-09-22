@@ -1,19 +1,24 @@
 package syntax
 
 type CompliationUnit struct {
-	Statement Statement
-	EofToken  SyntaxToken
+	Statements []MemberSyntax
+	EofToken   SyntaxToken
 }
 
-func NewCompliationUnit(Statement Statement, eofToken SyntaxToken) *CompliationUnit {
+func NewCompliationUnit(Statements []MemberSyntax, eofToken SyntaxToken) *CompliationUnit {
 	return &CompliationUnit{
-		Statement: Statement,
-		EofToken:  eofToken,
+		Statements: Statements,
+		EofToken:   eofToken,
 	}
 }
 
 func (e *CompliationUnit) GetChildren() []SyntaxNode {
-	return []SyntaxNode{e.Statement, e.EofToken}
+	res := []SyntaxNode{}
+	for _, s := range e.Statements {
+		res = append(res, s)
+	}
+	res = append(res, e.EofToken)
+	return res
 }
 func (e *CompliationUnit) Kind() SyntaxKind {
 	return SyntaxKindCompilationUnit

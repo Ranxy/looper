@@ -1,4 +1,4 @@
-package evaluator
+package evaluator_test
 
 import (
 	"fmt"
@@ -6,7 +6,8 @@ import (
 	"testing"
 
 	"github.com/Ranxy/looper/bind"
-	"github.com/Ranxy/looper/optimize"
+	"github.com/Ranxy/looper/bind/program"
+	"github.com/Ranxy/looper/evaluator"
 	"github.com/Ranxy/looper/symbol"
 	"github.com/Ranxy/looper/syntax"
 	"github.com/Ranxy/looper/texts"
@@ -144,8 +145,9 @@ func TestEvaluate(t *testing.T) {
 			}
 			vm := make(map[symbol.VariableSymbol]any)
 
-			blockStatements := optimize.Lower(boundTree.Statements)
-			ev := NewEvaluater(blockStatements, vm)
+			program := program.BindProgram(boundTree)
+			// bind.PrintBoundTree(os.Stdout, program.Statement)
+			ev := evaluator.NewEvaluater(program, vm)
 			got := ev.Evaluate()
 			require.Equal(t, tt.want, got)
 		})
@@ -214,8 +216,9 @@ func TestEvaluate_bool(t *testing.T) {
 			}
 			vm := make(map[symbol.VariableSymbol]any)
 
-			blockStatements := optimize.Lower(boundTree.Statements)
-			ev := NewEvaluater(blockStatements, vm)
+			program := program.BindProgram(boundTree)
+			// bind.PrintBoundTree(os.Stdout, program.Statement)
+			ev := evaluator.NewEvaluater(program, vm)
 			got := ev.Evaluate()
 			require.Equal(t, tt.want, got)
 		})
@@ -260,10 +263,10 @@ func TestEvaluate_string(t *testing.T) {
 			}
 			vm := make(map[symbol.VariableSymbol]any)
 
-			blockStatements := optimize.Lower(boundTree.Statements)
-
-			// bind.PrintBoundTree(os.Stdout, blockStatements)
-			ev := NewEvaluater(blockStatements, vm)
+			program := program.BindProgram(boundTree)
+			err := bind.PrintBoundTree(os.Stdout, program.Statement)
+			require.NoError(t, err)
+			ev := evaluator.NewEvaluater(program, vm)
 			got := ev.Evaluate()
 			require.Equal(t, tt.want, got)
 		})
@@ -298,10 +301,10 @@ func TestEvaluate_function(t *testing.T) {
 			}
 			vm := make(map[symbol.VariableSymbol]any)
 
-			blockStatements := optimize.Lower(boundTree.Statements)
-
-			bind.PrintBoundTree(os.Stdout, blockStatements)
-			ev := NewEvaluater(blockStatements, vm)
+			program := program.BindProgram(boundTree)
+			err := bind.PrintBoundTree(os.Stdout, program.Statement)
+			require.NoError(t, err)
+			ev := evaluator.NewEvaluater(program, vm)
 			got := ev.Evaluate()
 			require.Equal(t, tt.want, got)
 		})
@@ -340,11 +343,46 @@ func ev_variable(previous *bind.BoundGlobalScope, vm map[symbol.VariableSymbol]a
 		boundTree.Diagnostic.Print(text)
 		t.FailNow()
 	}
-	blockStatements := optimize.Lower(boundTree.Statements)
-	ev := NewEvaluater(blockStatements, vm)
+	program := program.BindProgram(boundTree)
+	// bind.PrintBoundTree(os.Stdout, program.Statement)
+	ev := evaluator.NewEvaluater(program, vm)
 
 	got := ev.Evaluate()
 	require.Equal(t, want, got, fmt.Sprintf("Text %s failed", text))
 
 	return boundTree
+}
+
+func TestEvaluate_function_declaration(t *testing.T) {
+	tests := []struct {
+		text    string
+		want    any
+		wantErr bool
+	}{
+		{
+			text:    `fn xt(x:int):int{x*10} fn plusten(x:int):int{x+10} {xt(plusten(10))}`,
+			want:    int64(200),
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.text, func(t *testing.T) {
+			textSource := texts.NewTextSource([]rune(tt.text))
+			tree := syntax.ParseToTree(textSource)
+			boundTree := bind.BindGlobalScope(nil, tree.Root)
+			if len(boundTree.Diagnostic.List) != 0 {
+				boundTree.Diagnostic.Print(tt.text)
+				t.FailNow()
+			}
+			vm := make(map[symbol.VariableSymbol]any)
+
+			program := program.BindProgram(boundTree)
+			err := bind.PrintBoundTree(os.Stdout, program.Statement)
+			require.NoError(t, err)
+			ev := evaluator.NewEvaluater(program, vm)
+			got := ev.Evaluate()
+			require.Equal(t, tt.want, got)
+			fmt.Println(got)
+		})
+	}
 }

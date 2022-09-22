@@ -27,6 +27,7 @@ const (
 	SyntaxKindOpenBraceToken          //{
 	SyntaxKindCloseBraceToken         //}
 	SyntaxKindSemicolon               // ;
+	SyntaxKindColon                   // :
 	SyntaxKindCommaToken              //,
 	SyntaxKindIdentifierToken
 
@@ -44,9 +45,14 @@ const (
 	SyntaxKindElseKeywords
 	SyntaxKindWhileKeywords
 	SyntaxkindForKeywords
+	SyntaxkindFunctionKeywords
 
 	//Nodes
 	SyntaxKindCompilationUnit
+	SyntaxKindGlobalStatement
+	SyntaxKindFunctionDeclaration
+	SyntaxKindTypeClause
+	SyntaxKindParameter
 
 	//Statement
 	SyntaxKindBlockStatement
@@ -97,6 +103,7 @@ var syntaxKindKeyMap = map[SyntaxKind]string{
 	SyntaxKindOpenBraceToken:          "OpenBraceToken",
 	SyntaxKindCloseBraceToken:         "CloseBraceToken",
 	SyntaxKindSemicolon:               "Semicolon",
+	SyntaxKindColon:                   "Colon",
 	SyntaxKindCommaToken:              "CommaToken",
 	SyntaxKindIdentifierToken:         "IdentifierToken",
 
@@ -105,16 +112,21 @@ var syntaxKindKeyMap = map[SyntaxKind]string{
 	SyntaxKindAmpersandToken: "AmpersandToken",
 	SyntaxKindPipeToken:      "PipeToken",
 
-	SyntaxKindTrueKeywords:  "TrueKeywords",
-	SyntaxKindFalseKeywords: "FalseKeywords",
-	SyntaxKindLetKeywords:   "LetKeywords",
-	SyntaxKindVarKeywords:   "VarKeywords",
-	SyntaxKindIfKeywords:    "IfKeywords",
-	SyntaxKindElseKeywords:  "ElseKeywords",
-	SyntaxKindWhileKeywords: "WhileKeywords",
-	SyntaxkindForKeywords:   "ForKeywords",
+	SyntaxKindTrueKeywords:     "TrueKeywords",
+	SyntaxKindFalseKeywords:    "FalseKeywords",
+	SyntaxKindLetKeywords:      "LetKeywords",
+	SyntaxKindVarKeywords:      "VarKeywords",
+	SyntaxKindIfKeywords:       "IfKeywords",
+	SyntaxKindElseKeywords:     "ElseKeywords",
+	SyntaxKindWhileKeywords:    "WhileKeywords",
+	SyntaxkindForKeywords:      "ForKeywords",
+	SyntaxkindFunctionKeywords: "FunctionKeywords",
 
-	SyntaxKindCompilationUnit: "CompilationUnit",
+	SyntaxKindCompilationUnit:     "CompilationUnit",
+	SyntaxKindFunctionDeclaration: "FunctionDeclaration",
+	SyntaxKindGlobalStatement:     "GlobalStatement",
+	SyntaxKindTypeClause:          "TypeClause",
+	SyntaxKindParameter:           "Parameter",
 
 	SyntaxKindBlockStatement:      "BlockStatement",
 	SyntaxKindVariableDeclaration: "VariableDeclaration",
@@ -164,6 +176,7 @@ var syntaxKindTextMap = map[SyntaxKind]string{
 	SyntaxKindOpenBraceToken:          "{",
 	SyntaxKindCloseBraceToken:         "}",
 	SyntaxKindSemicolon:               ";",
+	SyntaxKindColon:                   ":",
 	SyntaxKindCommaToken:              ",",
 
 	SyntaxKindTildeToken:     "~",
@@ -171,12 +184,13 @@ var syntaxKindTextMap = map[SyntaxKind]string{
 	SyntaxKindAmpersandToken: "&",
 	SyntaxKindPipeToken:      "|",
 
-	SyntaxKindTrueKeywords:  "true",
-	SyntaxKindFalseKeywords: "false",
-	SyntaxKindLetKeywords:   "let",
-	SyntaxKindVarKeywords:   "var",
-	SyntaxKindIfKeywords:    "if",
-	SyntaxKindElseKeywords:  "else",
-	SyntaxKindWhileKeywords: "while",
-	SyntaxkindForKeywords:   "for",
+	SyntaxKindTrueKeywords:     "true",
+	SyntaxKindFalseKeywords:    "false",
+	SyntaxKindLetKeywords:      "let",
+	SyntaxKindVarKeywords:      "var",
+	SyntaxKindIfKeywords:       "if",
+	SyntaxKindElseKeywords:     "else",
+	SyntaxKindWhileKeywords:    "while",
+	SyntaxkindForKeywords:      "for",
+	SyntaxkindFunctionKeywords: "fn",
 }

@@ -7,11 +7,11 @@ import (
 )
 
 type BoundVariableDeclaration struct {
-	Variable    *symbol.VariableSymbol
+	Variable    symbol.VariableSymbol
 	Initializer BoundExpression
 }
 
-func NewBoundVariableDeclaration(variable *symbol.VariableSymbol, initializer BoundExpression) *BoundVariableDeclaration {
+func NewBoundVariableDeclaration(variable symbol.VariableSymbol, initializer BoundExpression) *BoundVariableDeclaration {
 	return &BoundVariableDeclaration{
 		Variable:    variable,
 		Initializer: initializer,

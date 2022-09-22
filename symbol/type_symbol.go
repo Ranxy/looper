@@ -9,7 +9,7 @@ func NewTypeSymbol(name string) *TypeSymbol {
 }
 
 func (b *TypeSymbol) Kind() SymbolKind {
-	return SymbolKindVariable
+	return SymbolKindType
 }
 
 func (b *TypeSymbol) GetName() string {

@@ -2,6 +2,7 @@ package diagnostic
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/Ranxy/looper/symbol"
@@ -72,6 +73,15 @@ func (b *DiagnosticBag) Print(codeLine string) {
 	}
 }
 func (b *DiagnosticBag) PrintWithSource(source *texts.TextSource) {
+	sort.Slice(b.List, func(i, j int) bool {
+		cmp := b.List[i].Span.Start() - b.List[j].Span.Start()
+		if cmp == 0 {
+			cmp = b.List[i].Span.Length() - b.List[j].Span.Length()
+		}
+
+		return cmp < 0
+	})
+
 	for _, d := range b.List {
 
 		idx := source.GetLineIndex(d.Span.Start())

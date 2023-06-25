@@ -165,6 +165,10 @@ func (b *Binder) BindStatement(s syntax.Statement) Boundstatement {
 		return b.bindContinueStatement(s.(*syntax.ContinueStatement))
 	case syntax.SyntaxKindExpressStatement:
 		return b.BindExpressionStatement(s.(*syntax.ExpressStatement))
+	case syntax.SyntaxKindFunctionDeclaration:
+		f := s.(*syntax.FunctionDeclarationSyntax)
+		b.Diagnostics.FunctionNotTopLevel(f.Identifier.Span(), f.Identifier.Text)
+		return NewBoundErrorExpression()
 	default:
 		panic(fmt.Sprintf("Unexceped syntax %s", s.Kind()))
 	}

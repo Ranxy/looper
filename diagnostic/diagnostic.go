@@ -163,6 +163,12 @@ func (b *DiagnosticBag) UndefinedFunction(span texts.TextSpan, name string) {
 	msg := fmt.Sprintf("Function %s not defined", name)
 	b.Report(span, msg)
 }
+
+func (b *DiagnosticBag) FunctionNotTopLevel(span texts.TextSpan, name string) {
+	msg := fmt.Sprintf("Function %s not at top level", name)
+	b.Report(span, msg)
+}
+
 func (b *DiagnosticBag) UndefinedType(span texts.TextSpan, name string) {
 	msg := fmt.Sprintf("Type %s not defined", name)
 	b.Report(span, msg)

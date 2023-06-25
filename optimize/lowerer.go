@@ -86,7 +86,7 @@ func (l *LowerRewrite) RewriteWhileStatement(w Rewrite, node *bind.BoundWhileSta
 
 	continueLabelStatement := bind.NewLabelSymbol(node.ContinueLabel)
 	checklabelStatement := bind.NewLabelSymbol(checkLabel)
-	gotoTrue := bind.NewConditionalGotoSymbol(node.ContinueLabel, node.Condition, true)
+	gotoTrue := bind.NewConditionalGotoSymbol(node.ContinueLabel, node.Condition, false)
 	breakLabelStatement := bind.NewLabelSymbol(node.BreakLabel)
 
 	result := bind.NewBoundBlockStatement([]bind.Boundstatement{
@@ -101,22 +101,32 @@ func (l *LowerRewrite) RewriteWhileStatement(w Rewrite, node *bind.BoundWhileSta
 }
 
 func (l *LowerRewrite) RewriteForStatement(w Rewrite, node *bind.BoundForStatements) bind.Boundstatement {
-	// todo
+	// init
+	// start:
+	// gotofalse <condition> break
+	// <body>
+	// continue:
+	// update
+	// goto <condition> start
+	// break:
+
 	labelStart := l.GenerateLabel()
-	labelEnd := l.GenerateLabel()
-	condJumpEnd := bind.NewConditionalGotoSymbol(labelEnd, node.EndCheckConditionExpress, true)
-	jumpStart := bind.NewGotoSymbol(labelStart)
 	startStatement := bind.NewLabelSymbol(labelStart)
-	endStatement := bind.NewLabelSymbol(labelEnd)
+	continueLabelStatement := bind.NewLabelSymbol(node.ContinueLabel)
+	breakLabelStatement := bind.NewLabelSymbol(node.BreakLabel)
+
+	condJumpEnd := bind.NewConditionalGotoSymbol(node.BreakLabel, node.EndCheckConditionExpress, true)
+	jumpStart := bind.NewGotoSymbol(labelStart)
 
 	res := bind.NewBoundBlockStatement([]bind.Boundstatement{
 		node.InitCondition,
 		startStatement,
 		condJumpEnd,
 		node.Body,
+		continueLabelStatement,
 		node.UpdateCondition,
 		jumpStart,
-		endStatement,
+		breakLabelStatement,
 	})
 
 	return w.RewriteStatement(w, res)

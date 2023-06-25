@@ -280,7 +280,7 @@ func TestEvaluate_function(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			text:    `{let a = randint(100)}`,
+			text:    `fn xx(x:int):int{x+x } xx(5)`,
 			want:    int64(10),
 			wantErr: false,
 		},
@@ -333,6 +333,37 @@ func TestEvaluate_variable(t *testing.T) {
 	bt = ev_variable(bt, vm, t, "c == 2", true)
 	_ = ev_variable(bt, vm, t, "b==false", false)
 
+}
+
+func TestEvaluate_While(t *testing.T) {
+	text := "{var result = 0 { var i = 10  while i != 0 { result = result + i i = i - 1}} result }"
+	vm := make(map[symbol.VariableSymbol]any)
+
+	var bt *bind.BoundGlobalScope
+
+	_ = ev_variable(bt, vm, t, text, int64(55))
+}
+
+func TestEvaluate_For(t *testing.T) {
+	text := `{
+		var i = 0 
+		var result = 0 
+		for i = 1; i < 6 ;i = i + 1 {
+			if i ==2 {
+				continue
+			}
+			if i == 4{
+				break
+			}
+			result = result + i
+		} 
+		result
+	}`
+	vm := make(map[symbol.VariableSymbol]any)
+
+	var bt *bind.BoundGlobalScope
+
+	_ = ev_variable(bt, vm, t, text, int64(4))
 }
 
 func ev_variable(previous *bind.BoundGlobalScope, vm map[symbol.VariableSymbol]any, t *testing.T, text string, want any) *bind.BoundGlobalScope {

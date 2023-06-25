@@ -46,7 +46,15 @@ func TestLowerRewrite_BindWhileStatement(t *testing.T) {
 }
 
 func TestLowerRewrite_BindForStatement(t *testing.T) {
-	text := "{var i = 0 var result = 0 for i = 1; i < 5 ;i = i + 1 { result = result + 1 } result }"
+	text := `{
+		var i = 0 
+		var result = 0 
+		for i = 1; i < 6 ;i = i + 1 {
+
+			result = result + i
+		} 
+		result
+	}`
 	textSource := texts.NewTextSource([]rune(text))
 	tree := syntax.ParseToTree(textSource)
 	boundTree := bind.BindGlobalScope(nil, tree.Root)

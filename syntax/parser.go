@@ -83,6 +83,10 @@ func (p *Parser) ParseStatement() Statement {
 		return p.ParseWhileStatement()
 	case SyntaxkindForKeywords:
 		return p.ParseForStatement()
+	case SyntaxKindBreakKeywords:
+		return p.ParseBreakStatement()
+	case SyntaxKindContinueKeywords:
+		return p.ParseContinueStatement()
 	case SyntaxkindFunctionKeywords:
 		p.diagnostics.Report(p.Current().Span(), "Function must be defined at top level")
 		return p.ParseFunctionDeclaration()
@@ -142,6 +146,16 @@ func (p *Parser) ParseWhileStatement() Statement {
 	statement := p.ParseStatement()
 
 	return NewWhileStatement(keywords, condition, statement)
+}
+
+func (p *Parser) ParseBreakStatement() Statement {
+	keywords := p.MatchToken(SyntaxKindBreakKeywords)
+	return NewBreakStatement(keywords)
+}
+
+func (p *Parser) ParseContinueStatement() Statement {
+	keywords := p.MatchToken(SyntaxKindContinueKeywords)
+	return NewContinueStatement(keywords)
 }
 
 func (p *Parser) ParseIfStatement() Statement {

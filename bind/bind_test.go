@@ -135,7 +135,24 @@ func TestBinder_BindifStatement(t *testing.T) {
 }
 
 func TestBinder_BindWhileStatement(t *testing.T) {
-	text := "{ var i = 10 var result = 0 while i != 0 { result = result + i i = i - 1} result }"
+	text := `{ 
+		var i = 10 
+		var result = 0 
+		while i != 0 {
+			if (i == 5){
+				continue
+			}
+			if (i == 9){
+				break
+			}
+			result = result + i 
+			if (i == 0){
+				break
+			}
+			i = i - 1
+		} 
+		result
+	}`
 	textSource := texts.NewTextSource([]rune(text))
 	tree := syntax.ParseToTree(textSource)
 	boundTree := bind.BindGlobalScope(nil, tree.Root)

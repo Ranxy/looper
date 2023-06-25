@@ -187,3 +187,8 @@ func (b *DiagnosticBag) SymbolAlreadyDeclared(span texts.TextSpan, name string) 
 	msg := fmt.Sprintf("Symbol %s already declared", name)
 	b.Report(span, msg)
 }
+
+func (b *DiagnosticBag) ReportInvalidBreakOrContinue(span texts.TextSpan, name string) {
+	msg := fmt.Sprintf("The keyword %s can only be used inside of loops", name)
+	b.Report(span, msg)
+}

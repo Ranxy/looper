@@ -142,7 +142,21 @@ func TestNewParser_parser_if(t *testing.T) {
 }
 
 func TestNewParser_parser_while(t *testing.T) {
-	expr := "{ var i = 10 var result = 0 while i != 0 { result = result + i i = i - 1} result }"
+	expr := `{ 
+		var i = 10 
+		var result = 0 
+		while i != 0 {
+			if (i == 5){
+				continue
+			}
+			if (i == 9){
+				break
+			}
+			result = result + i 
+			i = i - 1
+		} 
+		result
+	}`
 	source := texts.NewTextSource([]rune(expr))
 	tree := newSyntaxTree(source)
 	require.Zero(t, len(tree.Diagnostics.List))

@@ -7,12 +7,17 @@ import (
 )
 
 type BoundWhileStatements struct {
+	BoundLoopStatements
 	Condition BoundExpression
 	Body      Boundstatement
 }
 
-func NewBoundWhileStatements(condition BoundExpression, body Boundstatement) *BoundWhileStatements {
+func NewBoundWhileStatements(condition BoundExpression, body Boundstatement, breakLabel *BoundLabel, continueLabel *BoundLabel) *BoundWhileStatements {
 	return &BoundWhileStatements{
+		BoundLoopStatements: BoundLoopStatements{
+			BreakLabel:    breakLabel,
+			ContinueLabel: continueLabel,
+		},
 		Condition: condition,
 		Body:      body,
 	}

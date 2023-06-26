@@ -45,6 +45,10 @@ func GetKeyWordsKind(text string) SyntaxKind {
 		return SyntaxKindWhileKeywords
 	case "for":
 		return SyntaxkindForKeywords
+	case "break":
+		return SyntaxKindBreakKeywords
+	case "continue":
+		return SyntaxKindContinueKeywords
 	case "fn":
 		return SyntaxkindFunctionKeywords
 	default:

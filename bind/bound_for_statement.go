@@ -7,14 +7,19 @@ import (
 )
 
 type BoundForStatements struct {
+	BoundLoopStatements
 	InitCondition            Boundstatement
 	EndCheckConditionExpress BoundExpression //must be bool
 	UpdateCondition          Boundstatement
 	Body                     Boundstatement
 }
 
-func NewBoundForStatements(initCondition Boundstatement, endCondition BoundExpression, updateCondition Boundstatement, body Boundstatement) *BoundForStatements {
+func NewBoundForStatements(initCondition Boundstatement, endCondition BoundExpression, updateCondition Boundstatement, body Boundstatement, breakLabel *BoundLabel, continueLabel *BoundLabel) *BoundForStatements {
 	return &BoundForStatements{
+		BoundLoopStatements: BoundLoopStatements{
+			BreakLabel:    breakLabel,
+			ContinueLabel: continueLabel,
+		},
 		InitCondition:            initCondition,
 		EndCheckConditionExpress: endCondition,
 		UpdateCondition:          updateCondition,

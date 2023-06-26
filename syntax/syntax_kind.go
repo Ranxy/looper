@@ -44,6 +44,8 @@ const (
 	SyntaxKindIfKeywords
 	SyntaxKindElseKeywords
 	SyntaxKindWhileKeywords
+	SyntaxKindBreakKeywords
+	SyntaxKindContinueKeywords
 	SyntaxkindForKeywords
 	SyntaxkindFunctionKeywords
 
@@ -60,6 +62,8 @@ const (
 	SyntaxKindIfStatement
 	SyntaxKindWhileStatement
 	SyntaxkindForStatement
+	SyntaxKindBreakStatement
+	SyntaxKindContinueStatement
 	SyntaxKindExpressStatement
 
 	SyntaxKindLiteralExpress
@@ -119,6 +123,8 @@ var syntaxKindKeyMap = map[SyntaxKind]string{
 	SyntaxKindIfKeywords:       "IfKeywords",
 	SyntaxKindElseKeywords:     "ElseKeywords",
 	SyntaxKindWhileKeywords:    "WhileKeywords",
+	SyntaxKindBreakKeywords:    "BreakKeywords",
+	SyntaxKindContinueKeywords: "ContinueKeywords",
 	SyntaxkindForKeywords:      "ForKeywords",
 	SyntaxkindFunctionKeywords: "FunctionKeywords",
 
@@ -133,6 +139,8 @@ var syntaxKindKeyMap = map[SyntaxKind]string{
 	SyntaxKindIfStatement:         "IfStatement",
 	SyntaxKindWhileStatement:      "WhileStatement",
 	SyntaxkindForStatement:        "ForStatement",
+	SyntaxKindBreakStatement:      "BreakStatement",
+	SyntaxKindContinueStatement:   "ContinueStatement",
 	SyntaxKindExpressStatement:    "ExpressStatement",
 
 	SyntaxKindLiteralExpress:       "LiteralExpress",
@@ -192,5 +200,7 @@ var syntaxKindTextMap = map[SyntaxKind]string{
 	SyntaxKindElseKeywords:     "else",
 	SyntaxKindWhileKeywords:    "while",
 	SyntaxkindForKeywords:      "for",
+	SyntaxKindBreakKeywords:    "break",
+	SyntaxKindContinueKeywords: "continue",
 	SyntaxkindFunctionKeywords: "fn",
 }

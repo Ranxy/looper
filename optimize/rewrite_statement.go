@@ -94,7 +94,7 @@ func (b *BasicRewrite) RewriteWhileStatement(w Rewrite, node *bind.BoundWhileSta
 		return node
 	}
 
-	return bind.NewBoundWhileStatements(cond, body)
+	return bind.NewBoundWhileStatements(cond, body, node.BreakLabel, node.ContinueLabel)
 }
 
 func (b *BasicRewrite) RewriteForStatement(w Rewrite, node *bind.BoundForStatements) bind.Boundstatement {
@@ -105,7 +105,7 @@ func (b *BasicRewrite) RewriteForStatement(w Rewrite, node *bind.BoundForStateme
 	if init == node.InitCondition && end == node.EndCheckConditionExpress && update == node.UpdateCondition && body == node.Body {
 		return node
 	}
-	return bind.NewBoundForStatements(init, end, update, body)
+	return bind.NewBoundForStatements(init, end, update, body, node.BreakLabel, node.ContinueLabel)
 }
 
 func (b *BasicRewrite) RewriteLabelStatement(w Rewrite, node *bind.LabelStatement) bind.Boundstatement {

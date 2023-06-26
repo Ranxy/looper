@@ -14,6 +14,14 @@ type Binder struct {
 	Diagnostics *diagnostic.DiagnosticBag
 	scope       *BoundScope
 	function    *symbol.FunctionSymbol
+
+	_labelCount  int
+	_looperStack list.List //stack[breakContinue]
+}
+
+type breakContinue struct {
+	BreakLabel    *BoundLabel
+	ContinueLabel *BoundLabel
 }
 
 func NewBinder(parent *BoundScope, function *symbol.FunctionSymbol) *Binder {
@@ -29,6 +37,10 @@ func NewBinder(parent *BoundScope, function *symbol.FunctionSymbol) *Binder {
 	}
 
 	return res
+}
+
+func BindErrorStatement() Boundstatement {
+	return NewBoundExpressStatements(NewBoundErrorExpression())
 }
 
 func BindGlobalScope(previous *BoundGlobalScope, s *syntax.CompliationUnit) *BoundGlobalScope {
@@ -147,8 +159,16 @@ func (b *Binder) BindStatement(s syntax.Statement) Boundstatement {
 		return b.BindWhileStatement(s.(*syntax.WhileStatement))
 	case syntax.SyntaxkindForStatement:
 		return b.BindForStatement(s.(*syntax.ForStatement))
+	case syntax.SyntaxKindBreakStatement:
+		return b.bindBreakStatement(s.(*syntax.BreakStatement))
+	case syntax.SyntaxKindContinueStatement:
+		return b.bindContinueStatement(s.(*syntax.ContinueStatement))
 	case syntax.SyntaxKindExpressStatement:
 		return b.BindExpressionStatement(s.(*syntax.ExpressStatement))
+	case syntax.SyntaxKindFunctionDeclaration:
+		f := s.(*syntax.FunctionDeclarationSyntax)
+		b.Diagnostics.FunctionNotTopLevel(f.Identifier.Span(), f.Identifier.Text)
+		return NewBoundErrorExpression()
 	default:
 		panic(fmt.Sprintf("Unexceped syntax %s", s.Kind()))
 	}
@@ -158,14 +178,51 @@ func (b *Binder) BindForStatement(s *syntax.ForStatement) Boundstatement {
 	initCond := b.BindStatement(s.InitCondition)
 	endCond := b.BindExpressionAndCheckType(s.EndCondition, symbol.TypeBool)
 	updateCond := b.BindStatement(s.UpdateCondition)
-	body := b.BindStatement(s.Body)
-	return NewBoundForStatements(initCond, endCond, updateCond, body)
+	body, breakLabel, continueLabel := b.BindLoopBody(s.Body)
+	return NewBoundForStatements(initCond, endCond, updateCond, body, breakLabel, continueLabel)
 }
 
 func (b *Binder) BindWhileStatement(s *syntax.WhileStatement) Boundstatement {
 	condition := b.BindExpressionAndCheckType(s.Condition, symbol.TypeBool)
-	body := b.BindStatement(s.Body)
-	return NewBoundWhileStatements(condition, body)
+	body, breakLabel, continueLabel := b.BindLoopBody(s.Body)
+	return NewBoundWhileStatements(condition, body, breakLabel, continueLabel)
+}
+
+func (b *Binder) BindLoopBody(body syntax.Statement) (res Boundstatement, breakLabel *BoundLabel, continueLabel *BoundLabel) {
+	b._labelCount += 1
+	breakLabel = NewBoundLabel(fmt.Sprintf("_break%d", b._labelCount))
+	continueLabel = NewBoundLabel(fmt.Sprintf("_continue%d", b._labelCount))
+
+	b._looperStack.PushFront(breakContinue{
+		BreakLabel:    breakLabel,
+		ContinueLabel: continueLabel,
+	})
+	boundBody := b.BindStatement(body)
+	b._looperStack.Remove(b._looperStack.Front())
+
+	return boundBody, breakLabel, continueLabel
+}
+
+func (b *Binder) bindBreakStatement(s *syntax.BreakStatement) Boundstatement {
+	if b._looperStack.Len() == 0 {
+		b.Diagnostics.ReportInvalidBreakOrContinue(s.Keywords.Span(), s.Keywords.Text)
+		return BindErrorStatement()
+	}
+
+	breakLabel := b._looperStack.Front().Value.(breakContinue).BreakLabel
+
+	return NewGotoSymbol(breakLabel)
+}
+
+func (b *Binder) bindContinueStatement(s *syntax.ContinueStatement) Boundstatement {
+	if b._looperStack.Len() == 0 {
+		b.Diagnostics.ReportInvalidBreakOrContinue(s.Keywords.Span(), s.Keywords.Text)
+		return BindErrorStatement()
+	}
+
+	continueLabel := b._looperStack.Front().Value.(breakContinue).ContinueLabel
+
+	return NewGotoSymbol(continueLabel)
 }
 
 func (b *Binder) BindIfStatement(s *syntax.IfStatement) Boundstatement {

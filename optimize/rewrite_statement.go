@@ -16,11 +16,14 @@ type RewriteStatement interface {
 	RewriteLabelStatement(w Rewrite, node *bind.LabelStatement) bind.Boundstatement
 	RewriteGotoStatement(w Rewrite, node *bind.GotoStatement) bind.Boundstatement
 	RewriteCondGotoStatement(w Rewrite, node *bind.ConditionalGotoStatement) bind.Boundstatement
+	RewriteReturnStatement(w Rewrite, node *bind.BoundReturnStatements) bind.Boundstatement
 	RewriteExpressionStatement(w Rewrite, node *bind.BoundExpressStatements) bind.Boundstatement
 }
 
 func (b *BasicRewrite) RewriteStatement(w Rewrite, node bind.Boundstatement) bind.Boundstatement {
 	switch node.Kind() {
+	case bind.BoundNodeKindErrorExpress:
+		return node
 	case bind.BoundNodeKindBlockStatement:
 		return w.RewriteBlockStatement(w, node.(*bind.BoundBlockStatements))
 	case bind.BoundNodeKindVariableDeclaration:
@@ -37,6 +40,8 @@ func (b *BasicRewrite) RewriteStatement(w Rewrite, node bind.Boundstatement) bin
 		return w.RewriteGotoStatement(w, node.(*bind.GotoStatement))
 	case bind.BoundNodeKindConditionalGotoStatement:
 		return w.RewriteCondGotoStatement(w, node.(*bind.ConditionalGotoStatement))
+	case bind.BoundNodeKindReturnStatement:
+		return w.RewriteReturnStatement(w, node.(*bind.BoundReturnStatements))
 	case bind.BoundNodeKindExpressionStatement:
 		return w.RewriteExpressionStatement(w, node.(*bind.BoundExpressStatements))
 	default:
@@ -123,6 +128,15 @@ func (b *BasicRewrite) RewriteCondGotoStatement(w Rewrite, node *bind.Conditiona
 	}
 	return bind.NewConditionalGotoSymbol(node.Label, cond, node.JumpIfFalse)
 }
+
+func (b *BasicRewrite) RewriteReturnStatement(w Rewrite, node *bind.BoundReturnStatements) bind.Boundstatement {
+	express := w.RewriteExpression(w, node.Express)
+	if express == node.Express {
+		return node
+	}
+	return bind.NewBoundReturnStatements(express)
+}
+
 func (b *BasicRewrite) RewriteExpressionStatement(w Rewrite, node *bind.BoundExpressStatements) bind.Boundstatement {
 	express := w.RewriteExpression(w, node.Express)
 	if express == node.Express {

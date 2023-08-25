@@ -280,7 +280,7 @@ func TestEvaluate_function(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			text:    `fn xx(x:int):int{x+x } xx(5)`,
+			text:    `fn xx(x:int):int{return x+x } xx(5)`,
 			want:    int64(10),
 			wantErr: false,
 		},
@@ -391,7 +391,7 @@ func TestEvaluate_function_declaration(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			text:    `fn xt(x:int):int{x*10} fn plusten(x:int):int{x+10} {xt(plusten(10))}`,
+			text:    `fn xt(x:int):int{return x*10} fn plusten(x:int):int{x+10} {xt(plusten(10))}`,
 			want:    int64(200),
 			wantErr: false,
 		},

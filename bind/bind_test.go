@@ -166,16 +166,68 @@ func TestBinder_BindWhileStatement(t *testing.T) {
 }
 
 func TestBinder_BindFunction(t *testing.T) {
-	text := `fn doSomething(x:int, f:string):int{for var i = 0;i<x;i=i+1{print(f)} x} {doSomething(3,"abc") }`
+	text := `fn doSomething(x:int, f:string):int{for var i = 0;i<x;i=i+1{print(f)} return x} {doSomething(3,"abc") }`
 	textSource := texts.NewTextSource([]rune(text))
 	tree := syntax.ParseToTree(textSource)
 	boundTree := bind.BindGlobalScope(nil, tree.Root)
 	program := program.BindProgram(boundTree)
-	err := bind.PrintBoundTree(os.Stdout, program.Statement)
+	err := bind.PrintBoundFunctions(os.Stdout, program.Functions)
+	require.NoError(t, err)
+	err = bind.PrintBoundTree(os.Stdout, program.Statement)
 	require.NoError(t, err)
 	require.Equal(t, len(program.Functions), 1)
 
 	if program.Diagnostic.Has() {
 		program.Diagnostic.Print(text)
 	}
+}
+
+func TestBinder_BindFunction_multiple(t *testing.T) {
+	text := `
+	fn doSomething(x:int, f:string):int{
+		for var i = 0;i<x;i=i+1{
+			print(f)
+		} 
+		return x
+	}
+	fn hello(v:int){
+		return ()
+	}
+	
+	hello(doSomething(2,"abc"))
+	`
+	textSource := texts.NewTextSource([]rune(text))
+	tree := syntax.ParseToTree(textSource)
+	boundTree := bind.BindGlobalScope(nil, tree.Root)
+	program := program.BindProgram(boundTree)
+	err := bind.PrintBoundProgram(os.Stdout, program.Functions, program.Statement)
+	require.NoError(t, err)
+
+	require.Equal(t, len(program.Functions), 2)
+
+	if program.Diagnostic.Has() {
+		program.Diagnostic.Print(text)
+	}
+}
+
+func TestBinder_Return_Must_In_function(t *testing.T) {
+	text := `
+	var i = 10 
+	var result = 0 
+	{
+		return 3
+	}
+	`
+
+	textSource := texts.NewTextSource([]rune(text))
+	tree := syntax.ParseToTree(textSource)
+	boundTree := bind.BindGlobalScope(nil, tree.Root)
+	program := program.BindProgram(boundTree)
+	err := bind.PrintBoundProgram(os.Stdout, program.Functions, program.Statement)
+	require.NoError(t, err)
+
+	require.True(t, program.Diagnostic.Has())
+
+	require.Len(t, program.Diagnostic.List, 1)
+	require.Equal(t, "The keyword return can only be used inside of function", program.Diagnostic.List[0].Message)
 }

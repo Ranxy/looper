@@ -142,6 +142,8 @@ func (b *Binder) BindExpressionInternal(express syntax.Express) BoundExpression 
 		return b.BindAssignmentExpress(express.(*syntax.AssignmentExpress))
 	case syntax.SyntaxKindCallExpress:
 		return b.BindCallExpression(express.(*syntax.CallExpress))
+	case syntax.SyntaxKindUnitExpress:
+		return b.BindUnitExpression(express.(*syntax.UnitExpress))
 	default:
 		panic(fmt.Sprintf("unexceped expresss %q", express.Kind()))
 	}
@@ -163,6 +165,8 @@ func (b *Binder) BindStatement(s syntax.Statement) Boundstatement {
 		return b.bindBreakStatement(s.(*syntax.BreakStatement))
 	case syntax.SyntaxKindContinueStatement:
 		return b.bindContinueStatement(s.(*syntax.ContinueStatement))
+	case syntax.SyntaxKindReturnStatement:
+		return b.BindReturnStatement(s.(*syntax.ReturnStatement))
 	case syntax.SyntaxKindExpressStatement:
 		return b.BindExpressionStatement(s.(*syntax.ExpressStatement))
 	case syntax.SyntaxKindFunctionDeclaration:
@@ -223,6 +227,16 @@ func (b *Binder) bindContinueStatement(s *syntax.ContinueStatement) Boundstateme
 	continueLabel := b._looperStack.Front().Value.(breakContinue).ContinueLabel
 
 	return NewGotoSymbol(continueLabel)
+}
+
+func (b *Binder) BindReturnStatement(s *syntax.ReturnStatement) Boundstatement {
+
+	expression := b.BindExpression(s.Express, true)
+
+	if b.function == nil {
+		b.Diagnostics.ReportInvalidReturn(s.ReturnKeywords.Span())
+	}
+	return NewBoundReturnStatements(expression)
 }
 
 func (b *Binder) BindIfStatement(s *syntax.IfStatement) Boundstatement {
@@ -400,6 +414,10 @@ func (b *Binder) BindCallExpression(express *syntax.CallExpress) BoundExpression
 	}
 
 	return NewBoundcallExpression(function, boundArguments)
+}
+
+func (b *Binder) BindUnitExpression(express *syntax.UnitExpress) BoundExpression {
+	return NewBoundUnitExpression(express)
 }
 
 func (b *Binder) BindFunctionDeclaration(s *syntax.FunctionDeclarationSyntax) {

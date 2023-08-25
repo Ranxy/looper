@@ -5,6 +5,8 @@ import (
 	"io"
 	"reflect"
 	"strconv"
+
+	"github.com/Ranxy/looper/symbol"
 )
 
 type BoundNodeKind int
@@ -17,6 +19,7 @@ const (
 	BoundNodeKindUnaryExpress
 	BoundNodeKindBinaryExpress
 	BoundNodeKindCallExpress
+	BoundNodeKindUnitExpress
 
 	BoundNodeKindBlockStatement
 	BoundNodeKindVariableDeclaration
@@ -26,6 +29,7 @@ const (
 	BoundNodeKindLabelStatement
 	BoundNodeKindGotoStatement
 	BoundNodeKindConditionalGotoStatement
+	BoundNodeKindReturnStatement
 	BoundNodeKindExpressionStatement
 )
 
@@ -36,6 +40,7 @@ var boundNodeKindNameMap = map[BoundNodeKind]string{
 	BoundNodeKindUnaryExpress:      "UnaryExpress",
 	BoundNodeKindBinaryExpress:     "BinaryExpress",
 	BoundNodeKindCallExpress:       "CallExpress",
+	BoundNodeKindUnitExpress:       "UnitExpress",
 
 	BoundNodeKindBlockStatement:           "BlockStatement",
 	BoundNodeKindVariableDeclaration:      "VariableDeclaration",
@@ -45,6 +50,7 @@ var boundNodeKindNameMap = map[BoundNodeKind]string{
 	BoundNodeKindLabelStatement:           "LabelStatement",
 	BoundNodeKindGotoStatement:            "GotoStatement",
 	BoundNodeKindConditionalGotoStatement: "ConditionalGotoStatement",
+	BoundNodeKindReturnStatement:          "ReturnStatement",
 	BoundNodeKindExpressionStatement:      "ExpressionStatement",
 }
 
@@ -77,6 +83,27 @@ func (s *literalValue) String() string {
 
 func PrintBoundTree(w io.Writer, node BoundNode) error {
 	return prettyPrint(w, node, "", true)
+}
+
+func PrintBoundFunctions(w io.Writer, funcs map[*symbol.FunctionSymbol]*BoundBlockStatements) error {
+	for fn, impl := range funcs {
+		w.Write([]byte("fn " + fn.String()))
+		w.Write([]byte("\n"))
+		err := prettyPrint(w, impl, "", true)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func PrintBoundProgram(w io.Writer, funcs map[*symbol.FunctionSymbol]*BoundBlockStatements, statement BoundNode) error {
+	err := PrintBoundFunctions(w, funcs)
+	if err != nil {
+		return err
+	}
+
+	return prettyPrint(w, statement, "", true)
 }
 
 func prettyPrint(w io.Writer, node BoundNode, indent string, isLast bool) error {

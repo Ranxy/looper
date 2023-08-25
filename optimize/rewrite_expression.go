@@ -17,6 +17,7 @@ type RewriteExpression interface {
 	RewriteUnaryExpression(w Rewrite, node *bind.BoundUnaryExpression) bind.BoundExpression
 	RewriteBinaryExpression(w Rewrite, node *bind.BoundBinaryExpression) bind.BoundExpression
 	RewriteCallExpression(w Rewrite, node *bind.BoundCallExpression) bind.BoundExpression
+	RewriteUnitExpression(w Rewrite, node *bind.BoundUnitExpression) bind.BoundExpression
 }
 
 func (b *BasicRewrite) RewriteExpression(w Rewrite, node bind.BoundExpression) bind.BoundExpression {
@@ -33,6 +34,8 @@ func (b *BasicRewrite) RewriteExpression(w Rewrite, node bind.BoundExpression) b
 		return w.RewriteBinaryExpression(w, node.(*bind.BoundBinaryExpression))
 	case bind.BoundNodeKindCallExpress:
 		return w.RewriteCallExpression(w, node.(*bind.BoundCallExpression))
+	case bind.BoundNodeKindUnitExpress:
+		return w.RewriteUnitExpression(w, node.(*bind.BoundUnitExpression))
 	default:
 		panic(fmt.Sprintf("Unexcepted node %s", node.Kind()))
 	}
@@ -89,4 +92,8 @@ func (b *BasicRewrite) RewriteCallExpression(w Rewrite, node *bind.BoundCallExpr
 		return node
 	}
 	return bind.NewBoundcallExpression(node.Function, arguments)
+}
+
+func (b *BasicRewrite) RewriteUnitExpression(w Rewrite, node *bind.BoundUnitExpression) bind.BoundExpression {
+	return node
 }

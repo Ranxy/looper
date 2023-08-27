@@ -65,6 +65,10 @@ func (e *Evaluater) EvaluateStatement(body *bind.BoundBlockStatements) any {
 			}
 		case bind.BoundNodeKindLabelStatement:
 			index += 1
+		case bind.BoundNodeKindReturnStatement:
+			resExpression := s.(*bind.BoundReturnStatements)
+			e.lastValue = e.EvaluateExpression(resExpression.Express)
+			return e.lastValue
 		default:
 			panic(fmt.Sprintf("Uncxcepted node %v", s.Kind()))
 		}
@@ -98,6 +102,8 @@ func (e *Evaluater) EvaluateExpression(node bind.BoundExpression) any {
 		return e.evaluateBinaryExpression(n)
 	case *bind.BoundCallExpression:
 		return e.evaluateCallExpression(n)
+	case *bind.BoundUnitExpression:
+		return nil
 	default:
 		panic(fmt.Sprintf("Unexceped node %v", node))
 	}

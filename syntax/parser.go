@@ -90,6 +90,8 @@ func (p *Parser) ParseStatement() Statement {
 	case SyntaxkindFunctionKeywords:
 		p.diagnostics.Report(p.Current().Span(), "Function must be defined at top level")
 		return p.ParseFunctionDeclaration()
+	case SyntaxKindReturnKeywords:
+		return p.ParseReturnStatement()
 	default:
 		return p.ParseExpressStatement()
 	}
@@ -226,6 +228,10 @@ func (p *Parser) parsePrimaryExpress() Express {
 	case SyntaxKindOpenParenthesisToken:
 		{
 			open := p.NextToken()
+			if p.Current().kind == SyntaxKindCloseParenthesisToken {
+				close := p.MatchToken(SyntaxKindCloseParenthesisToken)
+				return NewUnitExpress(open, close)
+			}
 			expr := p.ParserBinaryExpress(0)
 			right := p.MatchToken(SyntaxKindCloseParenthesisToken)
 
@@ -346,6 +352,13 @@ func (p *Parser) ParseFunctionDeclaration() MemberSyntax {
 	tp := p.ParseOptionTypeClause()
 	body := p.ParseBlockStatement()
 	return NewFunctionDeclaration(functionKeyword, identifier, openParenthesis, parameters, closeParenthesis, tp, body)
+}
+
+func (p *Parser) ParseReturnStatement() Statement {
+	var keywords = p.MatchToken(SyntaxKindReturnKeywords)
+	//return must have express, even return type is unit
+	express := p.ParserExpress()
+	return NewReturnStatement(keywords, express)
 }
 
 func (p *Parser) ParseMembers() []MemberSyntax {

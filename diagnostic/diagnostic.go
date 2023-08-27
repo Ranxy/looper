@@ -198,3 +198,7 @@ func (b *DiagnosticBag) ReportInvalidBreakOrContinue(span texts.TextSpan, name s
 	msg := fmt.Sprintf("The keyword %s can only be used inside of loops", name)
 	b.Report(span, msg)
 }
+func (b *DiagnosticBag) ReportInvalidReturn(span texts.TextSpan) {
+	msg := "The keyword return can only be used inside of function"
+	b.Report(span, msg)
+}

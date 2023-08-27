@@ -48,6 +48,7 @@ const (
 	SyntaxKindContinueKeywords
 	SyntaxkindForKeywords
 	SyntaxkindFunctionKeywords
+	SyntaxKindReturnKeywords
 
 	//Nodes
 	SyntaxKindCompilationUnit
@@ -64,6 +65,7 @@ const (
 	SyntaxkindForStatement
 	SyntaxKindBreakStatement
 	SyntaxKindContinueStatement
+	SyntaxKindReturnStatement
 	SyntaxKindExpressStatement
 
 	SyntaxKindLiteralExpress
@@ -73,6 +75,7 @@ const (
 	SyntaxKindParenthesizedExpress
 	SyntaxKindAssignmentExpress
 	SyntaxKindCallExpress
+	SyntaxKindUnitExpress
 )
 
 func (k SyntaxKind) String() string {
@@ -127,6 +130,7 @@ var syntaxKindKeyMap = map[SyntaxKind]string{
 	SyntaxKindContinueKeywords: "ContinueKeywords",
 	SyntaxkindForKeywords:      "ForKeywords",
 	SyntaxkindFunctionKeywords: "FunctionKeywords",
+	SyntaxKindReturnKeywords:   "ReturnKeywords",
 
 	SyntaxKindCompilationUnit:     "CompilationUnit",
 	SyntaxKindFunctionDeclaration: "FunctionDeclaration",
@@ -142,6 +146,7 @@ var syntaxKindKeyMap = map[SyntaxKind]string{
 	SyntaxKindBreakStatement:      "BreakStatement",
 	SyntaxKindContinueStatement:   "ContinueStatement",
 	SyntaxKindExpressStatement:    "ExpressStatement",
+	SyntaxKindReturnStatement:     "ReturnStatement",
 
 	SyntaxKindLiteralExpress:       "LiteralExpress",
 	SyntaxKindNameExpress:          "NameExpress",
@@ -150,6 +155,7 @@ var syntaxKindKeyMap = map[SyntaxKind]string{
 	SyntaxKindParenthesizedExpress: "ParenthesizedExpress",
 	SyntaxKindAssignmentExpress:    "AssignmentExpress",
 	SyntaxKindCallExpress:          "CallExpress",
+	SyntaxKindUnitExpress:          "UnitExpress",
 }
 
 func (k SyntaxKind) Text() string {
@@ -203,4 +209,5 @@ var syntaxKindTextMap = map[SyntaxKind]string{
 	SyntaxKindBreakKeywords:    "break",
 	SyntaxKindContinueKeywords: "continue",
 	SyntaxkindFunctionKeywords: "fn",
+	SyntaxKindReturnKeywords:   "return",
 }

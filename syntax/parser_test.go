@@ -88,7 +88,7 @@ func TestCase(t *testing.T) {
 			text: `var x:int = 3`,
 		},
 		{
-			text: `fn xt(x:int):int{x*10} {xt(20)}`,
+			text: `fn xt(x:int):int{x*10} {return xt(20)}`,
 		},
 		{
 			text: `fn println(x:string){print(x+"\n")} {println("hello")}`,
@@ -165,7 +165,7 @@ func TestNewParser_parser_while(t *testing.T) {
 }
 
 func TestNewParser_parser_function(t *testing.T) {
-	expr := `fn doSomething(x:int, f:string):int{for var i = 0;i<x;i=i+1{print(f)} x}`
+	expr := `fn doSomething(x:int, f:string):int{for var i = 0;i<x;i=i+1{print(f)} return (3)}`
 	source := texts.NewTextSource([]rune(expr))
 	tree := newSyntaxTree(source)
 	if len(tree.Diagnostics.List) > 0 {

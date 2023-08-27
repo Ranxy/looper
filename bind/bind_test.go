@@ -125,7 +125,7 @@ func TestBinder_BindifStatement(t *testing.T) {
 
 	program := program.BindProgram(boundTree)
 
-	err := bind.PrintBoundTree(os.Stdout, program.Statement)
+	err := bind.PrintBoundProgram(os.Stdout, program.Functions, program.Statement)
 	require.NoError(t, err)
 
 	t.Log(boundTree.Diagnostic)
@@ -157,7 +157,7 @@ func TestBinder_BindWhileStatement(t *testing.T) {
 	tree := syntax.ParseToTree(textSource)
 	boundTree := bind.BindGlobalScope(nil, tree.Root)
 	program := program.BindProgram(boundTree)
-	err := bind.PrintBoundTree(os.Stdout, program.Statement)
+	err := bind.PrintBoundProgram(os.Stdout, program.Functions, program.Statement)
 	require.NoError(t, err)
 	t.Log(boundTree.Diagnostic)
 	t.Log(boundTree.Variables)
@@ -171,9 +171,7 @@ func TestBinder_BindFunction(t *testing.T) {
 	tree := syntax.ParseToTree(textSource)
 	boundTree := bind.BindGlobalScope(nil, tree.Root)
 	program := program.BindProgram(boundTree)
-	err := bind.PrintBoundFunctions(os.Stdout, program.Functions)
-	require.NoError(t, err)
-	err = bind.PrintBoundTree(os.Stdout, program.Statement)
+	err := bind.PrintBoundProgram(os.Stdout, program.Functions, program.Statement)
 	require.NoError(t, err)
 	require.Equal(t, len(program.Functions), 1)
 

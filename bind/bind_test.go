@@ -97,7 +97,7 @@ func TestCase(t *testing.T) {
 			tree := syntax.ParseToTree(textSource)
 			boundTree := bind.BindGlobalScope(nil, tree.Root)
 			if boundTree.Diagnostic.Has() {
-				boundTree.Diagnostic.Print(tt.text)
+				boundTree.Diagnostic.Print(textSource)
 			}
 			require.False(t, boundTree.Diagnostic.Has())
 		})
@@ -176,7 +176,7 @@ func TestBinder_BindFunction(t *testing.T) {
 	require.Equal(t, len(program.Functions), 1)
 
 	if program.Diagnostic.Has() {
-		program.Diagnostic.Print(text)
+		program.Diagnostic.Print(textSource)
 	}
 }
 
@@ -204,7 +204,7 @@ func TestBinder_BindFunction_multiple(t *testing.T) {
 	require.Equal(t, len(program.Functions), 2)
 
 	if program.Diagnostic.Has() {
-		program.Diagnostic.Print(text)
+		program.Diagnostic.Print(textSource)
 	}
 }
 

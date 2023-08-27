@@ -78,7 +78,7 @@ func (s *TextSource) StringSub(start, end int) string {
 	return string(s.Text[start:end])
 }
 func (s *TextSource) StringSpan(span TextSpan) string {
-	return s.StringSub(span.start, span.length)
+	return s.StringSub(span.start, span.End())
 }
 
 func (s *TextSource) GetLineIndex(pos int) int {

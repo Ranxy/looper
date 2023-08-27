@@ -10,13 +10,13 @@ import (
 )
 
 func TestFlattenStatement(t *testing.T) {
-	text := "{var result = 0 {var i = 0 {for i = 1; i < 5 ;i = i + 1 { result = result + 1 }} result }}"
+	text := "{var result = 0 {var i = 0 {for i = 1; i < 5 ;i = i + 1 { result = result + 2 }} result }}"
 	textSource := texts.NewTextSource([]rune(text))
 	tree := syntax.ParseToTree(textSource)
 
 	boundTree := bind.BindGlobalScope(nil, tree.Root)
 	if len(boundTree.Diagnostic.List) != 0 {
-		boundTree.Diagnostic.Print(text)
+		boundTree.Diagnostic.Print(textSource)
 		t.FailNow()
 	}
 	befor := bind.NewBoundBlockStatement(boundTree.Statements)

@@ -17,7 +17,7 @@ func TestLowerRewrite_RewriteIfStatement(t *testing.T) {
 
 	boundTree := bind.BindGlobalScope(nil, tree.Root)
 	if len(boundTree.Diagnostic.List) != 0 {
-		boundTree.Diagnostic.Print(text)
+		boundTree.Diagnostic.Print(textSource)
 		t.FailNow()
 	}
 

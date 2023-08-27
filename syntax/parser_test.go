@@ -100,7 +100,7 @@ func TestCase(t *testing.T) {
 			tree := newSyntaxTree(source)
 			err := tree.Print(os.Stdout)
 			if tree.Diagnostics.Has() {
-				tree.Diagnostics.Print(tt.text)
+				tree.Diagnostics.Print(source)
 			}
 			require.Zero(t, len(tree.Diagnostics.List))
 			require.NoError(t, err)
@@ -169,7 +169,7 @@ func TestNewParser_parser_function(t *testing.T) {
 	source := texts.NewTextSource([]rune(expr))
 	tree := newSyntaxTree(source)
 	if len(tree.Diagnostics.List) > 0 {
-		tree.Diagnostics.Print(expr)
+		tree.Diagnostics.Print(source)
 	}
 	require.Zero(t, len(tree.Diagnostics.List))
 	err := tree.Print(os.Stdout)

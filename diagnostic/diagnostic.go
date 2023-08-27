@@ -2,6 +2,8 @@ package diagnostic
 
 import (
 	"fmt"
+	"io"
+	"os"
 	"sort"
 	"strings"
 
@@ -18,31 +20,37 @@ func (d *Diagnostic) String() string {
 	return d.Message
 }
 
-func (d *Diagnostic) StringWithLine(padding int, line string) string {
-	if d.Span.End() > len(line) {
-		return line
+func (d *Diagnostic) StringWithLine(padding int, line texts.TextLine) string {
+	if d.Span.End() > line.End() {
+		return line.String()
 	}
-	padding += d.Span.Start()
+	lineStart := d.Span.Start() - line.Start
+	tabCount := line.TabCount(lineStart)
+	padding = padding + lineStart - tabCount
 
 	sb := strings.Builder{}
-	sb.WriteString(line)
+	sb.WriteString(line.String())
 	sb.WriteString("\033[31m")
 	sb.WriteByte('\n')
-	for i := 0; i < padding; i++ {
-		sb.WriteByte(' ')
+
+	printPadding := func() {
+		for i := 0; i < tabCount; i++ {
+			sb.WriteByte('\t')
+		}
+		for i := 0; i < padding; i++ {
+			sb.WriteByte(' ')
+		}
 	}
+
+	printPadding()
 	for i := d.Span.Start(); i < d.Span.End(); i++ {
 		sb.WriteByte('^')
 	}
 	sb.WriteByte('\n')
-	for i := 0; i < padding; i++ {
-		sb.WriteByte(' ')
-	}
+	printPadding()
 	sb.WriteByte('|')
 	sb.WriteByte('\n')
-	for i := 0; i < padding; i++ {
-		sb.WriteByte(' ')
-	}
+	printPadding()
 	sb.WriteString(d.Message)
 	sb.WriteString("\033[0m")
 	sb.WriteByte('\n')
@@ -67,12 +75,29 @@ func (b *DiagnosticBag) Has() bool {
 	return len(b.List) != 0
 }
 
-func (b *DiagnosticBag) Print(codeLine string) {
+func (b *DiagnosticBag) Print(source *texts.TextSource) {
+	b.PrintWithSourceStdout(source)
+}
+
+func (b *DiagnosticBag) PrintWithSourceStdout(source *texts.TextSource) {
+	b.PrintWithSource(os.Stdout, source)
+}
+
+func (b *DiagnosticBag) PrintWithSource(w io.Writer, source *texts.TextSource) {
+	b.Sort()
+
 	for _, d := range b.List {
-		fmt.Print(d.StringWithLine(0, codeLine))
+
+		idx := source.GetLineIndex(d.Span.Start())
+		line := source.Lines[idx]
+		runeIdx := d.Span.Start() - line.Start + 1
+		lineOut := fmt.Sprintf("(%d, %d): ", idx+1, runeIdx)
+		w.Write([]byte(lineOut))
+		w.Write([]byte(d.StringWithLine(len(lineOut), line)))
 	}
 }
-func (b *DiagnosticBag) PrintWithSource(source *texts.TextSource) {
+
+func (b *DiagnosticBag) Sort() {
 	sort.Slice(b.List, func(i, j int) bool {
 		cmp := b.List[i].Span.Start() - b.List[j].Span.Start()
 		if cmp == 0 {
@@ -81,18 +106,8 @@ func (b *DiagnosticBag) PrintWithSource(source *texts.TextSource) {
 
 		return cmp < 0
 	})
-
-	for _, d := range b.List {
-
-		idx := source.GetLineIndex(d.Span.Start())
-		line := source.Lines[idx]
-		runeIdx := d.Span.Start() - line.Start + 1
-		lineText := source.StringSpan(line.Span())
-		lineOut := fmt.Sprintf("(%d, %d): ", idx+1, runeIdx)
-		fmt.Print(lineOut)
-		fmt.Print(d.StringWithLine(len(lineOut), lineText))
-	}
 }
+
 func (b *DiagnosticBag) Reset() {
 	b.List = b.List[0:0]
 }

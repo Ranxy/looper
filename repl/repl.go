@@ -86,7 +86,7 @@ func main() {
 			}
 		}
 		if len(tree.Diagnostics.List) != 0 {
-			tree.Diagnostics.PrintWithSource(sourceText)
+			tree.Diagnostics.PrintWithSourceStdout(sourceText)
 			tree.Diagnostics.Reset()
 		} else {
 			cm := compilation.NewCompliation(previous, tree)
@@ -100,7 +100,7 @@ func main() {
 
 			res := cm.Evaluate(vm)
 			if res.Diagnostic.Has() {
-				res.Diagnostic.PrintWithSource(sourceText)
+				res.Diagnostic.PrintWithSourceStdout(sourceText)
 				res.Diagnostic.Reset()
 			} else {
 				if res.Value != nil {

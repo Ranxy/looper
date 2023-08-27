@@ -31,3 +31,13 @@ func (t *TextLine) SpanWithLineBreak() TextSpan {
 func (t *TextLine) String() string {
 	return string(t.Source.Text[t.Start : t.Start+t.Length])
 }
+
+func (t *TextLine) TabCount(length int) int {
+	cnt := 0
+	for i := t.Start; i < t.Start+length; i++ {
+		if t.Source.Text[i] == '\t' {
+			cnt += 1
+		}
+	}
+	return cnt
+}

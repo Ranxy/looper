@@ -140,7 +140,7 @@ func TestEvaluate(t *testing.T) {
 
 			boundTree := bind.BindGlobalScope(nil, tree.Root)
 			if len(boundTree.Diagnostic.List) != 0 {
-				boundTree.Diagnostic.Print(tt.text)
+				boundTree.Diagnostic.Print(textSource)
 				t.FailNow()
 			}
 			vm := make(map[symbol.VariableSymbol]any)
@@ -211,7 +211,7 @@ func TestEvaluate_bool(t *testing.T) {
 			tree := syntax.ParseToTree(textSource)
 			boundTree := bind.BindGlobalScope(nil, tree.Root)
 			if len(boundTree.Diagnostic.List) != 0 {
-				boundTree.Diagnostic.Print(tt.text)
+				boundTree.Diagnostic.Print(textSource)
 				t.FailNow()
 			}
 			vm := make(map[symbol.VariableSymbol]any)
@@ -258,7 +258,7 @@ func TestEvaluate_string(t *testing.T) {
 			tree := syntax.ParseToTree(textSource)
 			boundTree := bind.BindGlobalScope(nil, tree.Root)
 			if len(boundTree.Diagnostic.List) != 0 {
-				boundTree.Diagnostic.Print(tt.text)
+				boundTree.Diagnostic.Print(textSource)
 				t.FailNow()
 			}
 			vm := make(map[symbol.VariableSymbol]any)
@@ -296,7 +296,7 @@ func TestEvaluate_function(t *testing.T) {
 			tree := syntax.ParseToTree(textSource)
 			boundTree := bind.BindGlobalScope(nil, tree.Root)
 			if len(boundTree.Diagnostic.List) != 0 {
-				boundTree.Diagnostic.Print(tt.text)
+				boundTree.Diagnostic.Print(textSource)
 				t.FailNow()
 			}
 			vm := make(map[symbol.VariableSymbol]any)
@@ -371,7 +371,7 @@ func ev_variable(previous *bind.BoundGlobalScope, vm map[symbol.VariableSymbol]a
 	tree := syntax.ParseToTree(textSource)
 	boundTree := bind.BindGlobalScope(previous, tree.Root)
 	if len(boundTree.Diagnostic.List) != 0 {
-		boundTree.Diagnostic.Print(text)
+		boundTree.Diagnostic.Print(textSource)
 		t.FailNow()
 	}
 	program := program.BindProgram(boundTree)
@@ -402,7 +402,7 @@ func TestEvaluate_function_declaration(t *testing.T) {
 			tree := syntax.ParseToTree(textSource)
 			boundTree := bind.BindGlobalScope(nil, tree.Root)
 			if len(boundTree.Diagnostic.List) != 0 {
-				boundTree.Diagnostic.Print(tt.text)
+				boundTree.Diagnostic.Print(textSource)
 				t.FailNow()
 			}
 			vm := make(map[symbol.VariableSymbol]any)

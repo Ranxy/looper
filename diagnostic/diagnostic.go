@@ -217,3 +217,8 @@ func (b *DiagnosticBag) ReportInvalidReturn(span texts.TextSpan) {
 	msg := "The keyword return can only be used inside of function"
 	b.Report(span, msg)
 }
+
+func (b *DiagnosticBag) ReportAllPathMustReturn(span texts.TextSpan) {
+	msg := "Not all code paths return a value"
+	b.Report(span, msg)
+}

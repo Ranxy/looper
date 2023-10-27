@@ -73,6 +73,12 @@ func newBookStringer(b bool) *boolStringer {
 	return &x
 }
 
+type Stringer string
+
+func (s Stringer) String() string {
+	return string(s)
+}
+
 type literalValue struct {
 	v any
 }

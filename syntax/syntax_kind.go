@@ -1,5 +1,7 @@
 package syntax
 
+import "fmt"
+
 type SyntaxKind uint8
 
 const (
@@ -162,6 +164,14 @@ func (k SyntaxKind) Text() string {
 	return syntaxKindTextMap[k]
 }
 
+func (k SyntaxKind) TextMust() string {
+	text, has := syntaxKindTextMap[k]
+	if !has {
+		panic(fmt.Sprintf("SyntaxKindTextMiss %d", k))
+	}
+	return text
+}
+
 func ListTextSyntaxKind() []SyntaxKind {
 	res := make([]SyntaxKind, 0, len(syntaxKindTextMap))
 	for k := range syntaxKindTextMap {
@@ -171,6 +181,7 @@ func ListTextSyntaxKind() []SyntaxKind {
 }
 
 var syntaxKindTextMap = map[SyntaxKind]string{
+	SyntaxKindWhiteSpaceToken:         " ",
 	SyntaxKindPlusToken:               "+",
 	SyntaxKindMinusToken:              "-",
 	SyntaxKindStarToken:               "*",

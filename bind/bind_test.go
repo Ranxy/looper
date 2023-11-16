@@ -229,3 +229,29 @@ func TestBinder_Return_Must_In_function(t *testing.T) {
 	require.Len(t, program.Diagnostic.List, 1)
 	require.Equal(t, "The keyword return can only be used inside of function", program.Diagnostic.List[0].Message)
 }
+
+func TestBinder_BindFunction_pathMustReturn(t *testing.T) {
+	text := `
+	fn doSomething(x:int):int{
+		if (x == 10){
+			return 1
+		}
+	}
+
+	doSomething(10)
+	`
+	textSource := texts.NewTextSource([]rune(text))
+	tree := syntax.ParseToTree(textSource)
+	require.Len(t, tree.Diagnostics.List, 0)
+	boundTree := bind.BindGlobalScope(nil, tree.Root)
+	require.Len(t, boundTree.Diagnostic.List, 0)
+	program := program.BindProgram(boundTree)
+	err := bind.PrintBoundProgram(os.Stdout, program.Functions, program.Statement)
+	require.NoError(t, err)
+
+	require.Equal(t, len(program.Functions), 1)
+
+	require.Len(t, program.Diagnostic.List, 1)
+
+	require.Equal(t, program.Diagnostic.List[0].Message, "Not all code paths return a value")
+}

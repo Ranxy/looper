@@ -19,6 +19,10 @@ func BindProgram(globalScope *bind.BoundGlobalScope) *BoundProgram {
 			binder := bind.NewBinder(parentScope, fn)
 			body := binder.BindStatement(fn.Declaration.(*syntax.FunctionDeclarationSyntax).Body)
 			lowerBody := optimize.Lower(body)
+
+			if fn.Type != symbol.TypeUnit && !bind.ALlPathReturn(lowerBody) {
+				diag.ReportAllPathMustReturn(fn.Declaration.(*syntax.FunctionDeclarationSyntax).Identifier.Span())
+			}
 			functionBodys[fn] = lowerBody
 
 			diag = diag.Merge(binder.Diagnostics)
